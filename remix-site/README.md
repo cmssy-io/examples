@@ -32,3 +32,9 @@ CMSSY_DRAFT_SECRET=… pnpm smoke:edit
 
 A build proves the site compiles. It says nothing about whether the site can be
 **edited** - and that is the part that breaks silently.
+
+## Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcmssy-io%2Fexamples%2Ftree%2Fmain%2Fremix-site&env=CMSSY_ORG_SLUG,CMSSY_WORKSPACE_SLUG,CMSSY_DRAFT_SECRET&envDescription=Your%20cmssy%20org%20slug%2C%20workspace%20slug%20and%20draft%20secret%20from%20Settings%20-%20Headless&envLink=https%3A%2F%2Fwww.cmssy.com%2Fdocs%2Fstart%2Finstallation&project-name=cmssy-remix-site&repository-name=cmssy-remix-site)
+
+Set **Root Directory** to `remix-site` - each example in this repo is a standalone app.

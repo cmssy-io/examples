@@ -16,6 +16,11 @@ storefront** with member sign-in, products, cart and checkout.
 > (which needs your own workspace), so any 16+ character placeholder renders the published
 > pages. For your own site, use the real secret generated under **Settings → Headless**.
 
+
+> **Deploying?** `CMSSY_SESSION_SECRET` signs the cart and customer session cookies. The value in
+> `.env.example` is a placeholder - generate your own before putting this anywhere real:
+> `openssl rand -base64 32`.
+
 ## What's inside
 
 ### Content site
