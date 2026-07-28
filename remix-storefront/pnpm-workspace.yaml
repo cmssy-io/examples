@@ -1,2 +1,7 @@
+# A single standalone app, not a monorepo - but pnpm needs the field to
+# accept this file at all on older majors.
+packages:
+  - .
+
 allowBuilds:
   esbuild: true

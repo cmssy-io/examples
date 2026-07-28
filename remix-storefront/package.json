@@ -28,5 +28,6 @@
     "typescript": "^5.7.0",
     "vite": "^6.0.0"
   },
-  "description": "A cmssy site on React Router (Remix): the catch-all route, block registry and verified edit mode."
+  "description": "A cmssy site on React Router (Remix): the catch-all route, block registry and verified edit mode.",
+  "packageManager": "pnpm@11.1.2"
 }

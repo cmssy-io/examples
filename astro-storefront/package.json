@@ -24,5 +24,6 @@
     "@types/react-dom": "^19.0.0",
     "typescript": "^5.7.0"
   },
-  "description": "A cmssy site on Astro: the catch-all route, block registry and verified edit mode with the Astro adapter."
+  "description": "A cmssy site on Astro: the catch-all route, block registry and verified edit mode with the Astro adapter.",
+  "packageManager": "pnpm@11.1.2"
 }
