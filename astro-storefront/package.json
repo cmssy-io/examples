@@ -7,19 +7,22 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "smoke:edit": "node smoke-edit.mjs"
+    "smoke:edit": "node smoke-edit.mjs",
+    "typecheck": "astro check"
   },
   "dependencies": {
     "@astrojs/react": "^4.2.0",
     "@astrojs/vercel": "^8.0.0",
-    "@cmssy/astro": "^9.0.0",
-    "@cmssy/core": "^9.0.0",
-    "@cmssy/react": "^9.0.0",
+    "@cmssy/astro": "^11.0.0",
+    "@cmssy/core": "^11.0.0",
+    "@cmssy/react": "^11.0.0",
     "astro": "^5.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@types/node": "^26.1.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "typescript": "^5.7.0"

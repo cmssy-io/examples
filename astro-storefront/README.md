@@ -14,6 +14,10 @@ fails the build if that ever stops being true.
 - `src/pages/cmssy-edit/[...path].astro` - the editor route. The edit bridge is a
   React island, because the editor talks over `postMessage` - and that protocol
   lives in `@cmssy/core`, not in React.
+- `src/pages/sitemap.xml.ts`, `src/pages/robots.txt.ts`, `src/services/` - SEO is
+  the app's own code since SDK v10. The sitemap lists one `<url>` per language
+  and drops drafts and the workspace's 404 page; the queries behind it live in
+  `src/services/`, which is where you add your own.
 
 ## Prove the editor works
 
@@ -22,6 +26,9 @@ pnpm smoke:edit
 ```
 
 A build cannot tell you whether the editor lives. This can.
+
+`pnpm typecheck` runs `astro check`, which covers the `.astro` files too -
+`astro build` does not typecheck them.
 
 ## Deploy
 
