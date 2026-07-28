@@ -1,12 +1,21 @@
-name: CI
+name: storefront
 
+# GitHub reads workflows only from the repository root. This one arrived here
+# as storefront/.github/workflows/ci.yml, where it had never run once.
 on:
   pull_request:
     branches: [main]
+    paths:
+      - "storefront/**"
+      - ".github/workflows/storefront.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: storefront
 
 jobs:
   ci:
@@ -20,6 +29,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+          cache-dependency-path: storefront/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
@@ -41,3 +51,13 @@ jobs:
           CMSSY_ORG_SLUG: cmssy
           CMSSY_WORKSPACE_SLUG: cmssy-demo
         run: pnpm types --check
+
+      # The app sends the documents in graphql/generated, not the .graphql files
+      # the step above checks. Without this, an SDK bump that changes a selection
+      # set passes CI while the app keeps sending the old one - the drift the
+      # vendored operations exist to remove, moved one file along.
+      - name: Generated documents are up to date
+        run: |
+          pnpm codegen
+          git diff --exit-code -- graphql/generated \
+            || { echo "::error::run pnpm codegen and commit graphql/generated"; exit 1; }

@@ -1,6 +1,14 @@
 /** A translatable field: one string, or one per enabled language. */
 export type LocalizedValue = string | Record<string, string>;
 
+export interface LocalizedTextOptions {
+  /** The language being rendered. */
+  locale?: string;
+  /** The workspace's default language, tried before any other. */
+  defaultLocale?: string | null;
+  fallback?: string;
+}
+
 /**
  * Reads a translatable field.
  *
@@ -12,20 +20,30 @@ export type LocalizedValue = string | Record<string, string>;
  */
 export function localizedText(
   value: unknown,
-  { locale, fallback = "" }: { locale?: string; fallback?: string } = {},
+  { locale, defaultLocale, fallback = "" }: LocalizedTextOptions = {},
 ): string {
   if (typeof value === "string") return value.trim() || fallback;
 
-  if (value && typeof value === "object") {
-    const map = value as Record<string, unknown>;
-    const preferred = locale ? map[locale] : undefined;
-    if (typeof preferred === "string" && preferred.trim()) return preferred;
+  // An array is not a language map. Without this check it would answer with
+  // element 0, because indices are keys like any other.
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return fallback;
+  }
 
-    // No entry for this locale: a partially translated page still reads better
-    // in the wrong language than not at all.
-    for (const entry of Object.values(map)) {
-      if (typeof entry === "string" && entry.trim()) return entry;
-    }
+  const map = value as Record<string, unknown>;
+
+  // The site's default language before anything else, because "whichever one
+  // it has" is settled by JSON key order - which puts a German title on a
+  // Norwegian page, and swaps it for a French one when the API reorders the
+  // map, with no content change.
+  for (const key of [locale, defaultLocale]) {
+    const entry = key ? map[key] : undefined;
+    if (typeof entry === "string" && entry.trim()) return entry.trim();
+  }
+
+  // A partially translated page still reads better in some language than none.
+  for (const entry of Object.values(map)) {
+    if (typeof entry === "string" && entry.trim()) return entry.trim();
   }
 
   return fallback;

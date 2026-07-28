@@ -23,10 +23,14 @@ export async function buildPageMetadata(path?: string[]): Promise<Metadata> {
 
   const page = meta.public?.page?.get ?? null;
 
-  // These three are translatable, and this query takes no locale - the API
-  // hands back the whole language map. `undefined`, not "", so an untitled page
-  // inherits the layout's metadata instead of blanking it.
-  const text = (value: unknown) => localizedText(value, { locale }) || undefined;
+  // These are translatable, and this query takes no locale - the API hands back
+  // the whole language map. `undefined`, not "", so an untitled page inherits
+  // the layout's metadata instead of blanking it.
+  const text = (value: unknown) =>
+    localizedText(value, {
+      locale,
+      defaultLocale: site?.defaultLanguage,
+    }) || undefined;
 
   const title =
     text(page?.seoTitle) ?? text(page?.displayName) ?? text(site?.siteName);
