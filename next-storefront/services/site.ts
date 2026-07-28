@@ -2,9 +2,11 @@ import { cmssy } from "@/cmssy.config";
 import { PublicSiteConfigDocument } from "@/graphql/generated/graphql";
 import { publicRequest } from "@/services/gateway";
 import type { SiteLocales } from "@/lib/locale-path";
+import type { LocalizedValue } from "@/lib/localized";
 
 export interface SiteConfig {
-  siteName: string | null;
+  /** Translatable, and this cache holds no locale - resolve it at the caller. */
+  siteName: LocalizedValue | null;
   defaultLanguage: string | null;
   enabledLanguages: string[] | null;
   notFoundPageId: string | null;
@@ -21,8 +23,7 @@ export async function fetchSiteConfig(): Promise<SiteConfig | null> {
   const config = data.public?.siteConfig ?? null;
   cached = config
     ? {
-
-        siteName: config.siteName as string | null,
+        siteName: (config.siteName as LocalizedValue | null) ?? null,
         defaultLanguage: config.defaultLanguage,
         enabledLanguages: config.enabledLanguages,
         notFoundPageId: config.notFoundPageId,

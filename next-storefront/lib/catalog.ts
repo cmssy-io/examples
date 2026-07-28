@@ -10,6 +10,7 @@ import type {
   CmssyLocalized,
   ProductData,
 } from "@/graphql/models";
+import { localizedText } from "@/lib/localized";
 
 const client = createCmssyClient(cmssy);
 
@@ -54,17 +55,12 @@ export type Product = {
 type RecordRow = { id: string; data: unknown };
 
 /**
- * A translatable field arrives resolved when the query carries a locale, but the
- * delivery API still answers with the whole map when it does not - so read it
- * through here rather than assuming a string.
+ * These queries carry a locale, so the field usually arrives resolved - but the
+ * delivery API answers with the whole map whenever it does not, and a record
+ * missing this language falls back to whichever one it has.
  */
 function text(value: CmssyLocalized | undefined, fallback = ""): string {
-  if (typeof value === "string") return value.trim() || fallback;
-  if (value) {
-    const first = Object.values(value).find((entry) => entry.trim());
-    if (first) return first;
-  }
-  return fallback;
+  return localizedText(value, { fallback });
 }
 
 function blank(value: string | null | undefined): string | null {
