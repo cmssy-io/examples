@@ -1,19 +1,12 @@
 import { cmssy } from "../../cmssy.config";
-import { localizedPath } from "../lib/locale-path";
 import { siteUrlFor } from "../lib/site-url";
 import { listPublicPages } from "../services/pages";
-import { fetchSiteConfig, siteLocalesFrom } from "../services/site";
+import { fetchSiteConfig } from "../services/site";
 import type { Route } from "./+types/sitemap";
-
-interface SitemapAlternate {
-  hreflang: string;
-  href: string;
-}
 
 interface SitemapEntry {
   loc: string;
   lastModified: string | null;
-  alternates: SitemapAlternate[];
 }
 
 function xmlEscape(value: string): string {
@@ -31,14 +24,15 @@ function renderEntry(entry: SitemapEntry): string {
     entry.lastModified
       ? `    <lastmod>${xmlEscape(entry.lastModified)}</lastmod>`
       : "",
-    ...entry.alternates.map(
-      (alternate) =>
-        `    <xhtml:link rel="alternate" hreflang="${xmlEscape(alternate.hreflang)}" href="${xmlEscape(alternate.href)}" />`,
-    ),
     "  </url>",
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+function pathFor(slug: string): string {
+  const normalized = slug.startsWith("/") ? slug : `/${slug}`;
+  return normalized === "/" ? "/" : normalized;
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -47,32 +41,18 @@ export async function loader({ request }: Route.LoaderArgs) {
     listPublicPages(),
     fetchSiteConfig(),
   ]);
-  const { defaultLocale, locales } = siteLocalesFrom(siteConfig);
   const notFoundPageId = siteConfig?.notFoundPageId ?? null;
 
   const entries = pages
     .filter((page) => page.publishedAt && page.id !== notFoundPageId)
-    .flatMap<SitemapEntry>((page) => {
-      const hrefFor = (locale: string) =>
-        `${siteUrl}${localizedPath(page.slug, locale, defaultLocale)}`;
-      const alternates: SitemapAlternate[] = [
-        ...locales.map((locale) => ({
-          hreflang: locale,
-          href: hrefFor(locale),
-        })),
-        { hreflang: "x-default", href: hrefFor(defaultLocale) },
-      ];
-
-      return locales.map((locale) => ({
-        loc: hrefFor(locale),
-        lastModified: page.updatedAt ?? page.publishedAt,
-        alternates,
-      }));
-    });
+    .map<SitemapEntry>((page) => ({
+      loc: `${siteUrl}${pathFor(page.slug)}`,
+      lastModified: page.updatedAt ?? page.publishedAt,
+    }));
 
   const body = [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ...entries.map(renderEntry),
     "</urlset>",
   ].join("\n");

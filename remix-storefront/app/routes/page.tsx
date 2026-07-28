@@ -3,7 +3,7 @@ import { createCmssyHeaders, createCmssyLoader } from "@cmssy/remix";
 import { cmssy } from "../../cmssy.config";
 import { blocks } from "../cmssy/blocks";
 import { CmssyEditor } from "../cmssy/editor";
-import { pickLocalized } from "../lib/locale-path";
+import { pickLocalized } from "../lib/localized";
 import { fetchPageMeta } from "../services/seo";
 import type { Route } from "./+types/page";
 
