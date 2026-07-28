@@ -27,9 +27,13 @@ clone renders real content without a cmssy account. Point one at your own worksp
 | [remix-storefront](./remix-storefront) | React Router 7 | The same, on React Router (Remix) |
 
 All four point at the same `cmssy-demo` workspace - one set of content, four unrelated frontends,
-none of which the CMS knows about. The Next examples render it. The Astro and React Router
-examples currently register only a `hero` block, which no page in that workspace uses, so they
-render **a blank page** - bringing all three storefronts to the same block set is in progress.
+none of which the CMS knows about.
+
+That is the goal, not yet the state. **Today only `next-storefront` implements the blocks that
+workspace uses.** `simple-blog` renders its `/blog` listing but a blank home page; the Astro and
+React Router examples register a single `hero` block that no page uses, so they render nothing at
+all. `examples.json` records which examples are asserted in CI and why the others are not.
+Bringing them to the same block set is in progress.
 
 ## Why this repo exists
 

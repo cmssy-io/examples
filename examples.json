@@ -1,0 +1,32 @@
+{
+  "$comment": "What CI does with each example. Consumed by scripts/assert-render.mjs and by the examples job in cmssy-sdk. `buildOnly` is a debt marker, not a category - every example here is meant to end up asserted.",
+  "examples": [
+    {
+      "dir": "next-storefront",
+      "build": "pnpm build",
+      "start": "pnpm start",
+      "port": 3000,
+      "assertRender": ["/"]
+    },
+    {
+      "dir": "simple-blog",
+      "build": "pnpm build",
+      "start": "pnpm start",
+      "port": 3000,
+      "buildOnly": true,
+      "buildOnlyReason": "Registers hero, prose, blog-index and testimonials. The demo workspace uses none of those on `/` (10 of 10 blocks have no component) and its site-header/site-footer layout blocks are unregistered, so `/blog` renders 2 of 4. Flip to assertRender once the block sets line up."
+    },
+    {
+      "dir": "astro-storefront",
+      "build": "pnpm build",
+      "buildOnly": true,
+      "buildOnlyReason": "Registers only `hero`, which no page in the demo workspace uses, so it renders a blank page."
+    },
+    {
+      "dir": "remix-storefront",
+      "build": "pnpm build",
+      "buildOnly": true,
+      "buildOnlyReason": "Same missing blocks as astro-storefront, and `pnpm start` is broken by the vercelPreset output path."
+    }
+  ]
+}
