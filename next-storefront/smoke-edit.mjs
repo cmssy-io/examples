@@ -1,21 +1,26 @@
 import { checkCmssyEditMode } from "@cmssy/next/testing";
 import { existsSync, readFileSync } from "node:fs";
 
-// Both, in that order: `.env` holds the workspace slugs a checkout shares, and
-// `.env.local` the secret it does not. Reading only one silently loses half the
-// credentials, which lands in exactly the missing-variable case below.
+// Both files, `.env.local` last so it wins - a checkout may split the workspace
+// slugs from the secret. Reading only one silently loses half the credentials.
 for (const file of [".env", ".env.local"]) {
   if (!existsSync(file)) continue;
-  for (const line of readFileSync(file, "utf8").split("\n")) {
+  // `\r?\n`, because `.` does not match `\r` and `$` without /m anchors at the
+  // end of input: on a CRLF file a `\n`-only split matches no line at all.
+  for (const line of readFileSync(file, "utf8").split(/\r?\n/)) {
     const match = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=(.*)$/.exec(
       line,
     );
     if (!match) continue;
+    // A real environment variable wins over the file, the way every other
+    // dotenv loader works - otherwise CI cannot override what a checkout has.
+    const [, name, rest] = match;
+    if (process.env[name]) continue;
     // Balanced quotes only: stripping one lone quote turns a valid secret into
-    // an invalid one and the failure blames the edit route instead.
-    const raw = match[2].trim();
-    const value = /^(["'])(.*)\1$/.exec(raw);
-    process.env[match[1]] = value ? value[2] : raw;
+    // an invalid one, and the failure then blames the edit route instead.
+    const raw = rest.trim();
+    const quoted = /^(["'])(.*)\1$/.exec(raw);
+    process.env[name] = quoted ? quoted[2] : raw;
   }
 }
 

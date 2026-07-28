@@ -8,9 +8,17 @@ on:
     paths:
       - "storefront/**"
       - ".github/workflows/storefront.yml"
+  # Also on main. A PR that touches no storefront file never runs this job, so
+  # without a push trigger the branch has no green run of its own - and a
+  # required check that can never report blocks such a PR forever.
+  push:
+    branches: [main]
+    paths:
+      - "storefront/**"
+      - ".github/workflows/storefront.yml"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 defaults:
@@ -23,7 +31,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # `defaults.run.working-directory` applies to `run` steps only, never to
+      # `uses` ones - and this action reads packageManager from a path relative
+      # to the repository root, which has no package.json.
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: storefront/package.json
 
       - uses: actions/setup-node@v4
         with:
@@ -59,5 +72,10 @@ jobs:
       - name: Generated documents are up to date
         run: |
           pnpm codegen
-          git diff --exit-code -- graphql/generated \
-            || { echo "::error::run pnpm codegen and commit graphql/generated"; exit 1; }
+          # status, not diff: codegen adding a FILE leaves `git diff` empty, and
+          # the check would pass on exactly the change it exists to catch.
+          if [ -n "$(git status --porcelain -- graphql/generated)" ]; then
+            git status --short -- graphql/generated
+            echo "::error::run pnpm codegen and commit graphql/generated"
+            exit 1
+          fi

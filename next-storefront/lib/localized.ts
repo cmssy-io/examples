@@ -4,7 +4,7 @@ export type LocalizedValue = string | Record<string, string>;
 export interface LocalizedTextOptions {
   /** The language being rendered. */
   locale?: string;
-  /** The workspace's default language, tried before any other. */
+  /** The workspace's default language, tried after `locale` and before the rest. */
   defaultLocale?: string | null;
   fallback?: string;
 }
@@ -32,12 +32,15 @@ export function localizedText(
 
   const map = value as Record<string, unknown>;
 
-  // The site's default language before anything else, because "whichever one
-  // it has" is settled by JSON key order - which puts a German title on a
-  // Norwegian page, and swaps it for a French one when the API reorders the
-  // map, with no content change.
-  for (const key of [locale, defaultLocale]) {
-    const entry = key ? map[key] : undefined;
+  // The language being rendered, then the site's default - both before
+  // "whichever one it has", which is settled by JSON key order and so puts a
+  // German title on a Norwegian page, then swaps it for a French one when the
+  // API reorders the map, with no content change.
+  const preferred = [locale, defaultLocale].filter(
+    (key, index, all): key is string => Boolean(key) && all.indexOf(key) === index,
+  );
+  for (const key of preferred) {
+    const entry = map[key];
     if (typeof entry === "string" && entry.trim()) return entry.trim();
   }
 

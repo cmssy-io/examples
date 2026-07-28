@@ -16,6 +16,10 @@ export interface SiteConfig {
 // The promise, not the value. Two callers in one `Promise.all` - which is how
 // page metadata asks for the site name and the locale at the same time - both
 // find an unresolved cache and both send the request.
+//
+// One consequence a value cache did not have: the rejected promise is shared,
+// so a caller that holds it without awaiting in the same tick gets an
+// unhandled-rejection warning. Await what this returns.
 let cached: Promise<SiteConfig | null> | undefined;
 
 export function fetchSiteConfig(): Promise<SiteConfig | null> {

@@ -12,7 +12,7 @@ function slugFromPath(path?: string[]): string {
 }
 
 export async function buildPageMetadata(path?: string[]): Promise<Metadata> {
-  const [meta, site, { locale }] = await Promise.all([
+  const [meta, site, { locale, defaultLocale }] = await Promise.all([
     publicRequest(PublicPageMetaDocument, {
       workspaceSlug: cmssy.workspaceSlug,
       slug: slugFromPath(path),
@@ -26,11 +26,10 @@ export async function buildPageMetadata(path?: string[]): Promise<Metadata> {
   // These are translatable, and this query takes no locale - the API hands back
   // the whole language map. `undefined`, not "", so an untitled page inherits
   // the layout's metadata instead of blanking it.
+  // `shopLocale` already normalised the default; reaching into the raw config
+  // for it would disagree with `locale` on a workspace that declares none.
   const text = (value: unknown) =>
-    localizedText(value, {
-      locale,
-      defaultLocale: site?.defaultLanguage,
-    }) || undefined;
+    localizedText(value, { locale, defaultLocale }) || undefined;
 
   const title =
     text(page?.seoTitle) ?? text(page?.displayName) ?? text(site?.siteName);
