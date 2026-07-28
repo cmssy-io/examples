@@ -15,11 +15,16 @@ pnpm install && pnpm dev
 - `headers` - the CSP that lets the admin frame your site. Drop it and the editor
   is an empty box with no error anywhere.
 - `app/routes/sitemap.ts`, `app/routes/robots.ts`, `app/services/` - SEO is the
-  app's own code since SDK v10. The sitemap lists one `<url>` per language and
-  drops drafts and the workspace's 404 page; the queries behind it live in
+  app's own code since SDK v10. The sitemap lists one `<url>` per page and drops
+  drafts and the workspace's 404 page; the queries behind it live in
   `app/services/`, which is where you add your own.
 - `meta` on the page route - the title and description come from the same
-  services layer, resolved for the language the page was routed as.
+  services layer, resolved for the locale the loader returns.
+
+This example serves one locale. It has no locale prefix routing, so `/no/blog`
+is not the Norwegian page - it is the same page the default locale gets, and the
+sitemap says so by listing each page once. `astro-storefront` shows the prefix
+version with a middleware; teaching this one the same is CMS-1088.
 
 ## Why there is no `/cmssy-edit` route here
 
