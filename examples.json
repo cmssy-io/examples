@@ -21,8 +21,8 @@
     {
       "dir": "astro-storefront",
       "build": "pnpm build",
-      "blocked": "CMS-1088",
-      "blockedReason": "Declares @cmssy/*@^9.0.0, two majors behind. Against the current SDK the build fails on createCmssyRobots, removed in v10. Not built here until it is migrated - see CMS-1088."
+      "buildOnly": true,
+      "buildOnlyReason": "On v11 and building, but registers only a `hero` block, which no page in the demo workspace uses - it renders a blank page. Flip to assertRender when the storefront blocks land."
     },
     {
       "dir": "remix-storefront",

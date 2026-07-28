@@ -1,5 +1,6 @@
 ---
 import { loadCmssyPage } from "@cmssy/astro";
+import { resolveEditorOrigin } from "@cmssy/core";
 import { cmssy } from "../../cmssy.config";
 import CmssyEditor from "../../cmssy/editor";
 
@@ -12,7 +13,7 @@ const { page, locale, defaultLocale, enabledLocales } = await loadCmssyPage(
   Astro.request,
   Astro.url,
 );
-const editorOrigin = cmssy.editorOrigin ?? "*";
+const editorOrigin = resolveEditorOrigin(cmssy.editorOrigin);
 ---
 
 <html lang={locale}>

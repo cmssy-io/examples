@@ -2,6 +2,8 @@
 import { loadCmssyPage } from "@cmssy/astro";
 import { cmssy } from "../cmssy.config";
 import { Blocks } from "../components/Blocks";
+import { pickLocalized } from "../lib/locale-path";
+import { fetchPageMeta } from "../services/seo";
 
 export const prerender = false;
 
@@ -14,12 +16,20 @@ const { page, locale, defaultLocale, enabledLocales } = await loadCmssyPage(
 if (!page) {
   Astro.response.status = 404;
 }
+
+const meta = page?.slug ? await fetchPageMeta(page.slug) : null;
+const title =
+  pickLocalized(meta?.seoTitle, locale, defaultLocale) ||
+  pickLocalized(meta?.displayName, locale, defaultLocale) ||
+  "cmssy on Astro";
+const description = pickLocalized(meta?.seoDescription, locale, defaultLocale);
 ---
 
 <html lang={locale}>
   <head>
     <meta charset="utf-8" />
-    <title>{page?.seoTitle?.[locale] ?? page?.displayName?.[locale] ?? "cmssy on Astro"}</title>
+    <title>{title}</title>
+    {description ? <meta name="description" content={description} /> : null}
   </head>
   <body>
     {
