@@ -21,7 +21,7 @@ clone renders real content without a cmssy account. Point one at your own worksp
 
 | Example                      | What it shows                                                                                                 |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| [simple-blog](./simple-blog) | A listing block with a server `loader`, your own GraphQL query against the delivery API, posts as child pages |
+| [simple-blog](./simple-blog) | A whole small site: blog listing with a server `loader`, rich text, and model records bound via `fields.relation` |
 
 ## Why this repo exists
 
@@ -32,6 +32,6 @@ example turns its pull request red.
 
 ## Related
 
-- [cmssy-next-starter](https://github.com/cmssy-io/cmssy-next-starter) - the minimal scaffold
-  `cmssy init` gives you. Start there if you want an empty app rather than a finished one.
+- `npx @cmssy/cli init` - generates this same wiring into an app you already have, if you
+  want an empty starting point rather than a finished one.
 - [Documentation](https://cmssy.com/docs)

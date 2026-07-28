@@ -2,7 +2,7 @@
   "name": "cmssy-example-simple-blog",
   "version": "0.1.0",
   "private": true,
-  "description": "A blog on cmssy: a listing block that loads published pages on the server, and an article page.",
+  "description": "A small cmssy site on Next.js: a blog listing block with a server loader, plus hero, prose and testimonials blocks.",
   "engines": {
     "node": ">=22"
   },
