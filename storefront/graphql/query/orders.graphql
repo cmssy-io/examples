@@ -1,0 +1,85 @@
+query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int) {
+  account {
+    orders(workspaceId: $workspaceId, skip: $skip, limit: $limit) {
+      total
+      hasMore
+      items {
+        id
+        status
+        subtotal
+        discount
+        appliedDiscount { code type value amount }
+        tax
+        total
+        pricesIncludeTax
+        taxSummary { rateId name rate base amount }
+        currency
+        customerEmail
+        refundedAmount
+        paymentProvider
+        paymentStatus
+        fulfillmentStatus
+        amountPaid
+        balanceDue
+        paymentReference
+        trackingNumber
+        trackingCarrier
+        invoiceNumber
+        invoiceUrl
+        invoiceProvider
+        paidAt
+        fulfilledAt
+        createdAt
+        orderNumber
+        poNumber
+        customerNote
+        shippingTotal
+        shippingMethod { id label price }
+        shippingAddress { name company line1 line2 postalCode city region country phone vatId }
+        items { name price listPrice tierMinQty currency quantity sku }
+        payments { amount reference provider at }
+      }
+    }
+  }
+}
+
+query MyOrder($workspaceId: ID!, $id: ID!) {
+  account {
+    order(workspaceId: $workspaceId, id: $id) {
+      id
+      status
+      subtotal
+      discount
+      appliedDiscount { code type value amount }
+      tax
+      total
+      pricesIncludeTax
+      taxSummary { rateId name rate base amount }
+      currency
+      customerEmail
+      refundedAmount
+      paymentProvider
+      paymentStatus
+      fulfillmentStatus
+      amountPaid
+      balanceDue
+      paymentReference
+      trackingNumber
+      trackingCarrier
+      invoiceNumber
+      invoiceUrl
+      invoiceProvider
+      paidAt
+      fulfilledAt
+      createdAt
+      orderNumber
+      poNumber
+      customerNote
+      shippingTotal
+      shippingMethod { id label price }
+      shippingAddress { name company line1 line2 postalCode city region country phone vatId }
+      items { name price listPrice tierMinQty currency quantity sku }
+      payments { amount reference provider at }
+    }
+  }
+}

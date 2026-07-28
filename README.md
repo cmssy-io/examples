@@ -19,9 +19,15 @@ clone renders real content without a cmssy account. Point one at your own worksp
 
 ## Examples
 
-| Example                      | What it shows                                                                                                 |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| [simple-blog](./simple-blog) | A whole small site: blog listing with a server `loader`, rich text, and model records bound via `fields.relation` |
+| Example | Framework | What it shows |
+| --- | --- | --- |
+| [simple-blog](./simple-blog) | Next.js | Blog listing with a server `loader`, rich text, model records bound via `fields.relation` |
+| [storefront](./storefront) | Next.js | Commerce: products, categories, cart, checkout, member accounts and orders as Server Actions |
+| [astro-site](./astro-site) | Astro | The catch-all route, block registry and verified edit mode on the Astro adapter |
+| [remix-site](./remix-site) | React Router 7 | The same, on React Router (Remix) |
+
+All four point at the same `cmssy-demo` workspace. That is the headless model applied to itself:
+one set of content, four unrelated frontends, none of which the CMS knows about.
 
 ## Why this repo exists
 

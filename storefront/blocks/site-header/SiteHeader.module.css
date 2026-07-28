@@ -1,0 +1,497 @@
+.utility {
+  background: var(--foreground);
+  color: var(--primary-foreground);
+  font-size: var(--text-xs);
+}
+
+.utilityInner {
+  max-width: var(--shop-max);
+  margin: 0 auto;
+  padding: 0 var(--shop-gutter);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  opacity: 0.85;
+}
+
+.utilityList {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in oklab, var(--background) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.headerInner {
+  max-width: var(--shop-max);
+  margin: 0 auto;
+  padding: 0 var(--shop-gutter);
+  height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.brandMark {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  background: var(--foreground);
+  color: var(--primary-foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-bold);
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.brandName {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.brandKicker {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  height: 100%;
+  padding: 0 12px;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--foreground);
+}
+
+.searchButton {
+  gap: 6px;
+  height: 100%;
+  padding: 0 16px;
+  border: none;
+  background: var(--foreground);
+  color: var(--primary-foreground);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.action {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 6px;
+  min-width: 60px;
+  color: var(--muted-foreground);
+  font-size: 10px;
+  text-align: center;
+}
+
+.action svg {
+  display: block;
+}
+
+.action:hover {
+  text-decoration: none;
+  color: var(--foreground);
+}
+
+.actionStrong {
+  color: var(--foreground);
+}
+
+.badge {
+  position: absolute;
+  top: -2px;
+  right: 12px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background: var(--foreground);
+  color: var(--primary-foreground);
+  font-size: 10px;
+  font-weight: var(--font-semibold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav {
+  border-top: 1px solid var(--border);
+  background: var(--card);
+}
+
+.navInner {
+  max-width: var(--shop-max);
+  margin: 0 auto;
+  padding: 0 var(--shop-gutter);
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+  overflow-x: auto;
+  /* Horizontal scroll is a fallback for narrow widths; never show the bar. */
+  scrollbar-width: none;
+}
+
+.navInner::-webkit-scrollbar {
+  display: none;
+}
+
+.navLink {
+  white-space: nowrap;
+}
+
+.navLink:hover {
+  text-decoration: none;
+  color: var(--foreground);
+}
+
+.navLinkActive {
+  color: var(--foreground);
+  font-weight: var(--font-medium);
+}
+
+/* The full 8-category row already fills the 1240 container, so the dispatch
+   note has no room on this line - it lives in the utility bar instead. */
+.dispatch {
+  display: none;
+}
+
+/* The header owns the mega menu, so hovering off the whole thing closes it. */
+.header {
+  position: sticky;
+}
+
+.navTrigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  white-space: nowrap;
+  font: inherit;
+  font-weight: var(--font-medium);
+  color: var(--foreground);
+}
+
+.chevron {
+  display: inline-flex;
+  transition: transform 150ms var(--ease-out);
+}
+
+.chevron svg {
+  width: 14px;
+  height: 14px;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.mega {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  z-index: 50;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+}
+
+.megaInner {
+  max-width: var(--shop-max);
+  margin: 0 auto;
+  padding: 0 var(--shop-gutter);
+  display: grid;
+  grid-template-columns: 236px 1fr 300px;
+  min-height: 340px;
+}
+
+.megaRail {
+  border-right: 1px solid var(--border);
+  padding: 14px 0;
+}
+
+.railItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 16px;
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+
+.railItem:hover {
+  text-decoration: none;
+}
+
+.railItemActive {
+  background: var(--secondary, color-mix(in oklab, var(--foreground) 5%, transparent));
+  color: var(--foreground);
+  font-weight: var(--font-medium);
+}
+
+.railName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.railCode {
+  width: 26px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.railArrow {
+  opacity: 0;
+  transition: opacity 150ms var(--ease-out);
+}
+
+.railItemActive .railArrow {
+  opacity: 1;
+}
+
+.megaBody {
+  padding: 22px 28px;
+}
+
+.megaHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.megaTitle {
+  font-weight: var(--font-semibold);
+  font-size: var(--text-base, 1rem);
+}
+
+.megaViewAll {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+.megaViewAll:hover {
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.megaLines {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+  margin-bottom: 22px;
+}
+
+.megaLine {
+  padding: 3px 0;
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+
+.megaLine:hover {
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.megaLabel {
+  display: block;
+  margin-bottom: 10px;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+}
+
+.megaBrands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.megaBrand {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--foreground);
+}
+
+.megaBrand:hover {
+  border-color: var(--muted-foreground);
+  text-decoration: none;
+}
+
+.megaFeatured {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px;
+  border-left: 1px solid var(--border);
+}
+
+.megaThumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  aspect-ratio: 1.5 / 1;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--foreground) 6%, transparent) 0%,
+    color-mix(in oklab, var(--foreground) 12%, transparent) 100%
+  );
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+
+.megaFeaturedName {
+  margin-bottom: 6px;
+  font-weight: var(--font-medium);
+  line-height: 1.3;
+}
+
+.megaFeaturedText {
+  margin-bottom: 14px;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+.megaFeaturedButton {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--foreground);
+}
+
+.megaFeaturedButton:hover {
+  border-color: var(--muted-foreground);
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .megaInner {
+    grid-template-columns: 1fr;
+  }
+
+  .megaRail,
+  .megaFeatured {
+    display: none;
+  }
+}
+
+/* Phone / narrow: drop the wordy utility copy, and give search its own row so
+   the brand, search and actions never fight for one cramped line. */
+@media (max-width: 768px) {
+  .utilityInner {
+    justify-content: flex-end;
+  }
+
+  .utilityNote,
+  .hoursNote {
+    display: none;
+  }
+
+  .utilityList a {
+    max-width: 48vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .headerInner {
+    flex-wrap: wrap;
+    height: auto;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    gap: 12px 12px;
+  }
+
+  .brand {
+    margin-right: auto;
+  }
+
+  .search {
+    order: 3;
+    flex-basis: 100%;
+  }
+}

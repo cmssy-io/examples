@@ -1,0 +1,13 @@
+query PublicSiteConfig($workspaceSlug: String!) {
+  public {
+    siteConfig(workspaceSlug: $workspaceSlug) {
+      siteName
+      defaultLanguage
+      enabledLanguages
+      notFoundPageId
+      branding {
+        ogImageUrl
+      }
+    }
+  }
+}

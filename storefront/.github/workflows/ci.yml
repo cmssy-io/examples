@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+      # next-env.d.ts and .next/types are gitignored here, so a fresh checkout
+      # has neither and tsc would quietly skip the generated route types. typegen
+      # writes them without a full build, which would need CMS credentials this
+      # job does not have.
+      - run: pnpm typegen
+      - run: pnpm typecheck
+
+      # graphql/models.ts is generated from the workspace's models, so it goes
+      # stale the moment someone edits a model in the CMS - and a stale field
+      # is a runtime undefined, not a build error. The slugs are the public
+      # demo workspace's, and the command needs no token.
+      - name: Model types match the workspace
+        env:
+          CMSSY_ORG_SLUG: cmssy
+          CMSSY_WORKSPACE_SLUG: cmssy-demo
+        run: npx --yes @cmssy/cli@^10.7.0 types --out graphql/models.ts --check

@@ -1,0 +1,28 @@
+{
+  "name": "cmssy-example-astro-site",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "smoke:edit": "node smoke-edit.mjs"
+  },
+  "dependencies": {
+    "@astrojs/react": "^4.2.0",
+    "@astrojs/vercel": "^8.0.0",
+    "@cmssy/astro": "^9.0.0",
+    "@cmssy/core": "^9.0.0",
+    "@cmssy/react": "^9.0.0",
+    "astro": "^5.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.0"
+  },
+  "description": "A cmssy site on Astro: the catch-all route, block registry and verified edit mode with the Astro adapter."
+}

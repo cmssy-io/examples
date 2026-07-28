@@ -1,0 +1,46 @@
+{
+  "name": "cmssy-example-storefront",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A storefront on cmssy: product and category pages, cart, checkout, account and orders as Server Actions.",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@11.1.2",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typegen": "next typegen",
+    "typecheck": "tsc --noEmit",
+    "smoke:edit": "node smoke-edit.mjs",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "types": "npx @cmssy/cli types --out graphql/models.ts"
+  },
+  "dependencies": {
+    "@cmssy/core": "^11.0.0",
+    "@cmssy/next": "^11.0.0",
+    "@cmssy/react": "^11.0.0",
+    "@cmssy/types": "^0.29.0",
+    "@graphql-typed-document-node/core": "3.2.0",
+    "jose": "^5.10.0",
+    "next": "^16.0.10",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "sanitize-html": "^2.17.5"
+  },
+  "devDependencies": {
+    "@cmssy/eslint-plugin": "^11.0.0",
+    "@graphql-codegen/cli": "^7.2.0",
+    "@graphql-codegen/client-preset": "^6.1.0",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/sanitize-html": "^2.16.1",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "^16.0.10",
+    "graphql": "^17.0.2",
+    "typescript": "^5.7.2"
+  }
+}

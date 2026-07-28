@@ -2,8 +2,17 @@
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "cmssy examples",
   "description": "Runnable example apps built with the cmssy headless SDK - the shapes `npx @cmssy/cli init` gets you to, with real content from the public demo workspace.",
-  "folders": ["simple-blog"],
-  "excludeFolders": ["node_modules", ".next", "_autodocs"],
+  "folders": [
+    "simple-blog",
+    "storefront",
+    "astro-site",
+    "remix-site"
+  ],
+  "excludeFolders": [
+    "node_modules",
+    ".next",
+    "_autodocs"
+  ],
   "rules": [
     "Edit mode requires a VERIFIED request: cmssyEdit=1 AND a cmssySecret matching the workspace draft secret. Use the createCmssyProxy preset from @cmssy/next/middleware - never treat a bare cmssyEdit=1 as edit mode.",
     "The editor origin is https://www.cmssy.io (cmssy cloud). app.cmssy.com does not exist.",

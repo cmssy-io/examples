@@ -1,0 +1,204 @@
+@import "./tokens.css";
+
+.shop-scope {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+.shop-scope h1,
+.shop-scope h2,
+.shop-scope h3 {
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+}
+
+/* Plain links inherit the surrounding colour - but a link that IS a button must
+   not: `.shop-scope a` outranks `.shop-btn` (0-1-1 over 0-1-0), so every
+   link-shaped button drew its label in the colour of its own background -
+   dark-on-black, light-on-white. Excluding buttons here keeps one rule for
+   both instead of restating the colours per element. */
+.shop-scope a:not([class*="shop-btn"]) {
+  color: inherit;
+  text-decoration: none;
+}
+
+.shop-scope a:not([class*="shop-btn"]):hover {
+  text-decoration: underline;
+}
+
+.shop-scope a.shop-btn,
+.shop-scope a.shop-btn:hover {
+  text-decoration: none;
+}
+
+.shop-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--shop-max);
+  margin: 0 auto;
+  padding: 24px 20px 64px;
+}
+
+.shop-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.shop-btn:hover:not(:disabled) {
+  border-color: var(--muted-foreground);
+}
+
+.shop-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.shop-btn-primary {
+  background: var(--foreground);
+  border-color: var(--foreground);
+  color: var(--primary-foreground);
+}
+
+.shop-btn-primary:hover:not(:disabled) {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.shop-input,
+.shop-select {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--text-sm);
+  box-shadow: var(--shadow-xs);
+}
+
+.shop-input:focus-visible,
+.shop-select:focus-visible,
+.shop-btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.shop-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin-bottom: 5px;
+}
+
+.shop-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+a.shop-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--muted-foreground);
+}
+
+/* sf-card: the design's interactive card. Like shop-card but lifts on hover on
+   any element (not just links) - product cards, result rows, tiles. */
+.sf-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.sf-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--muted-foreground);
+}
+
+.shop-muted {
+  color: var(--muted-foreground);
+}
+
+.shop-error {
+  color: var(--destructive);
+  font-size: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .shop-scope {
+    --shop-bg: #0f1216;
+    --shop-surface: #171c22;
+    --shop-border: #2a323c;
+    --shop-ink: #e9edf2;
+    --shop-muted: #97a2b0;
+    --shop-ink-inverse: #e9edf2;
+    --shop-dark: #0b0e12;
+    --shop-ok: #4ade80;
+    --shop-warn: #fbbf24;
+    --shop-danger: #f87171;
+  }
+}
+
+/* Loading skeleton — the design's soft pulsing block. */
+@keyframes sf-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.sf-skel {
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  animation: sf-pulse 1.2s ease-in-out infinite;
+}
+
+.shop-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

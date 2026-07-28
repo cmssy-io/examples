@@ -1,0 +1,11 @@
+query PublicPageLayouts($workspaceSlug: String!, $pageSlug: String!, $previewSecret: String) {
+  public {
+    page {
+      layouts(workspaceSlug: $workspaceSlug, pageSlug: $pageSlug, previewSecret: $previewSecret) {
+        position
+        blocks { id type content style advanced order isActive }
+        settings { desktopWidth mobileBehavior }
+      }
+    }
+  }
+}
