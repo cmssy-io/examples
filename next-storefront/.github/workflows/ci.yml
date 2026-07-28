@@ -31,12 +31,13 @@ jobs:
       - run: pnpm typegen
       - run: pnpm typecheck
 
-      # graphql/models.ts is generated from the workspace's models, so it goes
-      # stale the moment someone edits a model in the CMS - and a stale field
-      # is a runtime undefined, not a build error. The slugs are the public
-      # demo workspace's, and the command needs no token.
-      - name: Model types match the workspace
+      # Both halves of `pnpm types` are committed and both go stale on their
+      # own: graphql/models.ts the moment someone edits a model in the CMS - a
+      # stale field is a runtime undefined, not a build error - and
+      # cmssy/operations.graphql whenever the SDK changes a selection set. The
+      # slugs are the public demo workspace's, and the command needs no token.
+      - name: Generated types match the workspace and the SDK
         env:
           CMSSY_ORG_SLUG: cmssy
           CMSSY_WORKSPACE_SLUG: cmssy-demo
-        run: npx --yes @cmssy/cli@^10.7.0 types --out graphql/models.ts --check
+        run: pnpm types --check
