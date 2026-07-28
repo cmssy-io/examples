@@ -1,6 +1,7 @@
 {
-  "include": ["app/**/*", "*.ts"],
+  "include": ["app/**/*", "*.ts", ".react-router/types/**/*"],
   "compilerOptions": {
+    "rootDirs": [".", "./.react-router/types"],
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "types": ["node", "vite/client"],
     "target": "ES2022",

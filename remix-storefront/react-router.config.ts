@@ -6,5 +6,5 @@ import { vercelPreset } from "@vercel/react-router/vite";
 // editor request can be served from the page itself.
 export default {
   ssr: true,
-  presets: [vercelPreset()],
+  presets: process.env.LOCAL_SERVE ? [] : [vercelPreset()],
 } satisfies Config;

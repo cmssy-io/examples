@@ -3,9 +3,36 @@ import { createCmssyHeaders, createCmssyLoader } from "@cmssy/remix";
 import { cmssy } from "../../cmssy.config";
 import { blocks } from "../cmssy/blocks";
 import { CmssyEditor } from "../cmssy/editor";
+import { pickLocalized } from "../lib/localized";
+import { fetchPageMeta } from "../services/seo";
 import type { Route } from "./+types/page";
 
-export const loader = createCmssyLoader(cmssy);
+const cmssyLoader = createCmssyLoader(cmssy);
+
+export async function loader(args: Route.LoaderArgs) {
+  const data = await cmssyLoader(args);
+  return {
+    ...data,
+    meta: data.page?.slug ? await fetchPageMeta(data.page.slug) : null,
+  };
+}
+
+export function meta({ data }: Route.MetaArgs) {
+  if (!data) return [];
+  const title =
+    pickLocalized(data.meta?.seoTitle, data.locale, data.defaultLocale) ||
+    pickLocalized(data.meta?.displayName, data.locale, data.defaultLocale);
+  const description = pickLocalized(
+    data.meta?.seoDescription,
+    data.locale,
+    data.defaultLocale,
+  );
+
+  return [
+    ...(title ? [{ title }] : []),
+    ...(description ? [{ name: "description", content: description }] : []),
+  ];
+}
 
 // Without these the admin cannot frame the site, and the editor shows an empty
 // box with no error anywhere.
@@ -29,7 +56,12 @@ export default function CmssyPage({ loaderData }: Route.ComponentProps) {
     );
   }
 
-  if (!page) return <main><h1>Not found</h1></main>;
+  if (!page)
+    return (
+      <main>
+        <h1>Not found</h1>
+      </main>
+    );
 
   const blockMap = buildBlockMap(blocks);
   const context = buildBlockContext(locale, defaultLocale, enabledLocales);
