@@ -2,34 +2,49 @@ import { cmssy } from "@/cmssy.config";
 import { PublicSiteConfigDocument } from "@/graphql/generated/graphql";
 import { publicRequest } from "@/services/gateway";
 import type { SiteLocales } from "@/lib/locale-path";
+import type { LocalizedValue } from "@/lib/localized";
 
 export interface SiteConfig {
-  siteName: string | null;
+  /** Translatable, and this cache holds no locale - resolve it at the caller. */
+  siteName: LocalizedValue | null;
   defaultLanguage: string | null;
   enabledLanguages: string[] | null;
   notFoundPageId: string | null;
   branding: { ogImageUrl: string | null } | null;
 }
 
-let cached: SiteConfig | null | undefined;
+// The promise, not the value. Two callers in one `Promise.all` - which is how
+// page metadata asks for the site name and the locale at the same time - both
+// find an unresolved cache and both send the request.
+//
+// One consequence a value cache did not have: the rejected promise is shared,
+// so a caller that holds it without awaiting in the same tick gets an
+// unhandled-rejection warning. Await what this returns.
+let cached: Promise<SiteConfig | null> | undefined;
 
-export async function fetchSiteConfig(): Promise<SiteConfig | null> {
-  if (cached !== undefined) return cached;
+export function fetchSiteConfig(): Promise<SiteConfig | null> {
+  cached ??= loadSiteConfig().catch((error: unknown) => {
+    // Caching the value could not outlive a failure; caching the promise can.
+    // Clear it, or one bad response is the site config until the next deploy.
+    cached = undefined;
+    throw error;
+  });
+  return cached;
+}
+
+async function loadSiteConfig(): Promise<SiteConfig | null> {
   const data = await publicRequest(PublicSiteConfigDocument, {
     workspaceSlug: cmssy.workspaceSlug,
   });
   const config = data.public?.siteConfig ?? null;
-  cached = config
-    ? {
-
-        siteName: config.siteName as string | null,
-        defaultLanguage: config.defaultLanguage,
-        enabledLanguages: config.enabledLanguages,
-        notFoundPageId: config.notFoundPageId,
-        branding: config.branding,
-      }
-    : null;
-  return cached;
+  if (!config) return null;
+  return {
+    siteName: (config.siteName as LocalizedValue | null) ?? null,
+    defaultLanguage: config.defaultLanguage,
+    enabledLanguages: config.enabledLanguages,
+    notFoundPageId: config.notFoundPageId,
+    branding: config.branding,
+  };
 }
 
 export async function resolveSiteLocales(): Promise<SiteLocales> {

@@ -3,6 +3,8 @@ import { cmssy } from "@/cmssy.config";
 import { PublicPageMetaDocument } from "@/graphql/generated/graphql";
 import { publicRequest } from "@/services/gateway";
 import { fetchSiteConfig } from "@/services/site";
+import { shopLocale } from "@/lib/locale";
+import { localizedText } from "@/lib/localized";
 
 function slugFromPath(path?: string[]): string {
   const joined = (path ?? []).filter(Boolean).join("/");
@@ -10,21 +12,28 @@ function slugFromPath(path?: string[]): string {
 }
 
 export async function buildPageMetadata(path?: string[]): Promise<Metadata> {
-  const [meta, site] = await Promise.all([
+  const [meta, site, { locale, defaultLocale }] = await Promise.all([
     publicRequest(PublicPageMetaDocument, {
       workspaceSlug: cmssy.workspaceSlug,
       slug: slugFromPath(path),
     }),
     fetchSiteConfig(),
+    shopLocale(),
   ]);
 
   const page = meta.public?.page?.get ?? null;
 
-  const seoTitle = page?.seoTitle as string | null | undefined;
-  const displayName = page?.displayName as string | null | undefined;
-  const seoDescription = page?.seoDescription as string | null | undefined;
-  const title = seoTitle || displayName || site?.siteName || undefined;
-  const description = seoDescription || undefined;
+  // These are translatable, and this query takes no locale - the API hands back
+  // the whole language map. `undefined`, not "", so an untitled page inherits
+  // the layout's metadata instead of blanking it.
+  // `shopLocale` already normalised the default; reaching into the raw config
+  // for it would disagree with `locale` on a workspace that declares none.
+  const text = (value: unknown) =>
+    localizedText(value, { locale, defaultLocale }) || undefined;
+
+  const title =
+    text(page?.seoTitle) ?? text(page?.displayName) ?? text(site?.siteName);
+  const description = text(page?.seoDescription);
   const ogImageUrl = site?.branding?.ogImageUrl || undefined;
   const keywords =
     page?.seoKeywords && page.seoKeywords.length > 0
