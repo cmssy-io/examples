@@ -8,7 +8,8 @@
     "build": "react-router build",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc --noEmit",
-    "smoke:edit": "node scripts/smoke-edit.mjs"
+    "smoke:edit": "node scripts/smoke-edit.mjs",
+    "start:local": "LOCAL_SERVE=1 react-router build && react-router-serve ./build/server/index.js"
   },
   "dependencies": {
     "@cmssy/core": "^11.0.0",

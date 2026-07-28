@@ -4,11 +4,23 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useMatches,
 } from "react-router";
 
+interface LocaleData {
+  locale?: string;
+  defaultLocale?: string;
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const matches = useMatches();
+  const data = matches.reduce<LocaleData>(
+    (found, match) => (match.data as LocaleData | undefined) ?? found,
+    {},
+  );
+
   return (
-    <html lang="en">
+    <html lang={data.locale ?? data.defaultLocale}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
