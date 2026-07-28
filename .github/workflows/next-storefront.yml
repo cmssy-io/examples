@@ -1,21 +1,21 @@
-name: storefront
+name: next-storefront
 
 # GitHub reads workflows only from the repository root. This one arrived here
-# as storefront/.github/workflows/ci.yml, where it had never run once.
+# as next-storefront/.github/workflows/ci.yml, where it had never run once.
 on:
   pull_request:
     branches: [main]
     paths:
-      - "storefront/**"
-      - ".github/workflows/storefront.yml"
-  # Also on main. A PR that touches no storefront file never runs this job, so
+      - "next-storefront/**"
+      - ".github/workflows/next-storefront.yml"
+  # Also on main. A PR that touches no next-storefront file never runs this job, so
   # without a push trigger the branch has no green run of its own - and a
   # required check that can never report blocks such a PR forever.
   push:
     branches: [main]
     paths:
-      - "storefront/**"
-      - ".github/workflows/storefront.yml"
+      - "next-storefront/**"
+      - ".github/workflows/next-storefront.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -23,7 +23,7 @@ concurrency:
 
 defaults:
   run:
-    working-directory: storefront
+    working-directory: next-storefront
 
 jobs:
   ci:
@@ -36,13 +36,13 @@ jobs:
       # to the repository root, which has no package.json.
       - uses: pnpm/action-setup@v4
         with:
-          package_json_file: storefront/package.json
+          package_json_file: next-storefront/package.json
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: storefront/pnpm-lock.yaml
+          cache-dependency-path: next-storefront/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
