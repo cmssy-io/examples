@@ -1,12 +1,14 @@
 {
-  "$comment": "What CI does with each example. Consumed by scripts/assert-render.mjs and by the examples job in cmssy-sdk. `buildOnly` is a debt marker, not a category - every example here is meant to end up asserted.",
+  "$comment": "What CI does with each example. Consumed by scripts/assert-render.mjs and by the examples job in cmssy-sdk. `buildOnly` and `blocked` are debt markers, not categories - every example here is meant to end up asserted, and each marker names what has to happen for it to go away.",
   "examples": [
     {
       "dir": "next-storefront",
       "build": "pnpm build",
       "start": "pnpm start",
       "port": 3000,
-      "assertRender": ["/"]
+      "assertRender": [
+        "/"
+      ]
     },
     {
       "dir": "simple-blog",
@@ -19,8 +21,8 @@
     {
       "dir": "astro-storefront",
       "build": "pnpm build",
-      "buildOnly": true,
-      "buildOnlyReason": "Registers only `hero`, which no page in the demo workspace uses, so it renders a blank page."
+      "blocked": "CMS-1088",
+      "blockedReason": "Declares @cmssy/*@^9.0.0, two majors behind. Against the current SDK the build fails on createCmssyRobots, removed in v10. Not built here until it is migrated - see CMS-1088."
     },
     {
       "dir": "remix-storefront",
