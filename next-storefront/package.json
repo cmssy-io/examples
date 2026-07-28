@@ -16,12 +16,12 @@
     "typecheck": "tsc --noEmit",
     "smoke:edit": "node smoke-edit.mjs",
     "codegen": "graphql-codegen --config codegen.ts",
-    "types": "npx @cmssy/cli types --out graphql/models.ts"
+    "types": "cmssy types --out graphql/models.ts"
   },
   "dependencies": {
-    "@cmssy/core": "^11.0.0",
-    "@cmssy/next": "^11.0.0",
-    "@cmssy/react": "^11.0.0",
+    "@cmssy/core": "^11.3.0",
+    "@cmssy/next": "^11.3.0",
+    "@cmssy/react": "^11.3.0",
     "@cmssy/types": "^0.29.0",
     "@graphql-typed-document-node/core": "3.2.0",
     "jose": "^5.10.0",
@@ -31,7 +31,8 @@
     "sanitize-html": "^2.17.5"
   },
   "devDependencies": {
-    "@cmssy/eslint-plugin": "^11.0.0",
+    "@cmssy/cli": "^11.3.0",
+    "@cmssy/eslint-plugin": "^11.3.0",
     "@graphql-codegen/cli": "^7.2.0",
     "@graphql-codegen/client-preset": "^6.1.0",
     "@types/node": "^25.9.1",

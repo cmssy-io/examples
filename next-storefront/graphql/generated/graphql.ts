@@ -24,6 +24,27 @@ export type CheckoutInput = {
   workspaceId: string | number;
 };
 
+export type FormActionType =
+  | 'contact'
+  | 'custom';
+
+export type FormFieldType =
+  | 'boolean'
+  | 'date'
+  | 'datetime'
+  | 'email'
+  | 'file'
+  | 'hidden'
+  | 'multiselect'
+  | 'number'
+  | 'password'
+  | 'phone'
+  | 'radio'
+  | 'select'
+  | 'text'
+  | 'textarea'
+  | 'url';
+
 export type LayoutMobileBehavior =
   | 'collapse'
   | 'keep';
@@ -64,6 +85,11 @@ export type SiteMemberRegisterInput = {
   password: string;
 };
 
+export type SubmitFormInput = {
+  data: unknown;
+  website?: string | null | undefined;
+};
+
 /** Input for updating a cart item */
 export type UpdateCartItemInput = {
   itemId: string | number;
@@ -72,6 +98,92 @@ export type UpdateCartItemInput = {
   quantity?: number | null | undefined;
   workspaceId: string | number;
 };
+
+export type PublicSiteConfigQueryVariables = Exact<{
+  workspaceSlug: string;
+}>;
+
+
+export type PublicSiteConfigQuery = { public: { siteConfig: { id: string, workspaceId: string, siteName: unknown, defaultLanguage: string, enabledLanguages: Array<string>, enabledFeatures: Array<string>, notFoundPageId: string | null, previewUrl: string | null, branding: { brandName: string | null, logoUrl: string | null, logoDarkUrl: string | null, faviconUrl: string | null, ogImageUrl: string | null } | null } | null } };
+
+export type PublicPageQueryVariables = Exact<{
+  workspaceSlug: string;
+  slug: string;
+  previewSecret?: string | null | undefined;
+}>;
+
+
+export type PublicPageQuery = { public: { page: { get: { id: string, slug: string, pageType: string, blocks: Array<{ id: string, type: string, content: unknown, style: unknown, advanced: unknown }>, publishedBlocks: Array<{ id: string, type: string, content: unknown, style: unknown, advanced: unknown }> } | null } } };
+
+export type PublicPageByIdQueryVariables = Exact<{
+  workspaceSlug: string;
+  pageId: string | number;
+}>;
+
+
+export type PublicPageByIdQuery = { public: { page: { getById: { id: string, slug: string, pageType: string, publishedBlocks: Array<{ id: string, type: string, content: unknown, style: unknown, advanced: unknown }> } | null } } };
+
+export type PublicPagesQueryVariables = Exact<{
+  workspaceSlug: string;
+}>;
+
+
+export type PublicPagesQuery = { public: { page: { list: Array<{ id: string, slug: string, updatedAt: string, publishedAt: string | null }> } } };
+
+export type PublicPageMetaQueryVariables = Exact<{
+  workspaceSlug: string;
+  slug: string;
+}>;
+
+
+export type PublicPageMetaQuery = { public: { page: { get: { id: string, seoTitle: unknown, seoDescription: unknown, seoKeywords: Array<string>, displayName: unknown } | null } } };
+
+export type PublicPageLayoutsQueryVariables = Exact<{
+  workspaceSlug: string;
+  pageSlug: string;
+  previewSecret?: string | null | undefined;
+}>;
+
+
+export type PublicPageLayoutsQuery = { public: { page: { layouts: Array<{ position: LayoutPosition, blocks: Array<{ id: string, type: string, content: unknown, style: unknown, advanced: unknown, order: number, isActive: boolean }>, settings: { desktopWidth: number | null, mobileBehavior: LayoutMobileBehavior } | null }> } } };
+
+export type PublicModelRecordsQueryVariables = Exact<{
+  workspaceId: string;
+  modelSlug: string;
+  filter?: unknown;
+  sort?: string | null | undefined;
+  locale?: string | null | undefined;
+  limit?: number | null | undefined;
+  offset?: number | null | undefined;
+  populate?: Array<string> | string | null | undefined;
+}>;
+
+
+export type PublicModelRecordsQuery = { public: { model: { records: { total: number, hasMore: boolean, items: Array<{ id: string, modelId: string, data: unknown, status: string | null, createdAt: string, updatedAt: string }> } } } };
+
+export type PublicRecordsByIdsQueryVariables = Exact<{
+  workspaceId: string;
+  ids: Array<string> | string;
+  locale?: string | null | undefined;
+}>;
+
+
+export type PublicRecordsByIdsQuery = { public: { model: { recordsByIds: Array<{ id: string, modelId: string, data: unknown, status: string | null, createdAt: string, updatedAt: string }> } } };
+
+export type PublicFormQueryVariables = Exact<{
+  formId: string | number;
+}>;
+
+
+export type PublicFormQuery = { public: { form: { get: { id: string, name: string, slug: string, description: string | null, fields: Array<{ id: string, name: string, fieldType: FormFieldType, label: unknown, placeholder: unknown, helpText: unknown, defaultValue: string | null, width: string, order: number, showWhen: unknown, requiredWhen: unknown, options: Array<{ value: string, label: unknown, disabled: boolean }>, validation: { required: boolean, minLength: number | null, maxLength: number | null, minValue: number | null, maxValue: number | null, pattern: string | null, customMessage: string | null } }>, settings: { actionType: FormActionType, submitButtonLabel: unknown, successMessage: unknown, errorMessage: unknown, redirectUrl: string | null, requireLogin: boolean, enableCaptcha: boolean } } | null } } };
+
+export type SubmitFormMutationVariables = Exact<{
+  formId: string | number;
+  input: SubmitFormInput;
+}>;
+
+
+export type SubmitFormMutation = { public: { form: { submit: { success: boolean, message: string, submissionId: string | null, redirectUrl: string | null, accessToken: string | null, customer: unknown } } } };
 
 export type AddToCartMutationVariables = Exact<{
   input: AddToCartInput;
@@ -174,15 +286,6 @@ export type CartQueryVariables = Exact<{
 
 export type CartQuery = { cart: { get: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
-export type PublicPageLayoutsQueryVariables = Exact<{
-  workspaceSlug: string;
-  pageSlug: string;
-  previewSecret?: string | null | undefined;
-}>;
-
-
-export type PublicPageLayoutsQuery = { public: { page: { layouts: Array<{ position: LayoutPosition, blocks: Array<{ id: string, type: string, content: unknown, style: unknown, advanced: unknown, order: number, isActive: boolean }>, settings: { desktopWidth: number | null, mobileBehavior: LayoutMobileBehavior } | null }> } } };
-
 export type PublicModelProductsQueryVariables = Exact<{
   workspaceId: string;
   modelSlug: string;
@@ -196,19 +299,6 @@ export type PublicModelProductsQueryVariables = Exact<{
 
 
 export type PublicModelProductsQuery = { public: { model: { records: { total: number, hasMore: boolean, items: Array<{ id: string, data: unknown, priceTiers: Array<{ minQty: number, price: number }> }> } } } };
-
-export type PublicModelRecordsQueryVariables = Exact<{
-  workspaceId: string;
-  modelSlug: string;
-  filter?: unknown;
-  locale?: string | null | undefined;
-  limit?: number | null | undefined;
-  offset?: number | null | undefined;
-  sort?: string | null | undefined;
-}>;
-
-
-export type PublicModelRecordsQuery = { public: { model: { records: { total: number, hasMore: boolean, items: Array<{ id: string, data: unknown }> } } } };
 
 export type PublicOrderQueryVariables = Exact<{
   workspaceId: string | number;
@@ -236,14 +326,6 @@ export type MyOrderQueryVariables = Exact<{
 
 export type MyOrderQuery = { account: { order: { id: string, status: string, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, refundedAmount: number, paymentProvider: string | null, paymentStatus: string, fulfillmentStatus: string, amountPaid: number, balanceDue: number, paymentReference: string | null, trackingNumber: string | null, trackingCarrier: string | null, invoiceNumber: string | null, invoiceUrl: string | null, invoiceProvider: string | null, paidAt: string | null, fulfilledAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }>, payments: Array<{ amount: number, reference: string, provider: string | null, at: string }> } | null } };
 
-export type PublicPageMetaQueryVariables = Exact<{
-  workspaceSlug: string;
-  slug: string;
-}>;
-
-
-export type PublicPageMetaQuery = { public: { page: { get: { seoTitle: unknown, seoDescription: unknown, seoKeywords: Array<string>, displayName: unknown } | null } } };
-
 export type PublicPagesByTypeQueryVariables = Exact<{
   workspaceId: string;
   parentSlug?: string | null | undefined;
@@ -254,13 +336,6 @@ export type PublicPagesByTypeQueryVariables = Exact<{
 
 export type PublicPagesByTypeQuery = { public: { page: { byType: { hasMore: boolean, items: Array<{ id: string, slug: string, fullSlug: string, publishedAt: string | null, displayName: unknown, seoTitle: unknown, seoDescription: unknown }> } } } };
 
-export type PublicPagesQueryVariables = Exact<{
-  workspaceSlug: string;
-}>;
-
-
-export type PublicPagesQuery = { public: { page: { list: Array<{ id: string, slug: string, updatedAt: string, publishedAt: string | null }> } } };
-
 export type ProductQueryVariables = Exact<{
   workspaceId: string;
   modelSlug: string;
@@ -269,13 +344,6 @@ export type ProductQueryVariables = Exact<{
 
 
 export type ProductQuery = { public: { model: { records: { items: Array<{ id: string, data: unknown, priceTiers: Array<{ minQty: number, price: number }>, variants: Array<{ id: string, sku: string | null, price: number, inventory: number | null, tiers: Array<{ minQty: number, price: number }>, selectedOptions: Array<{ name: string, value: string }> }> }> } } } };
-
-export type PublicSiteConfigQueryVariables = Exact<{
-  workspaceSlug: string;
-}>;
-
-
-export type PublicSiteConfigQuery = { public: { siteConfig: { siteName: unknown, defaultLanguage: string, enabledLanguages: Array<string>, notFoundPageId: string | null, branding: { ogImageUrl: string | null } | null } | null } };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -296,6 +364,244 @@ export class TypedDocumentString<TResult, TVariables>
   }
 }
 
+export const PublicSiteConfigDocument = new TypedDocumentString(`
+    query PublicSiteConfig($workspaceSlug: String!) {
+  public {
+    siteConfig(workspaceSlug: $workspaceSlug) {
+      id
+      workspaceId
+      siteName
+      defaultLanguage
+      enabledLanguages
+      enabledFeatures
+      notFoundPageId
+      previewUrl
+      branding {
+        brandName
+        logoUrl
+        logoDarkUrl
+        faviconUrl
+        ogImageUrl
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PublicSiteConfigQuery, PublicSiteConfigQueryVariables>;
+export const PublicPageDocument = new TypedDocumentString(`
+    query PublicPage($workspaceSlug: String!, $slug: String!, $previewSecret: String) {
+  public {
+    page {
+      get(workspaceSlug: $workspaceSlug, slug: $slug, previewSecret: $previewSecret) {
+        id
+        slug
+        pageType
+        blocks {
+          id
+          type
+          content
+          style
+          advanced
+        }
+        publishedBlocks {
+          id
+          type
+          content
+          style
+          advanced
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PublicPageQuery, PublicPageQueryVariables>;
+export const PublicPageByIdDocument = new TypedDocumentString(`
+    query PublicPageById($workspaceSlug: String!, $pageId: ID!) {
+  public {
+    page {
+      getById(workspaceSlug: $workspaceSlug, pageId: $pageId) {
+        id
+        slug
+        pageType
+        publishedBlocks {
+          id
+          type
+          content
+          style
+          advanced
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PublicPageByIdQuery, PublicPageByIdQueryVariables>;
+export const PublicPagesDocument = new TypedDocumentString(`
+    query PublicPages($workspaceSlug: String!) {
+  public {
+    page {
+      list(workspaceSlug: $workspaceSlug) {
+        id
+        slug
+        updatedAt
+        publishedAt
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PublicPagesQuery, PublicPagesQueryVariables>;
+export const PublicPageMetaDocument = new TypedDocumentString(`
+    query PublicPageMeta($workspaceSlug: String!, $slug: String!) {
+  public {
+    page {
+      get(workspaceSlug: $workspaceSlug, slug: $slug) {
+        id
+        seoTitle
+        seoDescription
+        seoKeywords
+        displayName
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PublicPageMetaQuery, PublicPageMetaQueryVariables>;
+export const PublicPageLayoutsDocument = new TypedDocumentString(`
+    query PublicPageLayouts($workspaceSlug: String!, $pageSlug: String!, $previewSecret: String) {
+  public {
+    page {
+      layouts(
+        workspaceSlug: $workspaceSlug
+        pageSlug: $pageSlug
+        previewSecret: $previewSecret
+      ) {
+        position
+        blocks {
+          id
+          type
+          content
+          style
+          advanced
+          order
+          isActive
+        }
+        settings {
+          desktopWidth
+          mobileBehavior
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PublicPageLayoutsQuery, PublicPageLayoutsQueryVariables>;
+export const PublicModelRecordsDocument = new TypedDocumentString(`
+    query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int, $populate: [String!]) {
+  public {
+    model {
+      records(
+        workspaceId: $workspaceId
+        modelSlug: $modelSlug
+        filter: $filter
+        sort: $sort
+        locale: $locale
+        limit: $limit
+        offset: $offset
+        populate: $populate
+      ) {
+        items {
+          id
+          modelId
+          data
+          status
+          createdAt
+          updatedAt
+        }
+        total
+        hasMore
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PublicModelRecordsQuery, PublicModelRecordsQueryVariables>;
+export const PublicRecordsByIdsDocument = new TypedDocumentString(`
+    query PublicRecordsByIds($workspaceId: String!, $ids: [String!]!, $locale: String) {
+  public {
+    model {
+      recordsByIds(workspaceId: $workspaceId, ids: $ids, locale: $locale) {
+        id
+        modelId
+        data
+        status
+        createdAt
+        updatedAt
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PublicRecordsByIdsQuery, PublicRecordsByIdsQueryVariables>;
+export const PublicFormDocument = new TypedDocumentString(`
+    query PublicForm($formId: ID!) {
+  public {
+    form {
+      get(formId: $formId) {
+        id
+        name
+        slug
+        description
+        fields {
+          id
+          name
+          fieldType
+          label
+          placeholder
+          helpText
+          defaultValue
+          width
+          order
+          showWhen
+          requiredWhen
+          options {
+            value
+            label
+            disabled
+          }
+          validation {
+            required
+            minLength
+            maxLength
+            minValue
+            maxValue
+            pattern
+            customMessage
+          }
+        }
+        settings {
+          actionType
+          submitButtonLabel
+          successMessage
+          errorMessage
+          redirectUrl
+          requireLogin
+          enableCaptcha
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PublicFormQuery, PublicFormQueryVariables>;
+export const SubmitFormDocument = new TypedDocumentString(`
+    mutation SubmitForm($formId: ID!, $input: SubmitFormInput!) {
+  public {
+    form {
+      submit(formId: $formId, input: $input) {
+        success
+        message
+        submissionId
+        redirectUrl
+        accessToken
+        customer
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SubmitFormMutation, SubmitFormMutationVariables>;
 export const AddToCartDocument = new TypedDocumentString(`
     mutation AddToCart($input: AddToCartInput!) {
   cart {
@@ -975,34 +1281,6 @@ export const CartDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CartQuery, CartQueryVariables>;
-export const PublicPageLayoutsDocument = new TypedDocumentString(`
-    query PublicPageLayouts($workspaceSlug: String!, $pageSlug: String!, $previewSecret: String) {
-  public {
-    page {
-      layouts(
-        workspaceSlug: $workspaceSlug
-        pageSlug: $pageSlug
-        previewSecret: $previewSecret
-      ) {
-        position
-        blocks {
-          id
-          type
-          content
-          style
-          advanced
-          order
-          isActive
-        }
-        settings {
-          desktopWidth
-          mobileBehavior
-        }
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<PublicPageLayoutsQuery, PublicPageLayoutsQueryVariables>;
 export const PublicModelProductsDocument = new TypedDocumentString(`
     query PublicModelProducts($workspaceId: String!, $modelSlug: String!, $filter: JSON, $stockState: String, $locale: String, $limit: Int, $offset: Int, $sort: String) {
   public {
@@ -1032,30 +1310,6 @@ export const PublicModelProductsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PublicModelProductsQuery, PublicModelProductsQueryVariables>;
-export const PublicModelRecordsDocument = new TypedDocumentString(`
-    query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String, $limit: Int, $offset: Int, $sort: String) {
-  public {
-    model {
-      records(
-        workspaceId: $workspaceId
-        modelSlug: $modelSlug
-        filter: $filter
-        locale: $locale
-        limit: $limit
-        offset: $offset
-        sort: $sort
-      ) {
-        items {
-          id
-          data
-        }
-        total
-        hasMore
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<PublicModelRecordsQuery, PublicModelRecordsQueryVariables>;
 export const PublicOrderDocument = new TypedDocumentString(`
     query PublicOrder($workspaceId: ID!, $orderId: ID!, $accessToken: String!) {
   public {
@@ -1298,20 +1552,6 @@ export const MyOrderDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<MyOrderQuery, MyOrderQueryVariables>;
-export const PublicPageMetaDocument = new TypedDocumentString(`
-    query PublicPageMeta($workspaceSlug: String!, $slug: String!) {
-  public {
-    page {
-      get(workspaceSlug: $workspaceSlug, slug: $slug) {
-        seoTitle
-        seoDescription
-        seoKeywords
-        displayName
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<PublicPageMetaQuery, PublicPageMetaQueryVariables>;
 export const PublicPagesByTypeDocument = new TypedDocumentString(`
     query PublicPagesByType($workspaceId: String!, $parentSlug: String, $limit: Int, $offset: Int) {
   public {
@@ -1337,20 +1577,6 @@ export const PublicPagesByTypeDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PublicPagesByTypeQuery, PublicPagesByTypeQueryVariables>;
-export const PublicPagesDocument = new TypedDocumentString(`
-    query PublicPages($workspaceSlug: String!) {
-  public {
-    page {
-      list(workspaceSlug: $workspaceSlug) {
-        id
-        slug
-        updatedAt
-        publishedAt
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<PublicPagesQuery, PublicPagesQueryVariables>;
 export const ProductDocument = new TypedDocumentString(`
     query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON) {
   public {
@@ -1388,18 +1614,3 @@ export const ProductDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ProductQuery, ProductQueryVariables>;
-export const PublicSiteConfigDocument = new TypedDocumentString(`
-    query PublicSiteConfig($workspaceSlug: String!) {
-  public {
-    siteConfig(workspaceSlug: $workspaceSlug) {
-      siteName
-      defaultLanguage
-      enabledLanguages
-      notFoundPageId
-      branding {
-        ogImageUrl
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<PublicSiteConfigQuery, PublicSiteConfigQueryVariables>;
