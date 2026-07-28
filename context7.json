@@ -18,9 +18,9 @@
     "The editor origin is https://www.cmssy.io (cmssy cloud). app.cmssy.com does not exist.",
     "Each block exports its field schema as `props` and the component is typed BlockProps<typeof props> - never hand-write block content types.",
     "Locales come from the workspace (Settings -> Languages); CmssyConfig has no defaultLocale/enabledLocales.",
-    "To wire cmssy into an existing app, run: npx @cmssy/cli init && npx @cmssy/cli link.",
+    "To wire cmssy into an existing app, run npx @cmssy/cli init, then npx @cmssy/cli link.",
     "Structured, reusable content (testimonials, FAQ items, team members) lives in workspace models and reaches a block via fields.relation - never as a fields.repeater of record-shaped items in block props. Repeaters are for view-local structure only.",
-    "A block's `loader` runs on the server during SSR only - never in the browser and never in the editor, where the component receives `data: undefined`. Keep server-only dependencies inside it.",
+    "A block loader runs on the server during SSR only. It does not run in the browser, and it does not run in the editor, where the component gets no data prop. Server-only imports belong inside it.",
     "Each example directory is standalone: its own package.json and lockfile, no root manifest, no workspace. Install and run from inside the directory."
   ]
 }
