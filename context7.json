@@ -4,9 +4,9 @@
   "description": "Runnable example apps built with the cmssy headless SDK - the shapes `npx @cmssy/cli init` gets you to, with real content from the public demo workspace.",
   "folders": [
     "simple-blog",
-    "storefront",
-    "astro-site",
-    "remix-site"
+    "next-storefront",
+    "astro-storefront",
+    "remix-storefront"
   ],
   "excludeFolders": [
     "node_modules",

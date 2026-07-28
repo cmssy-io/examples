@@ -1,4 +1,4 @@
-# storefront
+# next-storefront
 
 A full-featured [Next.js](https://nextjs.org) (App Router) showcase of the headless
 [cmssy](https://www.cmssy.com) CMS: an editable, SEO-ready content site **plus a working
@@ -8,7 +8,7 @@ storefront** with member sign-in, products, cart and checkout.
 > **[simple-blog](../simple-blog)** - the minimal
 > clone-and-grow template. This repo is the _demo_: it shows what the SDK can do.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcmssy-io%2Fexamples%2Ftree%2Fmain%2Fstorefront&env=CMSSY_ORG_SLUG,CMSSY_WORKSPACE_SLUG,CMSSY_DRAFT_SECRET,CMSSY_SESSION_SECRET&envDescription=Your%20cmssy%20org%20slug,%20workspace%20slug%20and%20draft%20secret%20from%20Settings%20-%20Headless,%20plus%20a%20session%20secret%20for%20the%20shop&envLink=https://www.cmssy.com/docs/installation&project-name=cmssy-storefront&repository-name=cmssy-storefront)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcmssy-io%2Fexamples%2Ftree%2Fmain%2Fnext-storefront&env=CMSSY_ORG_SLUG,CMSSY_WORKSPACE_SLUG,CMSSY_DRAFT_SECRET,CMSSY_SESSION_SECRET&envDescription=Your%20cmssy%20org%20slug,%20workspace%20slug%20and%20draft%20secret%20from%20Settings%20-%20Headless,%20plus%20a%20session%20secret%20for%20the%20shop&envLink=https://www.cmssy.com/docs/installation&project-name=cmssy-next-storefront&repository-name=cmssy-next-storefront)
 
 > **Try it instantly.** To render the published demo content before creating your own
 > workspace, set `CMSSY_ORG_SLUG=cmssy` and `CMSSY_WORKSPACE_SLUG=cmssy-demo`.
@@ -61,7 +61,7 @@ lives in the `product` data model.
 
 ```bash
 git clone https://github.com/cmssy-io/examples
-cd examples/storefront
+cd examples/next-storefront
 pnpm install
 cp .env.example .env        # then fill in the values below
 pnpm dev                    # http://localhost:3000

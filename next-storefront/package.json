@@ -1,8 +1,8 @@
 {
-  "name": "cmssy-example-storefront",
+  "name": "cmssy-example-next-storefront",
   "version": "0.1.0",
   "private": true,
-  "description": "A storefront on cmssy: product and category pages, cart, checkout, account and orders as Server Actions.",
+  "description": "A storefront on cmssy: products, categories, cart, checkout, member accounts and orders as Server Actions.",
   "engines": {
     "node": ">=22"
   },
