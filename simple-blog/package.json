@@ -1,0 +1,32 @@
+{
+  "name": "cmssy-example-simple-blog",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A blog on cmssy: a listing block that loads published pages on the server, and an article page.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@cmssy/next": "^11.0.0",
+    "@cmssy/react": "^11.0.0",
+    "next": "^16.0.10",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "sanitize-html": "^2.17.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/sanitize-html": "^2.16.1",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "^16.0.10",
+    "typescript": "^5.7.2"
+  }
+}

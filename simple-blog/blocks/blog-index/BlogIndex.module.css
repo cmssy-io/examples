@@ -1,0 +1,75 @@
+.empty {
+  margin: 0 auto;
+  max-width: 48rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #71717a;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+.grid {
+  margin: 0 auto;
+  max-width: 64rem;
+  padding: 3rem 1.5rem;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card {
+  display: block;
+  border: 1px solid #e4e4e7;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s;
+}
+
+.card:hover {
+  border-color: rgb(10 10 10 / 0.3);
+}
+
+.date {
+  font-size: 0.75rem;
+  color: #71717a;
+}
+
+.title {
+  margin: 0.5rem 0 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.card:hover .title {
+  color: #7c3aed;
+}
+
+.excerpt {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: #71717a;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
