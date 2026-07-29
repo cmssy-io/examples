@@ -1,5 +1,7 @@
 ---
 import { loadCmssyPage } from "@cmssy/astro";
+import { resolveEditorBlockData } from "@cmssy/react";
+import { blocks } from "../cmssy/blocks";
 import { cmssy } from "../cmssy.config";
 import { Blocks } from "../components/Blocks";
 import { pickLocalized } from "../lib/locale-path";
@@ -16,6 +18,15 @@ const { page, locale, defaultLocale, enabledLocales } = await loadCmssyPage(
 if (!page) {
   Astro.response.status = 404;
 }
+
+const { data: blockData } = await resolveEditorBlockData({
+  page,
+  blocks,
+  locale,
+  defaultLocale,
+  enabledLocales,
+  config: cmssy,
+});
 
 const meta = page?.slug ? await fetchPageMeta(page.slug) : null;
 const title =
@@ -39,6 +50,7 @@ const description = pickLocalized(meta?.seoDescription, locale, defaultLocale);
           locale={locale}
           defaultLocale={defaultLocale}
           enabledLocales={enabledLocales}
+          blockData={blockData}
         />
       ) : (
         <main><h1>Not found</h1></main>
