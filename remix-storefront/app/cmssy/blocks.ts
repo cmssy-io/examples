@@ -65,7 +65,13 @@ export const categoryGridBlock = defineBlock({
   props: categoryGridProps,
   loader: async ({ context }) => {
     const { loadCategories } = await import("../services/catalog");
-    return { items: await loadCategories(context?.locale.current) };
+    if (!context) return { items: [] };
+    return {
+      items: await loadCategories({
+        current: context.locale.current,
+        default: context.locale.default,
+      }),
+    };
   },
 });
 
@@ -76,12 +82,16 @@ export const productGridBlock = defineBlock({
   props: productGridProps,
   loader: async ({ content, context }) => {
     const { loadProducts } = await import("../services/catalog");
+    if (!context) return { items: [] };
     return {
-      items: await loadProducts(context?.locale.current, {
-        categorySlug: content.categorySlug,
-        sort: content.sort,
-        limit: content.limit,
-      }),
+      items: await loadProducts(
+        { current: context.locale.current, default: context.locale.default },
+        {
+          categorySlug: content.categorySlug,
+          sort: content.sort,
+          limit: content.limit,
+        },
+      ),
     };
   },
 });

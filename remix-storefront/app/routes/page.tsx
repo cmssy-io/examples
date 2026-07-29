@@ -16,14 +16,18 @@ const cmssyLoader = createCmssyLoader(cmssy);
 
 export async function loader(args: Route.LoaderArgs) {
   const data = await cmssyLoader(args);
-  const { data: blockData } = await resolveEditorBlockData({
-    page: data.page,
-    blocks,
-    locale: data.locale,
-    defaultLocale: data.defaultLocale,
-    enabledLocales: data.enabledLocales,
-    config: cmssy,
-  });
+  const blockData = data.isEdit
+    ? {}
+    : (
+        await resolveEditorBlockData({
+          page: data.page,
+          blocks,
+          locale: data.locale,
+          defaultLocale: data.defaultLocale,
+          enabledLocales: data.enabledLocales,
+          config: cmssy,
+        })
+      ).data;
 
   return {
     ...data,
