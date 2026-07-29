@@ -26,9 +26,12 @@
     },
     {
       "dir": "remix-storefront",
-      "build": "pnpm build",
-      "buildOnly": true,
-      "buildOnlyReason": "Same missing blocks as astro-storefront: the demo workspace's blocks have no components here, so a render assertion fails on every one of them. `pnpm build:local && pnpm start` serves it locally now - see CMS-1088."
+      "build": "pnpm build:local",
+      "start": "pnpm start",
+      "port": 3000,
+      "assertRender": [
+        "/"
+      ]
     }
   ]
 }
