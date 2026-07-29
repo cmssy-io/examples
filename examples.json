@@ -20,9 +20,12 @@
     },
     {
       "dir": "astro-storefront",
-      "build": "pnpm build",
-      "buildOnly": true,
-      "buildOnlyReason": "On v11 and building, but registers only a `hero` block, which no page in the demo workspace uses - it renders a blank page. Flip to assertRender when the storefront blocks land."
+      "build": "pnpm build:local",
+      "start": "pnpm start",
+      "port": 4321,
+      "assertRender": [
+        "/"
+      ]
     },
     {
       "dir": "remix-storefront",
