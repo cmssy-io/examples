@@ -54,6 +54,25 @@ jobs:
       - run: pnpm typegen
       - run: pnpm typecheck
 
+      # The vendored operations come from the CLI, the app's reads come from the
+      # runtime packages, and nothing ties their versions together - the CLI
+      # carries its own nested @cmssy/core. Bump one and not the other and the
+      # check below compares the file against a version this app no longer runs,
+      # and passes.
+      - name: The CLI and the runtime SDK are the same version
+        run: |
+          set -euo pipefail
+          version() {
+            node -p "JSON.parse(require('fs').readFileSync('node_modules/@cmssy/$1/package.json','utf8')).version"
+          }
+          cli=$(version cli)
+          core=$(version core)
+          if [ "$cli" != "$core" ]; then
+            echo "::error::@cmssy/cli $cli writes the operations, the app runs @cmssy/core $core - bump both"
+            exit 1
+          fi
+          echo "both on $cli"
+
       # Both halves of `pnpm types` are committed and both go stale on their
       # own: graphql/models.ts the moment someone edits a model in the CMS - a
       # stale field is a runtime undefined, not a build error - and
