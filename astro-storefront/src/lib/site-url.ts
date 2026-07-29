@@ -4,20 +4,17 @@ function stripTrailingSlashes(value: string): string {
   return value.replace(/\/+$/, "");
 }
 
-export function siteUrlFor(
-  config: CmssyConfig,
-  url: URL,
-  request: Request,
-): string {
+export function siteUrlFor(config: CmssyConfig, url: URL): string {
   if (config.siteUrl) return stripTrailingSlashes(config.siteUrl);
 
-  const host =
-    request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  if (!host) return stripTrailingSlashes(url.origin);
+  const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercelHost) return `https://${vercelHost}`;
 
-  const isLoopback =
-    host.startsWith("localhost") || host.startsWith("127.0.0.1");
-  const protocol =
-    request.headers.get("x-forwarded-proto") ?? (isLoopback ? "http" : "https");
-  return stripTrailingSlashes(`${protocol}://${host}`);
+  if (process.env.NODE_ENV !== "production") {
+    return stripTrailingSlashes(url.origin);
+  }
+
+  throw new Error(
+    "cmssy: set CMSSY_SITE_URL to this site's public origin. It cannot be read from the request in production - Host and X-Forwarded-Host come from the client, and this value is published in sitemap.xml and robots.txt.",
+  );
 }

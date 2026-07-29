@@ -44,7 +44,7 @@ function renderEntry(entry: SitemapEntry): string {
 }
 
 export const GET: APIRoute = async ({ request, url }) => {
-  const siteUrl = siteUrlFor(cmssy, url, request);
+  const siteUrl = siteUrlFor(cmssy, url);
   const [{ defaultLocale, locales }, pages, siteConfig] = await Promise.all([
     resolveSiteLocales(),
     listPublicPages(),
