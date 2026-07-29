@@ -27,11 +27,13 @@ jobs:
       - id: check
         run: |
           set -uo pipefail
-          if node scripts/check-sdk-drift.mjs; then
-            echo "behind=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "behind=true" >> "$GITHUB_OUTPUT"
-          fi
+          node scripts/check-sdk-drift.mjs
+          status=$?
+          case "$status" in
+            0) echo "behind=false" >> "$GITHUB_OUTPUT" ;;
+            1) echo "behind=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::the drift check itself failed - not bumping anything"; exit "$status" ;;
+          esac
 
       - if: steps.check.outputs.behind == 'true'
         uses: pnpm/action-setup@v4
@@ -94,6 +96,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B chore/sdk-drift
           git add -A
+          if git diff --staged --quiet; then
+            echo "::notice::the check reported drift but the bump changed nothing - leaving it alone"
+            exit 0
+          fi
           git commit -m "chore(examples): take @cmssy $LATEST everywhere"
           git push -f origin chore/sdk-drift
           body=$(printf '%s\n\n%s\n\n%s\n' \
