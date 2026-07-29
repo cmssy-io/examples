@@ -13,9 +13,9 @@
   "dependencies": {
     "@astrojs/react": "^4.2.0",
     "@astrojs/vercel": "^8.0.0",
-    "@cmssy/astro": "^11.0.0",
-    "@cmssy/core": "^11.0.0",
-    "@cmssy/react": "^11.0.0",
+    "@cmssy/astro": "^11.4.2",
+    "@cmssy/core": "^11.4.2",
+    "@cmssy/react": "^11.4.2",
     "astro": "^5.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
