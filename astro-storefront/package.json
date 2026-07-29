@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "smoke:edit": "node smoke-edit.mjs",
+    "smoke:edit": "node --env-file-if-exists=.env.local smoke-edit.mjs",
     "typecheck": "astro check"
   },
   "dependencies": {

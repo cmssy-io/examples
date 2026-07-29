@@ -1,5 +1,7 @@
 import type { CmssyConfig } from "@cmssy/remix";
 
+const LOOPBACK = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/;
+
 function stripTrailingSlashes(value: string): string {
   return value.replace(/\/+$/, "");
 }
@@ -7,15 +9,15 @@ function stripTrailingSlashes(value: string): string {
 export function siteUrlFor(config: CmssyConfig, request: Request): string {
   if (config.siteUrl) return stripTrailingSlashes(config.siteUrl);
 
-  const host =
-    request.headers.get("x-forwarded-host") ??
-    request.headers.get("host") ??
-    new URL(request.url).host;
+  const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercelHost) return stripTrailingSlashes(`https://${vercelHost}`);
 
-  const isLoopback =
-    host.startsWith("localhost") || host.startsWith("127.0.0.1");
-  const protocol =
-    request.headers.get("x-forwarded-proto") ?? (isLoopback ? "http" : "https");
+  const url = new URL(request.url);
+  if (import.meta.env.DEV && LOOPBACK.test(url.host)) {
+    return stripTrailingSlashes(url.origin);
+  }
 
-  return stripTrailingSlashes(`${protocol}://${host}`);
+  throw new Error(
+    "cmssy: set CMSSY_SITE_URL to this site's public origin. Any other host on the request comes from the client, and this value is published in sitemap.xml and robots.txt.",
+  );
 }
