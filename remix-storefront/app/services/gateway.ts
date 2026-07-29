@@ -44,3 +44,13 @@ export const PAGE_META_QUERY = `query PublicPageMeta($workspaceSlug: String!, $s
     }
   }
 }`;
+
+export const MODEL_RECORDS_QUERY = `query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int) {
+  public {
+    model {
+      records(workspaceId: $workspaceId, modelSlug: $modelSlug, filter: $filter, sort: $sort, locale: $locale, limit: $limit, offset: $offset) {
+        items { id data }
+      }
+    }
+  }
+}`;

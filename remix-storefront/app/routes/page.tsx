@@ -1,4 +1,9 @@
-import { CmssyBlock, buildBlockContext, buildBlockMap } from "@cmssy/react";
+import {
+  CmssyBlock,
+  buildBlockContext,
+  buildBlockMap,
+  resolveEditorBlockData,
+} from "@cmssy/react";
 import { createCmssyHeaders, createCmssyLoader } from "@cmssy/remix";
 import { cmssy } from "../../cmssy.config";
 import { blocks } from "../cmssy/blocks";
@@ -11,8 +16,18 @@ const cmssyLoader = createCmssyLoader(cmssy);
 
 export async function loader(args: Route.LoaderArgs) {
   const data = await cmssyLoader(args);
+  const { data: blockData } = await resolveEditorBlockData({
+    page: data.page,
+    blocks,
+    locale: data.locale,
+    defaultLocale: data.defaultLocale,
+    enabledLocales: data.enabledLocales,
+    config: cmssy,
+  });
+
   return {
     ...data,
+    blockData,
     meta: data.page?.slug ? await fetchPageMeta(data.page.slug) : null,
   };
 }
@@ -39,8 +54,15 @@ export function meta({ data }: Route.MetaArgs) {
 export const headers = createCmssyHeaders(cmssy);
 
 export default function CmssyPage({ loaderData }: Route.ComponentProps) {
-  const { page, locale, defaultLocale, enabledLocales, isEdit, editorOrigin } =
-    loaderData;
+  const {
+    page,
+    locale,
+    defaultLocale,
+    enabledLocales,
+    isEdit,
+    editorOrigin,
+    blockData,
+  } = loaderData;
 
   // A verified editor request renders the same page through the edit bridge.
   // No separate route: a React Router page always sees its query string.
@@ -76,6 +98,7 @@ export default function CmssyPage({ loaderData }: Route.ComponentProps) {
           locale={locale}
           defaultLocale={defaultLocale}
           context={context}
+          data={blockData[block.id]}
         />
       ))}
     </main>
