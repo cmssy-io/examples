@@ -58,22 +58,3 @@ export const PAGE_META_QUERY = `query PublicPageMeta($workspaceSlug: String!, $s
   }
 }`;
 
-export const PAGE_LAYOUTS_QUERY = `query PublicPageLayouts(
-  $workspaceSlug: String!
-  $pageSlug: String!
-  $previewSecret: String
-) {
-  public {
-    page {
-      layouts(
-        workspaceSlug: $workspaceSlug
-        pageSlug: $pageSlug
-        previewSecret: $previewSecret
-      ) {
-        position
-        blocks { id type content style advanced order isActive }
-        settings { desktopWidth mobileBehavior }
-      }
-    }
-  }
-}`;
