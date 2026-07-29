@@ -9,7 +9,7 @@
     "build:local": "LOCAL_SERVE=1 react-router build",
     "start": "node --env-file-if-exists=.env.local ./node_modules/@react-router/serve/bin.js ./build/server/index.js",
     "typecheck": "react-router typegen && tsc --noEmit",
-    "smoke:edit": "node scripts/smoke-edit.mjs"
+    "smoke:edit": "node --env-file-if-exists=.env.local scripts/smoke-edit.mjs"
   },
   "dependencies": {
     "@cmssy/core": "^11.0.0",

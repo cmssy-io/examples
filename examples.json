@@ -28,7 +28,7 @@
       "dir": "remix-storefront",
       "build": "pnpm build",
       "buildOnly": true,
-      "buildOnlyReason": "Same missing blocks as astro-storefront, and `pnpm start` is broken by the vercelPreset output path."
+      "buildOnlyReason": "Same missing blocks as astro-storefront: the demo workspace's blocks have no components here, so a render assertion fails on every one of them. `pnpm build:local && pnpm start` serves it locally now - see CMS-1088."
     }
   ]
 }

@@ -33,13 +33,14 @@ SMOKE_BASE_URL=http://localhost:4321 pnpm smoke:edit
 
 A build cannot tell you whether the editor lives. This can. It needs a server
 already running and the base URL to point at - as an argument or in
-`SMOKE_BASE_URL` - plus `CMSSY_DRAFT_SECRET`, which `.env` already carries.
+`SMOKE_BASE_URL`. `CMSSY_DRAFT_SECRET` comes from `.env.local`, which the script
+loads itself.
 
 `pnpm typecheck` runs `astro check`, which covers the `.astro` files too -
 `astro build` does not typecheck them.
 
 ## Deploy
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcmssy-io%2Fexamples%2Ftree%2Fmain%2Fastro-storefront&env=CMSSY_ORG_SLUG,CMSSY_WORKSPACE_SLUG,CMSSY_DRAFT_SECRET,CMSSY_SITE_URL&envDescription=Your%20cmssy%20org%20slug%2C%20workspace%20slug%20and%20draft%20secret%20from%20Settings%20-%20Headless&envLink=https%3A%2F%2Fwww.cmssy.com%2Fdocs%2Fstart%2Finstallation&project-name=cmssy-astro-storefront&repository-name=cmssy-astro-storefront)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcmssy-io%2Fexamples%2Ftree%2Fmain%2Fastro-storefront&env=CMSSY_ORG_SLUG,CMSSY_WORKSPACE_SLUG,CMSSY_DRAFT_SECRET,CMSSY_SITE_URL&envDescription=Your%20cmssy%20org%20slug%2C%20workspace%20slug%20and%20draft%20secret%20from%20Settings%20-%20Headless%2C%20plus%20the%20public%20origin%20this%20site%20will%20be%20served%20from.&envLink=https%3A%2F%2Fwww.cmssy.com%2Fdocs%2Fstart%2Finstallation&project-name=cmssy-astro-storefront&repository-name=cmssy-astro-storefront)
 
 Set **Root Directory** to `astro-storefront` - each example in this repo is a standalone app.
