@@ -1,0 +1,145 @@
+name: render
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "SDK version to install (exact, or a dist-tag like latest)"
+        required: false
+        default: latest
+  repository_dispatch:
+    types: [sdk-released]
+  schedule:
+    - cron: "40 5 * * *"
+
+concurrency:
+  group: render-${{ github.event.client_payload.version || github.event.inputs.version || 'latest' }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      sdk: ${{ steps.resolve.outputs.sdk }}
+      matrix: ${{ steps.matrix.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: resolve
+        env:
+          REQUESTED: ${{ github.event.client_payload.version || github.event.inputs.version || 'latest' }}
+        run: |
+          set -euo pipefail
+          if [ "$REQUESTED" = "latest" ] || [ -z "$REQUESTED" ]; then
+            sdk=$(npm view @cmssy/core version)
+          else
+            sdk="${REQUESTED#v}"
+          fi
+          echo "sdk=$sdk" >> "$GITHUB_OUTPUT"
+          echo "::notice title=SDK under test::@cmssy/* $sdk"
+
+      - id: matrix
+        run: |
+          set -euo pipefail
+          value=$(node -e "
+            const { examples } = require('./examples.json');
+            process.stdout.write(JSON.stringify({ include: examples }));
+          ")
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+
+  render:
+    needs: version
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.version.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ${{ matrix.dir }}/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install ${{ matrix.dir }} against @cmssy/* ${{ needs.version.outputs.sdk }}
+        if: ${{ !matrix.blocked }}
+        env:
+          SDK: ${{ needs.version.outputs.sdk }}
+        run: |
+          set -euo pipefail
+          node scripts/use-sdk-version.mjs "${{ matrix.dir }}" "$SDK"
+          cd "${{ matrix.dir }}"
+          pnpm install --no-frozen-lockfile
+
+      - name: The installed SDK is the one under test
+        if: ${{ !matrix.blocked }}
+        working-directory: ${{ matrix.dir }}
+        env:
+          SDK: ${{ needs.version.outputs.sdk }}
+        run: |
+          set -euo pipefail
+          installed=$(node -p "JSON.parse(require('fs').readFileSync('node_modules/@cmssy/react/package.json','utf8')).version")
+          if [ "$installed" != "$SDK" ]; then
+            echo "::error::asked for @cmssy/* $SDK, node_modules has @cmssy/react $installed"
+            exit 1
+          fi
+          echo "@cmssy/react $installed"
+
+      - name: Build
+        if: ${{ !matrix.blocked }}
+        working-directory: ${{ matrix.dir }}
+        env:
+          BUILD: ${{ matrix.build }}
+          CMSSY_ORG_SLUG: cmssy
+          CMSSY_WORKSPACE_SLUG: cmssy-demo
+          CMSSY_DRAFT_SECRET: examples-ci-placeholder-draft-secret
+          CMSSY_SESSION_SECRET: examples-ci-placeholder-session-secret
+          NEXT_PUBLIC_SITE_URL: http://localhost:${{ matrix.port || 3000 }}
+        run: eval "$BUILD"
+
+      - name: Assert it renders what the workspace sends
+        if: ${{ !matrix.buildOnly && !matrix.blocked }}
+        working-directory: ${{ matrix.dir }}
+        env:
+          START: ${{ matrix.start }}
+          PORT: ${{ matrix.port }}
+          PATHS: ${{ join(matrix.assertRender, ' ') }}
+          CMSSY_ORG_SLUG: cmssy
+          CMSSY_WORKSPACE_SLUG: cmssy-demo
+          CMSSY_DRAFT_SECRET: examples-ci-placeholder-draft-secret
+          CMSSY_SESSION_SECRET: examples-ci-placeholder-session-secret
+          NEXT_PUBLIC_SITE_URL: http://localhost:${{ matrix.port }}
+        run: |
+          set -o pipefail
+          eval "$START" > /tmp/server.log 2>&1 &
+          echo $! > /tmp/server.pid
+          npx --yes wait-on "http://localhost:$PORT" --timeout 90000
+          kill -0 "$(cat /tmp/server.pid)" 2>/dev/null || {
+            echo "::error::the server exited before it could be asked anything"
+            exit 1
+          }
+          # shellcheck disable=SC2086
+          node ../scripts/assert-render.mjs "http://localhost:$PORT" $PATHS
+
+      - name: Server log
+        if: ${{ failure() && !matrix.buildOnly && !matrix.blocked }}
+        working-directory: ${{ matrix.dir }}
+        run: cat /tmp/server.log || true
+
+      - name: This example was only built
+        if: ${{ matrix.buildOnly && !matrix.blocked }}
+        env:
+          DIR: ${{ matrix.dir }}
+          REASON: ${{ matrix.buildOnlyReason }}
+        run: printf '::notice title=%s is build-only, its render is unchecked::%s\n' "$DIR" "$REASON"
+
+      - name: This example was not built at all
+        if: ${{ matrix.blocked }}
+        env:
+          DIR: ${{ matrix.dir }}
+          TICKET: ${{ matrix.blocked }}
+          REASON: ${{ matrix.blockedReason }}
+        run: printf '::warning title=%s is NOT BUILT (%s)::%s\n' "$DIR" "$TICKET" "$REASON"
