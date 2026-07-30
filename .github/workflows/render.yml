@@ -1,6 +1,11 @@
 name: render
 
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/render.yml"
+      - "scripts/**"
+      - "examples.json"
   workflow_dispatch:
     inputs:
       version:
