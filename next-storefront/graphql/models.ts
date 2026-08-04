@@ -4,6 +4,12 @@
 /** A translatable field: one string, or one per enabled language. */
 export type CmssyLocalized = string | Record<string, string>;
 
+/** What a media field holds. Mirrors `MediaFieldValue` in @cmssy/types. */
+export type CmssyMedia = string;
+
+/** What a file field holds. Mirrors `FileFieldValue` in @cmssy/types. */
+export type CmssyFile = string;
+
 /** A record as `public.model.records` returns it, with `data` typed. */
 export interface CmssyRecordOf<Data> {
   id: string;
@@ -32,7 +38,7 @@ export interface CategoryData {
   /** Description */
   description?: CmssyLocalized;
   /** Image */
-  image?: string;
+  image?: CmssyMedia;
   /** Sort order */
   sortOrder?: number;
 }
@@ -71,9 +77,9 @@ export interface ProductData {
   /** Inventory */
   inventory?: number;
   /** Image */
-  image?: string;
+  image?: CmssyMedia;
   /** Gallery */
-  gallery?: string[];
+  gallery?: CmssyMedia[];
   /** Specs */
   specs?: {
     /** Material */

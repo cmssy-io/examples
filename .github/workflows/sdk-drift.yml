@@ -25,6 +25,7 @@ jobs:
           node-version: 22
 
       - id: check
+        shell: bash {0}
         run: |
           set -uo pipefail
           node scripts/check-sdk-drift.mjs
