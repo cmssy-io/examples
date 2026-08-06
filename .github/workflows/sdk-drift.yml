@@ -1,0 +1,114 @@
+name: sdk-drift
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: sdk-drift
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - id: check
+        shell: bash {0}
+        run: |
+          set -uo pipefail
+          node scripts/check-sdk-drift.mjs
+          status=$?
+          case "$status" in
+            0) echo "behind=false" >> "$GITHUB_OUTPUT" ;;
+            1) echo "behind=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::the drift check itself failed - not bumping anything"; exit "$status" ;;
+          esac
+
+      - if: steps.check.outputs.behind == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.1.2
+
+      - id: bump
+        if: steps.check.outputs.behind == 'true'
+        run: |
+          set -euo pipefail
+          latest=$(npm view @cmssy/core version)
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          failed=""
+          for dir in $(node -p "JSON.parse(require('fs').readFileSync('examples.json','utf8')).examples.map(e=>e.dir).join(' ')"); do
+            (
+              cd "$dir"
+              node -e "
+                const fs = require('fs');
+                const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+                for (const field of ['dependencies', 'devDependencies']) {
+                  for (const name of Object.keys(pkg[field] ?? {})) {
+                    if (name.startsWith('@cmssy/') && name !== '@cmssy/types') {
+                      pkg[field][name] = '^${latest}';
+                    }
+                  }
+                }
+                fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+              "
+              pnpm install --no-frozen-lockfile
+              cp .env.example .env.local
+              pnpm build
+              rm -f .env.local
+            ) || failed="$failed $dir"
+          done
+          echo "failed=$failed" >> "$GITHUB_OUTPUT"
+
+      - name: Open an issue when a bumped example stops building
+        if: steps.check.outputs.behind == 'true' && steps.bump.outputs.failed != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LATEST: ${{ steps.bump.outputs.latest }}
+          FAILED: ${{ steps.bump.outputs.failed }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          body=$(printf '%s\n\n%s\n\n%s\n' \
+            "Raising the examples to \`@cmssy/* $LATEST\` made these stop building:$FAILED" \
+            "That is a consumer-visible break in a published release, not an examples problem." \
+            "Run: $RUN_URL")
+          gh issue create --title "@cmssy $LATEST breaks:$FAILED" --body "$body"
+
+      - name: Open the bump PR
+        if: steps.check.outputs.behind == 'true' && steps.bump.outputs.failed == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LATEST: ${{ steps.bump.outputs.latest }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B chore/sdk-drift
+          git add -A
+          if git diff --staged --quiet; then
+            echo "::notice::the check reported drift but the bump changed nothing - leaving it alone"
+            exit 0
+          fi
+          git commit -m "chore(examples): take @cmssy $LATEST everywhere"
+          git push -f origin chore/sdk-drift
+          body=$(printf '%s\n\n%s\n\n%s\n' \
+            "Every example was a minor or more behind \`@cmssy/* $LATEST\`." \
+            "Each one was reinstalled and **built** before this PR was opened. A build failure opens an issue instead, because that is a break in the published SDK rather than drift." \
+            "A patch behind does not open a PR - an example demonstrates a released version, not the tip.")
+          gh pr view chore/sdk-drift >/dev/null 2>&1 || gh pr create \
+            --base main \
+            --head chore/sdk-drift \
+            --title "chore(examples): take @cmssy $LATEST everywhere" \
+            --body "$body"

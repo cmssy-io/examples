@@ -23,9 +23,10 @@ Next):
 - `app/api/draft/route.ts` - draft preview (`createDraftRoute`); enter with
   `?secret=<CMSSY_DRAFT_SECRET>`, exit with `?disable=1`
 - `app/[[...path]]/layout.tsx` + `app/cmssy-edit/[[...path]]/layout.tsx` - two root layouts, one
-  per route tree: the public one renders header/footer with `CmssyServerLayout`, the edit one
-  through `cmssy/editable-layout.tsx`. A server-rendered header cannot be edited, and a
-  client-mounted one cannot be static
+  per route tree. Both render header/footer through `CmssyLayoutSlot` and differ only in
+  `editMode`: the public one passes `false`, the edit one passes `isCmssyEditMode()` and gets
+  the blocks through `cmssy/editable-layout.tsx`. A server-rendered header cannot be edited,
+  and a client-mounted one cannot be static
 - `app/sitemap.ts` + `app/robots.ts` - written here, from `services/pages.ts`: a sitemap is a
   query plus a mapping, and the CMS has no business owning your route files
 - `lib/locale-path.ts` + `services/` - the app's own locale helpers, delivery queries and

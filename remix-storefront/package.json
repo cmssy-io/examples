@@ -4,12 +4,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "react-router dev",
+    "dev": "react-router dev --port 3000",
     "build": "react-router build",
-    "start": "react-router-serve ./build/server/index.js",
+    "build:local": "LOCAL_SERVE=1 react-router build",
+    "start": "node --env-file-if-exists=.env.local ./node_modules/@react-router/serve/bin.js ./build/server/index.js",
     "typecheck": "react-router typegen && tsc --noEmit",
-    "smoke:edit": "node scripts/smoke-edit.mjs",
-    "start:local": "LOCAL_SERVE=1 react-router build && react-router-serve ./build/server/index.js"
+    "smoke:edit": "node --env-file-if-exists=.env.local scripts/smoke-edit.mjs"
   },
   "dependencies": {
     "@cmssy/core": "^12.1.1",

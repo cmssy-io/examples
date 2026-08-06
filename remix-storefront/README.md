@@ -3,7 +3,7 @@
 A cmssy site that works, is editable, and proves it stays that way.
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 pnpm install && pnpm dev
 ```
 
@@ -36,8 +36,8 @@ the same way, on the same protocol, with less machinery.
 ## Prove the editor works
 
 ```bash
-pnpm build && pnpm start &
-CMSSY_DRAFT_SECRET=… pnpm smoke:edit
+pnpm build:local && pnpm start &
+pnpm smoke:edit
 ```
 
 A build proves the site compiles. It says nothing about whether the site can be
@@ -48,12 +48,13 @@ a route's loader data and its `meta` agree.
 
 ## Deploy
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcmssy-io%2Fexamples%2Ftree%2Fmain%2Fremix-storefront&env=CMSSY_ORG_SLUG,CMSSY_WORKSPACE_SLUG,CMSSY_DRAFT_SECRET&envDescription=Your%20cmssy%20org%20slug%2C%20workspace%20slug%20and%20draft%20secret%20from%20Settings%20-%20Headless&envLink=https%3A%2F%2Fwww.cmssy.com%2Fdocs%2Fstart%2Finstallation&project-name=cmssy-remix-storefront&repository-name=cmssy-remix-storefront)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcmssy-io%2Fexamples%2Ftree%2Fmain%2Fremix-storefront&env=CMSSY_ORG_SLUG,CMSSY_WORKSPACE_SLUG,CMSSY_DRAFT_SECRET,CMSSY_SITE_URL&envDescription=Your%20cmssy%20org%20slug%2C%20workspace%20slug%20and%20draft%20secret%20from%20Settings%20-%20Headless%2C%20plus%20the%20public%20origin%20this%20site%20will%20be%20served%20from.&envLink=https%3A%2F%2Fwww.cmssy.com%2Fdocs%2Fstart%2Finstallation&project-name=cmssy-remix-storefront&repository-name=cmssy-remix-storefront)
 
 Set **Root Directory** to `remix-storefront` - each example in this repo is a standalone app.
 
-`react-router.config.ts` applies the Vercel preset only when `VERCEL` is set.
-The preset splits the server build into per-runtime bundles
-(`build/server/nodejs_<hash>/index.js`) that Vercel's builder knows how to find
-and `react-router-serve` does not, so applying it everywhere breaks
-`pnpm build && pnpm start` locally and in CI.
+`react-router.config.ts` applies the Vercel preset unless `LOCAL_SERVE` is set,
+so `pnpm build` produces exactly what Vercel deploys. The preset splits the
+server build into per-runtime bundles (`build/server/nodejs_<hash>/index.js`)
+that Vercel's builder knows how to find and `react-router-serve` does not - which
+is why serving it yourself is `pnpm build:local && pnpm start`, not
+`pnpm build && pnpm start`.

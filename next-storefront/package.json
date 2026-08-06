@@ -22,7 +22,6 @@
     "@cmssy/core": "^12.1.1",
     "@cmssy/next": "^12.1.1",
     "@cmssy/react": "^12.1.1",
-    "@cmssy/types": "^0.29.0",
     "@graphql-typed-document-node/core": "3.2.0",
     "jose": "^5.10.0",
     "next": "^16.0.10",

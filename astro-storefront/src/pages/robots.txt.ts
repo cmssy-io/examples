@@ -5,7 +5,7 @@ import { siteUrlFor } from "../lib/site-url";
 export const prerender = false;
 
 export const GET: APIRoute = ({ request, url }) => {
-  const siteUrl = siteUrlFor(cmssy, url, request);
+  const siteUrl = siteUrlFor(cmssy, url);
   const body = [
     "User-agent: *",
     "Allow: /",

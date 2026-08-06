@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "smoke:edit": "node smoke-edit.mjs",
+    "build:local": "LOCAL_SERVE=1 astro build",
+    "start": "node --env-file-if-exists=.env.local ./dist/server/entry.mjs",
+    "smoke:edit": "node --env-file-if-exists=.env.local smoke-edit.mjs",
     "typecheck": "astro check"
   },
   "dependencies": {
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@astrojs/node": "^9.0.0",
     "@types/node": "^26.1.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

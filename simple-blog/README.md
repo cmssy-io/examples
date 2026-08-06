@@ -86,7 +86,7 @@ Three cmssy values plus your own origin (cmssy cloud handles the rest):
 ```
 app/
   [[...path]]/page.tsx        catch-all: createCmssyPage + your generateMetadata
-  [[...path]]/layout.tsx      public root layout: header/footer via CmssyServerLayout
+  [[...path]]/layout.tsx      public root layout: header/footer via CmssyLayoutSlot
   cmssy-edit/[[...path]]/     dedicated dynamic route for verified editor requests
   api/draft/route.ts          draft preview enter/exit (createDraftRoute)
   sitemap.ts, robots.ts       SEO from the workspace's published pages
@@ -123,10 +123,11 @@ styles/globals.css            plain base styles - cmssy does not control styling
 - **Drafts** - `/api/draft?secret=<CMSSY_DRAFT_SECRET>&redirect=/` enables Next draft
   mode for reviewing unpublished content on the public routes, without the editor.
   Exit with `/api/draft?disable=1`.
-- **Layout blocks** - the header and footer are cmssy layout blocks, fetched in
-  `services/layout.ts`. There are two root layouts on purpose: the public one renders them
-  with `CmssyServerLayout`, the edit one through `cmssy/editable-layout.tsx`. A header still
-  server-rendered in edit mode is one the editor can select but not fill.
+- **Layout blocks** - the header and footer are cmssy layout blocks, fetched by
+  `CmssyLayoutSlot` itself. Both root layouts call it and differ only in `editMode`: the
+  public one passes `false` and gets server-rendered markup, the edit route passes what
+  `isCmssyEditMode()` returns and gets the same blocks through `cmssy/editable-layout.tsx`.
+  A header still server-rendered in edit mode is one the editor can select but not fill.
 - **Server loaders** - a block's `loader` runs only on the server (never in the browser
   or the editor), so dependencies like `sanitize-html` and the GraphQL client stay out
   of the client bundle. See `blocks/prose` and `blocks/blog-index`.
