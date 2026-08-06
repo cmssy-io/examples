@@ -1,4 +1,4 @@
-import { fields, type BlockProps } from "@cmssy/react";
+import { fields, mediaUrl, type BlockProps } from "@cmssy/react";
 
 export const heroProps = {
   badgeText: fields.text({ label: "Badge" }),
@@ -13,6 +13,8 @@ export const heroProps = {
 };
 
 export function Hero({ content }: BlockProps<typeof heroProps>) {
+  const mediaSrc = mediaUrl(content.media);
+
   return (
     <section>
       {content.badgeText ? <p>{content.badgeText}</p> : null}
@@ -27,7 +29,7 @@ export function Hero({ content }: BlockProps<typeof heroProps>) {
       {content.secondaryButtonText && content.secondaryButtonUrl ? (
         <a href={content.secondaryButtonUrl}>{content.secondaryButtonText}</a>
       ) : null}
-      {content.media ? <img src={content.media} alt="" /> : null}
+      {mediaSrc ? <img src={mediaSrc} alt="" /> : null}
     </section>
   );
 }

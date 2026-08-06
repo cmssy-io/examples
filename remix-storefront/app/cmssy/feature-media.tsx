@@ -1,4 +1,4 @@
-import { fields, type BlockProps } from "@cmssy/react";
+import { fields, mediaUrl, type BlockProps } from "@cmssy/react";
 
 export const featureMediaProps = {
   heading: fields.text({ label: "Heading", required: true }),
@@ -25,6 +25,8 @@ export const featureMediaProps = {
 export function FeatureMedia({ content }: BlockProps<typeof featureMediaProps>) {
   const bullets = content.bullets ?? [];
 
+  const mediaSrc = mediaUrl(content.media);
+
   return (
     <section>
       <h2>{content.heading}</h2>
@@ -39,7 +41,7 @@ export function FeatureMedia({ content }: BlockProps<typeof featureMediaProps>) 
       {content.buttonText && content.buttonUrl ? (
         <a href={content.buttonUrl}>{content.buttonText}</a>
       ) : null}
-      {content.media ? <img src={content.media} alt="" /> : null}
+      {mediaSrc ? <img src={mediaSrc} alt="" /> : null}
     </section>
   );
 }
