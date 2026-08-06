@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { CmssyLink } from "@/components/cmssy-link";
-import { fields, type BlockProps } from "@cmssy/react";
+import { fields, mediaUrl, type BlockProps } from "@cmssy/react";
 import styles from "./FeatureMedia.module.css";
 
 export const featureMediaProps = {
@@ -29,6 +29,7 @@ export default function FeatureMedia({
   content,
 }: BlockProps<typeof featureMediaProps>) {
   const { heading, text, buttonText, buttonUrl = "#", media } = content;
+  const mediaSrc = mediaUrl(media);
   if (!heading) return null;
 
   const bullets = (content.bullets ?? []).filter((bullet) => bullet.text);
@@ -55,10 +56,10 @@ export default function FeatureMedia({
         ) : null}
       </div>
 
-      {media ? (
+      {mediaSrc ? (
         <div className={styles.media}>
           <Image
-            src={media}
+            src={mediaSrc}
             alt={heading}
             fill
             sizes="(max-width: 860px) 100vw, 50vw"
