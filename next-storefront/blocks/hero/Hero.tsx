@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { CmssyLink } from "@/components/cmssy-link";
-import { fields, type BlockProps } from "@cmssy/react";
+import { fields, mediaUrl, type BlockProps } from "@cmssy/react";
 import styles from "./Hero.module.css";
 
 export const heroProps = {
@@ -29,6 +29,7 @@ export default function Hero({ content }: BlockProps<typeof heroProps>) {
     secondaryButtonUrl = "#",
     media,
   } = content;
+  const mediaSrc = mediaUrl(media);
 
   if (!heading && !headingHighlight) return null;
 
@@ -70,12 +71,12 @@ export default function Hero({ content }: BlockProps<typeof heroProps>) {
           </div>
         )}
 
-        {media && (
+        {mediaSrc && (
           <div className={styles.media}>
             <div className={styles.mediaFrame}>
-              {isVideo(media) ? (
+              {isVideo(mediaSrc) ? (
                 <video
-                  src={media}
+                  src={mediaSrc}
                   autoPlay
                   muted
                   loop
@@ -84,7 +85,7 @@ export default function Hero({ content }: BlockProps<typeof heroProps>) {
                 />
               ) : (
                 <Image
-                  src={media}
+                  src={mediaSrc}
                   alt={heading ?? ""}
                   fill
                   sizes="(max-width: 768px) 100vw, 768px"

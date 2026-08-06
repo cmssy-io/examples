@@ -1,4 +1,4 @@
-import { createCmssyClient } from "@cmssy/core";
+import { createCmssyClient, mediaUrl, mediaUrls } from "@cmssy/core";
 import { cmssy } from "@/cmssy.config";
 import {
   PublicModelProductsDocument,
@@ -124,8 +124,8 @@ function toProduct(item: {
     specs: data.specs ?? null,
     datasheetUrl: blank(data.datasheetUrl),
     tiers: [...(item.priceTiers ?? [])].sort((a, b) => a.minQty - b.minQty),
-    image: blank(data.image),
-    gallery: data.gallery ?? [],
+    image: mediaUrl(data.image),
+    gallery: mediaUrls(data.gallery),
   };
 }
 
