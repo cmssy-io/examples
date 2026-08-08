@@ -15,14 +15,14 @@ importers:
         specifier: ^8.0.0
         version: 8.2.11(astro@5.18.2(@types/node@26.1.1)(@vercel/functions@2.2.13)(rollup@4.62.2)(typescript@5.9.3)(yaml@2.9.0))(react@19.2.7)(rollup@4.62.2)
       '@cmssy/astro':
-        specifier: ^12.1.1
-        version: 12.1.1(@cmssy/react@12.1.1(react@19.2.7))(astro@5.18.2(@types/node@26.1.1)(@vercel/functions@2.2.13)(rollup@4.62.2)(typescript@5.9.3)(yaml@2.9.0))
+        specifier: ^12.2.0
+        version: 12.2.0(@cmssy/react@12.2.0(react@19.2.7))(astro@5.18.2(@types/node@26.1.1)(@vercel/functions@2.2.13)(rollup@4.62.2)(typescript@5.9.3)(yaml@2.9.0))
       '@cmssy/core':
-        specifier: ^12.1.1
-        version: 12.1.1
+        specifier: ^12.2.0
+        version: 12.2.0
       '@cmssy/react':
-        specifier: ^12.1.1
-        version: 12.1.1(react@19.2.7)
+        specifier: ^12.2.0
+        version: 12.2.0(react@19.2.7)
       astro:
         specifier: ^5.2.0
         version: 5.18.2(@types/node@26.1.1)(@vercel/functions@2.2.13)(rollup@4.62.2)(typescript@5.9.3)(yaml@2.9.0)
@@ -201,17 +201,17 @@ packages:
     resolution: {integrity: sha512-CuNiSqg7+e1cO/GjffyMOm5Tt2jUF9CWHHnvQ/UkqvtkGfHdgwEC0wpmq7fkN3gxwpRnrAN0WzO3vREKmNolMQ==}
     engines: {node: '>=18'}
 
-  '@cmssy/astro@12.1.1':
-    resolution: {integrity: sha512-h5//wDGxE69xPfp2ObEf+zqce1HcN056cNE5Hv3CL3uK+xSy9uq/AsJJIklXeUuPDaovaGnUMQj1Qct/ovc/Dg==}
+  '@cmssy/astro@12.2.0':
+    resolution: {integrity: sha512-xO99LN67Iv0NF8UULy8yBuYwGBtrLh7GdQpv2LWdGczokyHkh0C3/cvKbBc99MeNTX8QZKxx5xPwhTolVoLMOw==}
     peerDependencies:
-      '@cmssy/react': ^12.1.1
+      '@cmssy/react': ^12.2.0
       astro: '>=4.16'
 
-  '@cmssy/core@12.1.1':
-    resolution: {integrity: sha512-CGcW7E640oN98v89GyajXgFNBxp4nnHptgKPclm+Um2RZa7gYm/WANESuHxNfZ+PjfZ4aDK56ODc1TtozuzyVw==}
+  '@cmssy/core@12.2.0':
+    resolution: {integrity: sha512-AO/Jy7zp49iPoZE0JXctdRhzerH5CdRyDPLwdiGkTSZlJOQZ/F4yrBoRaantEZWr5V9A/VACDcRypVGf+/piEQ==}
 
-  '@cmssy/react@12.1.1':
-    resolution: {integrity: sha512-A5HQPFhX+Y1TrbqNIQTKbq16b8BvfIt+NjdgPI5dXWBvx/dBdoPF8a+SH98aO1SljR6CLkPTZVgU5m/G6TU9iA==}
+  '@cmssy/react@12.2.0':
+    resolution: {integrity: sha512-wINd6CeZZYj6xl3Sss2ZLxlGGu+MyxbpYCKd/wgO6MTY4NmriDqz8mIASXmBYfNLMd3CLtWZLeqLKJ4jtp5pvw==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
 
@@ -1562,8 +1562,8 @@ packages:
   jackspeak@3.4.3:
     resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
 
-  jose@6.2.3:
-    resolution: {integrity: sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==}
+  jose@6.2.8:
+    resolution: {integrity: sha512-Bsdjwm3Qsd/P0jR+BHDe3LytDfY7WBq2HmCCLIwuVRHMuEC9ae7/R474GIUdF1NgCyZjzVo/A9DOiOBtXq8ZoQ==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -2808,20 +2808,20 @@ snapshots:
     dependencies:
       fontkitten: 1.0.3
 
-  '@cmssy/astro@12.1.1(@cmssy/react@12.1.1(react@19.2.7))(astro@5.18.2(@types/node@26.1.1)(@vercel/functions@2.2.13)(rollup@4.62.2)(typescript@5.9.3)(yaml@2.9.0))':
+  '@cmssy/astro@12.2.0(@cmssy/react@12.2.0(react@19.2.7))(astro@5.18.2(@types/node@26.1.1)(@vercel/functions@2.2.13)(rollup@4.62.2)(typescript@5.9.3)(yaml@2.9.0))':
     dependencies:
-      '@cmssy/core': 12.1.1
-      '@cmssy/react': 12.1.1(react@19.2.7)
+      '@cmssy/core': 12.2.0
+      '@cmssy/react': 12.2.0(react@19.2.7)
       astro: 5.18.2(@types/node@26.1.1)(@vercel/functions@2.2.13)(rollup@4.62.2)(typescript@5.9.3)(yaml@2.9.0)
 
-  '@cmssy/core@12.1.1':
+  '@cmssy/core@12.2.0':
     dependencies:
       '@cmssy/types': 0.35.0
-      jose: 6.2.3
+      jose: 6.2.8
 
-  '@cmssy/react@12.1.1(react@19.2.7)':
+  '@cmssy/react@12.2.0(react@19.2.7)':
     dependencies:
-      '@cmssy/core': 12.1.1
+      '@cmssy/core': 12.2.0
       '@cmssy/types': 0.35.0
       react: 19.2.7
 
@@ -4082,7 +4082,7 @@ snapshots:
     optionalDependencies:
       '@pkgjs/parseargs': 0.11.0
 
-  jose@6.2.3: {}
+  jose@6.2.8: {}
 
   js-tokens@4.0.0: {}
 

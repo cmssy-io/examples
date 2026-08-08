@@ -12,16 +12,16 @@
     "smoke:edit": "node --env-file-if-exists=.env.local scripts/smoke-edit.mjs"
   },
   "dependencies": {
-    "@cmssy/core": "^12.1.1",
-    "@cmssy/react": "^12.1.1",
-    "@cmssy/remix": "^12.1.1",
+    "@cmssy/core": "^12.2.0",
+    "@cmssy/react": "^12.2.0",
+    "@cmssy/remix": "^12.2.0",
     "@react-router/node": "^7.5.0",
     "@react-router/serve": "^7.5.0",
+    "@vercel/react-router": "^1.1.0",
     "isbot": "^5.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router": "^7.5.0",
-    "@vercel/react-router": "^1.1.0"
+    "react-router": "^7.5.0"
   },
   "devDependencies": {
     "@react-router/dev": "^7.5.0",
