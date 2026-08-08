@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@cmssy/next':
-        specifier: ^12.1.1
-        version: 12.1.1(@cmssy/react@12.1.1(react@19.2.7))(next@16.2.10(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^12.2.0
+        version: 12.2.0(@cmssy/react@12.2.0(react@19.2.7))(next@16.2.10(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@cmssy/react':
-        specifier: ^12.1.1
-        version: 12.1.1(react@19.2.7)
+        specifier: ^12.2.0
+        version: 12.2.0(react@19.2.7)
       next:
         specifier: ^16.0.10
         version: 16.2.10(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -118,19 +118,19 @@ packages:
     resolution: {integrity: sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA==}
     engines: {node: '>=6.9.0'}
 
-  '@cmssy/core@12.1.1':
-    resolution: {integrity: sha512-CGcW7E640oN98v89GyajXgFNBxp4nnHptgKPclm+Um2RZa7gYm/WANESuHxNfZ+PjfZ4aDK56ODc1TtozuzyVw==}
+  '@cmssy/core@12.2.0':
+    resolution: {integrity: sha512-AO/Jy7zp49iPoZE0JXctdRhzerH5CdRyDPLwdiGkTSZlJOQZ/F4yrBoRaantEZWr5V9A/VACDcRypVGf+/piEQ==}
 
-  '@cmssy/next@12.1.1':
-    resolution: {integrity: sha512-VY8tdJrg9PZzkIX7gDh4KAkSRfn0Yh3mpLTmOiFT5J4Ta6modFrKDCU/6ZyfJaMsgUga82TMw+TyL8q7qi1F/w==}
+  '@cmssy/next@12.2.0':
+    resolution: {integrity: sha512-IntD6QYpnBUrwg3UPXnYK3uL6Nct+3TzcmV7qn6jP9k9mjkGZJ94N8MVPU8NjLl+YO/hx1StiK1xrOBmfTVfug==}
     peerDependencies:
-      '@cmssy/react': ^12.1.1
+      '@cmssy/react': ^12.2.0
       next: '>=15'
       react: ^18.2.0 || ^19.0.0
       react-dom: ^18.2.0 || ^19.0.0
 
-  '@cmssy/react@12.1.1':
-    resolution: {integrity: sha512-A5HQPFhX+Y1TrbqNIQTKbq16b8BvfIt+NjdgPI5dXWBvx/dBdoPF8a+SH98aO1SljR6CLkPTZVgU5m/G6TU9iA==}
+  '@cmssy/react@12.2.0':
+    resolution: {integrity: sha512-wINd6CeZZYj6xl3Sss2ZLxlGGu+MyxbpYCKd/wgO6MTY4NmriDqz8mIASXmBYfNLMd3CLtWZLeqLKJ4jtp5pvw==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
 
@@ -1351,8 +1351,8 @@ packages:
     resolution: {integrity: sha512-H0dkQoCa3b2VEeKQBOxFph+JAbcrQdE7KC0UkqwpLmv2EC4P41QXP+rqo9wYodACiG5/WM5s9oDApTU8utwj9g==}
     engines: {node: '>= 0.4'}
 
-  jose@6.2.3:
-    resolution: {integrity: sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==}
+  jose@6.2.8:
+    resolution: {integrity: sha512-Bsdjwm3Qsd/P0jR+BHDe3LytDfY7WBq2HmCCLIwuVRHMuEC9ae7/R474GIUdF1NgCyZjzVo/A9DOiOBtXq8ZoQ==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -1975,24 +1975,24 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@cmssy/core@12.1.1':
+  '@cmssy/core@12.2.0':
     dependencies:
       '@cmssy/types': 0.35.0
-      jose: 6.2.3
+      jose: 6.2.8
 
-  '@cmssy/next@12.1.1(@cmssy/react@12.1.1(react@19.2.7))(next@16.2.10(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@cmssy/next@12.2.0(@cmssy/react@12.2.0(react@19.2.7))(next@16.2.10(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
-      '@cmssy/core': 12.1.1
-      '@cmssy/react': 12.1.1(react@19.2.7)
+      '@cmssy/core': 12.2.0
+      '@cmssy/react': 12.2.0(react@19.2.7)
       '@cmssy/types': 0.35.0
       next: 16.2.10(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
       server-only: 0.0.1
 
-  '@cmssy/react@12.1.1(react@19.2.7)':
+  '@cmssy/react@12.2.0(react@19.2.7)':
     dependencies:
-      '@cmssy/core': 12.1.1
+      '@cmssy/core': 12.2.0
       '@cmssy/types': 0.35.0
       react: 19.2.7
 
@@ -3314,7 +3314,7 @@ snapshots:
       has-symbols: 1.1.0
       set-function-name: 2.0.2
 
-  jose@6.2.3: {}
+  jose@6.2.8: {}
 
   js-tokens@4.0.0: {}
 
