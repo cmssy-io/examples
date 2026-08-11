@@ -12,6 +12,6 @@ export async function authRequest<R, V>(
   return client.query<R, V>(
     document,
     variables,
-    { headers: { "x-workspace-id": workspaceId } },
+    { public: true, headers: { "x-workspace-id": workspaceId } },
   );
 }

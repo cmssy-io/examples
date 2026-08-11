@@ -17,6 +17,7 @@ export async function cartRequest<R, V>(
     document,
     buildVariables(workspaceId),
     {
+      public: true,
       headers: {
         "x-workspace-id": workspaceId,
         "x-cart-session": cartToken,

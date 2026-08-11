@@ -16,6 +16,7 @@ export async function memberRequest<R, V>(
     document,
     buildVariables(workspaceId),
     {
+      public: true,
       headers: {
         "x-workspace-id": workspaceId,
         authorization: `Bearer ${accessToken}`,
