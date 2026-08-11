@@ -42,7 +42,7 @@ export async function fetchOrderByToken(
   const data = await client.query(
     PublicOrderDocument,
     { workspaceId, orderId, accessToken },
-    { headers: { "x-workspace-id": workspaceId } },
+    { public: true, headers: { "x-workspace-id": workspaceId } },
   );
   return data.public.order.byToken;
 }
