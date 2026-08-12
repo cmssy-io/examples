@@ -1,13 +1,15 @@
 import { ProductCard } from "@/components/shop/product-card";
 import type { Product } from "@/lib/catalog";
+import { CATEGORY_MODEL } from "@/lib/catalog-models";
 import { fields, type BlockProps } from "@cmssy/react";
 import catalog from "@/components/shop/catalog.module.css";
 import styles from "./ProductGrid.module.css";
 
 export const productGridProps = {
   heading: fields.text({ label: "Heading", defaultValue: "Popular lines" }),
-  categorySlug: fields.text({
-    label: "Category slug",
+  category: fields.relation({
+    label: "Category",
+    model: CATEGORY_MODEL,
     helperText: "Leave empty to pull from the whole catalog",
   }),
   sort: fields.select({

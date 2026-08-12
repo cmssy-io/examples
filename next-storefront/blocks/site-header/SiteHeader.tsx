@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { fields, type BlockProps } from "@cmssy/react";
+import { CATEGORY_MODEL } from "@/lib/catalog-models";
 import { useCart } from "@/components/shop/cart-provider";
 import { useCmssyUser } from "@/components/shop/user-provider";
 import { useCartUi } from "@/components/shop/cart-ui";
@@ -61,8 +62,13 @@ export const siteHeaderProps = {
     label: "Navigation categories",
     itemLabel: "Category",
     addButtonLabel: "Add category",
+    helperText: "Leave empty to show every category.",
     itemSchema: {
-      slug: fields.text({ label: "Category slug", required: true }),
+      category: fields.relation({
+        label: "Category",
+        model: CATEGORY_MODEL,
+        required: true,
+      }),
     },
   }),
 };
@@ -86,12 +92,12 @@ export default function SiteHeader({
 
   const allCategories = data?.categories ?? [];
 
-  const navSlugs = (content.navCategories ?? [])
-    .map((item) => item.slug?.trim())
-    .filter((slug): slug is string => Boolean(slug));
-  const categories = navSlugs.length
-    ? navSlugs
-        .map((slug) => allCategories.find((category) => category.slug === slug))
+  const navIds = (content.navCategories ?? [])
+    .map((item) => item.category?.id)
+    .filter((id): id is string => Boolean(id));
+  const categories = navIds.length
+    ? navIds
+        .map((id) => allCategories.find((category) => category.id === id))
         .filter((category): category is (typeof allCategories)[number] =>
           Boolean(category),
         )
@@ -147,9 +153,7 @@ export default function SiteHeader({
               const search = String(form.get("q") ?? "").trim();
               router.push(
                 localePath(
-                  search
-                    ? `/c/all?q=${encodeURIComponent(search)}`
-                    : "/c/all",
+                  search ? `/c/all?q=${encodeURIComponent(search)}` : "/c/all",
                 ),
               );
             }}
@@ -169,10 +173,7 @@ export default function SiteHeader({
           </form>
 
           <div className={styles.actions}>
-            <Link
-              href={localePath("/quick-order")}
-              className={styles.action}
-            >
+            <Link href={localePath("/quick-order")} className={styles.action}>
               <Icon path={QUICK_ORDER_ICON} />
               <span>{copy.quickOrder}</span>
             </Link>
@@ -184,7 +185,6 @@ export default function SiteHeader({
               href={localePath("/cart")}
               className={`${styles.action} ${styles.actionStrong}`}
               onClick={(event) => {
-
                 if (
                   event.metaKey ||
                   event.ctrlKey ||
@@ -231,9 +231,7 @@ export default function SiteHeader({
                 key={category.id}
                 href={localePath(`/c/${category.slug}`)}
                 className={`${styles.navLink} ${
-                  pathname === `/c/${category.slug}`
-                    ? styles.navLinkActive
-                    : ""
+                  pathname === `/c/${category.slug}` ? styles.navLinkActive : ""
                 }`}
                 onMouseEnter={() => {
                   setActiveIndex(index);
