@@ -7,10 +7,12 @@ export const blogIndexBlock = defineBlock({
   component: BlogIndex,
   props: blogIndexProps,
   loader: async ({ content }) => {
-    const parentSlug =
-      typeof content.parentSlug === "string" ? content.parentSlug : "";
+    const parentSlug = content.parentPage?.slug;
     if (!parentSlug) return null;
     const { loadPosts } = await import("./load-posts");
-    return loadPosts({ parentSlug, limit: Number(content.postsPerPage) || 9 });
+    return loadPosts({
+      parentSlug,
+      limit: Number(content.postsPerPage) || 9,
+    });
   },
 });

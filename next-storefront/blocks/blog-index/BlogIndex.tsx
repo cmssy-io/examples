@@ -4,9 +4,10 @@ import type { Localized, Post } from "./load-posts";
 import styles from "./BlogIndex.module.css";
 
 export const blogIndexProps = {
-  parentSlug: fields.text({
-    label: "Parent slug",
-    placeholder: "/blog",
+  parentPage: fields.pageSelector({
+    label: "Parent page",
+    multiple: false,
+    helperText: "Posts are the children of this page.",
   }),
   postsPerPage: fields.number({ label: "Posts per page", defaultValue: 9 }),
 };
