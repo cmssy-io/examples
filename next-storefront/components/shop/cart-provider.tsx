@@ -26,7 +26,7 @@ import {
 } from "@/lib/actions/cart";
 import {
   actionErrorMessage,
-  handledStaleDeployment,
+  reloadIfStaleDeployment,
 } from "@/lib/action-errors";
 
 type CartAction =
@@ -140,11 +140,7 @@ export function CartProvider({
             setError(null);
           }
         } catch (err) {
-          // The actions return their own failures, so a throw here is the call
-          // itself failing - a retired build, a dropped connection. Swallowing
-          // it keeps `done` from hanging; React discards the optimistic item
-          // when the transition ends, so the cart snaps back to server state.
-          if (!handledStaleDeployment(err)) {
+          if (!reloadIfStaleDeployment(err)) {
             setError(actionErrorMessage(err, "Commerce request failed"));
           }
         } finally {
@@ -179,9 +175,6 @@ export function CartProvider({
         run(null, () => setShippingAction(shippingMethodId)),
       merge: () => run(null, () => mergeCartAction()),
       checkout: async (input) => {
-        // No reload on a retired build here: checkout carries a filled-in form
-        // and the order never reached the server, so the message asks for the
-        // refresh instead of wiping what the customer typed.
         let result: Awaited<ReturnType<typeof checkoutAction>>;
         try {
           result = await checkoutAction(input);
@@ -196,7 +189,7 @@ export function CartProvider({
         try {
           setCart(await getCartAction());
         } catch (err) {
-          if (!handledStaleDeployment(err)) {
+          if (!reloadIfStaleDeployment(err)) {
             setError(actionErrorMessage(err, "Commerce request failed"));
           }
         }

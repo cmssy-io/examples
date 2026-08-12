@@ -14,7 +14,7 @@ import {
 } from "@/lib/actions/auth";
 import {
   actionErrorMessage,
-  handledStaleDeployment,
+  reloadIfStaleDeployment,
 } from "@/lib/action-errors";
 import type { SessionUser } from "@/lib/cmssy/session";
 
@@ -51,8 +51,6 @@ export function UserProvider({
     () => ({
       user,
       loading,
-      // Credentials are typed into a form, so a failed call reports back as a
-      // rejected sign-in rather than reloading the page out from under it.
       signIn: async (identity, password) => {
         setLoading(true);
         try {
@@ -87,10 +85,7 @@ export function UserProvider({
         try {
           await signOutAction();
         } catch (err) {
-          // The session cookie is still set if the call never landed, so the
-          // signed-out UI is a lie until the document reloads against the
-          // server's view of the session.
-          if (!handledStaleDeployment(err)) setUser(user);
+          if (!reloadIfStaleDeployment(err)) setUser(user);
         }
       },
     }),
