@@ -12,6 +12,10 @@ import {
   signInAction,
   signOutAction,
 } from "@/lib/actions/auth";
+import {
+  actionErrorMessage,
+  reloadIfStaleDeployment,
+} from "@/lib/action-errors";
 import type { SessionUser } from "@/lib/cmssy/session";
 
 export interface AuthResult {
@@ -53,6 +57,11 @@ export function UserProvider({
           const result = await signInAction(identity, password);
           if (result.ok && result.user) setUser(result.user);
           return { ok: result.ok, message: result.message };
+        } catch (err) {
+          return {
+            ok: false,
+            message: actionErrorMessage(err, "Sign in failed."),
+          };
         } finally {
           setLoading(false);
         }
@@ -62,14 +71,22 @@ export function UserProvider({
         try {
           const result = await registerAction(identity, password, fields);
           return { ok: result.ok, message: result.message };
+        } catch (err) {
+          return {
+            ok: false,
+            message: actionErrorMessage(err, "Registration failed."),
+          };
         } finally {
           setLoading(false);
         }
       },
       signOut: async () => {
-
         setUser(null);
-        await signOutAction();
+        try {
+          await signOutAction();
+        } catch (err) {
+          if (!reloadIfStaleDeployment(err)) setUser(user);
+        }
       },
     }),
     [user, loading],

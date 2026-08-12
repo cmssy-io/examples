@@ -24,6 +24,10 @@ import {
   updateItemAction,
   type CartResult,
 } from "@/lib/actions/cart";
+import {
+  actionErrorMessage,
+  reloadIfStaleDeployment,
+} from "@/lib/action-errors";
 
 type CartAction =
   | { type: "add"; recordId: string; quantity: number }
@@ -128,13 +132,20 @@ export function CartProvider({
       });
       startTransition(async () => {
         if (optimistic) applyOptimistic(optimistic);
-        const result = await action();
-        if ("error" in result) setError(result.error);
-        else {
-          setCart(result.cart);
-          setError(null);
+        try {
+          const result = await action();
+          if ("error" in result) setError(result.error);
+          else {
+            setCart(result.cart);
+            setError(null);
+          }
+        } catch (err) {
+          if (!reloadIfStaleDeployment(err)) {
+            setError(actionErrorMessage(err, "Commerce request failed"));
+          }
+        } finally {
+          settle();
         }
-        settle();
       });
       return done;
     };
@@ -164,12 +175,25 @@ export function CartProvider({
         run(null, () => setShippingAction(shippingMethodId)),
       merge: () => run(null, () => mergeCartAction()),
       checkout: async (input) => {
-        const result = await checkoutAction(input);
+        let result: Awaited<ReturnType<typeof checkoutAction>>;
+        try {
+          result = await checkoutAction(input);
+        } catch (err) {
+          throw new Error(actionErrorMessage(err, "Checkout failed"));
+        }
         if ("error" in result) throw new Error(result.error);
         setCart(null);
         return result.order;
       },
-      refresh: async () => setCart(await getCartAction()),
+      refresh: async () => {
+        try {
+          setCart(await getCartAction());
+        } catch (err) {
+          if (!reloadIfStaleDeployment(err)) {
+            setError(actionErrorMessage(err, "Commerce request failed"));
+          }
+        }
+      },
     };
   }, [optimisticCart, isPending, error, applyOptimistic, startTransition]);
 
