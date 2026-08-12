@@ -107,7 +107,10 @@ jobs:
             "Every example was a minor or more behind \`@cmssy/* $LATEST\`." \
             "Each one was reinstalled and **built** before this PR was opened. A build failure opens an issue instead, because that is a break in the published SDK rather than drift." \
             "A patch behind does not open a PR - an example demonstrates a released version, not the tip.")
-          gh pr view chore/sdk-drift >/dev/null 2>&1 || gh pr create \
+          open_prs=$(gh pr list --head chore/sdk-drift --base main --state open \
+            --json number,headRepositoryOwner \
+            --jq "[.[] | select(.headRepositoryOwner.login == \"$GITHUB_REPOSITORY_OWNER\")] | length")
+          [ "$open_prs" -gt 0 ] || gh pr create \
             --base main \
             --head chore/sdk-drift \
             --title "chore(examples): take @cmssy $LATEST everywhere" \
