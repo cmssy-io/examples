@@ -12,6 +12,7 @@ const { page, locale, defaultLocale, enabledLocales } = await loadCmssyPage(
   cmssy,
   Astro.request,
   Astro.url,
+  { prerendered: Astro.isPrerendered },
 );
 const editorOrigin = resolveEditorOrigin(cmssy.editorOrigin);
 ---

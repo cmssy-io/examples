@@ -4,7 +4,7 @@
   "private": true,
   "description": "A storefront on cmssy: products, categories, cart, checkout, member accounts and orders as Server Actions.",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.13.0"
   },
   "packageManager": "pnpm@11.1.2",
   "scripts": {
@@ -19,28 +19,28 @@
     "types": "cmssy types --out graphql/models.ts"
   },
   "dependencies": {
-    "@cmssy/core": "^12.6.0",
-    "@cmssy/next": "^12.6.0",
-    "@cmssy/react": "^12.6.0",
+    "@cmssy/core": "^12.12.0",
+    "@cmssy/next": "^12.12.0",
+    "@cmssy/react": "^12.12.0",
     "@graphql-typed-document-node/core": "3.2.0",
-    "jose": "^5.10.0",
-    "next": "^16.0.10",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "sanitize-html": "^2.17.5"
+    "jose": "^6.2.9",
+    "next": "^16.3.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "sanitize-html": "^2.17.7"
   },
   "devDependencies": {
-    "@cmssy/cli": "^12.6.0",
-    "@cmssy/eslint-plugin": "^12.6.0",
+    "@cmssy/cli": "^12.12.0",
+    "@cmssy/eslint-plugin": "^12.12.0",
     "@graphql-codegen/cli": "^7.2.0",
     "@graphql-codegen/client-preset": "^6.1.0",
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "@types/sanitize-html": "^2.16.1",
-    "eslint": "^9.39.1",
-    "eslint-config-next": "^16.0.10",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.1",
     "graphql": "^17.0.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.9.3"
   }
 }

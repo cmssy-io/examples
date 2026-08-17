@@ -7,6 +7,8 @@ cp .env.example .env.local
 pnpm install && pnpm dev
 ```
 
+Needs Node 22.22 or newer - react-router 8 says so itself.
+
 ## What is wired
 
 - `app/routes/page.tsx` - the cmssy page. `createCmssyLoader` fetches it, and a

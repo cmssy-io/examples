@@ -7,7 +7,10 @@ export function publicQuery<T>(
   document: string,
   variables: Record<string, unknown>,
 ): Promise<T> {
-  return client.query<T>(document, variables, { public: true, retry: {} });
+  return client.query<T>(document, variables, {
+    public: true,
+    retry: "interactive",
+  });
 }
 
 export const SITE_CONFIG_QUERY = `query PublicSiteConfig($workspaceSlug: String!) {

@@ -36,7 +36,7 @@ export async function loader(args: Route.LoaderArgs) {
   };
 }
 
-export function meta({ data }: Route.MetaArgs) {
+export function meta({ loaderData: data }: Route.MetaArgs) {
   if (!data) return [];
   const title =
     pickLocalized(data.meta?.seoTitle, data.locale, data.defaultLocale) ||

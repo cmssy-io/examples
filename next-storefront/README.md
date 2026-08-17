@@ -17,7 +17,6 @@ storefront** with member sign-in, products, cart and checkout.
 > characters, which `/api/draft` requires of any secret before it will run. For your own
 > site, use the real secret generated under **Settings → Headless**.
 
-
 > **Deploying?** `CMSSY_SESSION_SECRET` signs the cart and customer session cookies. The value in
 > `.env.example` is a placeholder - generate your own before putting this anywhere real:
 > `openssl rand -base64 32`.
@@ -70,10 +69,10 @@ pnpm dev                    # http://localhost:3000
 
 Two generators, both committed so a fresh clone builds without running either:
 
-| Command         | Reads                                   | Writes                    |
-| --------------- | --------------------------------------- | ------------------------- |
-| `pnpm codegen`  | the live delivery **schema**            | `graphql/generated/`      |
-| `pnpm types`    | the workspace's **models**              | `graphql/models.ts`       |
+| Command        | Reads                        | Writes               |
+| -------------- | ---------------------------- | -------------------- |
+| `pnpm codegen` | the live delivery **schema** | `graphql/generated/` |
+| `pnpm types`   | the workspace's **models**   | `graphql/models.ts`  |
 
 Re-run `codegen` after editing a `.graphql` file, and `types` after changing a model in
 the CMS - then `pnpm typecheck`. A field you removed in the CMS becomes a compile error
@@ -148,7 +147,7 @@ It then appears in the editor's block picker automatically. Full guide:
 
 ## Deploy
 
-Use the **Deploy with Vercel** button above, or push to any Node 22+ host. Set the
+Use the **Deploy with Vercel** button above, or push to any Node 22.13+ host. Set the
 environment variables in your host's dashboard. After deploying, open the site in the cmssy
 editor to start editing visually.
 
