@@ -1,4 +1,5 @@
 import { createCmssyClient } from "@cmssy/react";
+import { nextRetryMode } from "@cmssy/next";
 import { cmssy } from "@/cmssy.config";
 
 // One delivery client for the whole app. Public reads need no token: the API
@@ -10,14 +11,18 @@ export const client = createCmssyClient(cmssy);
  *
  * `public` routes the request to the org-scoped delivery path. Without it the
  * request lands on the base endpoint, where the workspace is looked up by slug
- * alone - across every organisation. `retry` because these are reads, and a
- * transient 429 during a build should not fail a deploy.
+ * alone - across every organisation. `nextRetryMode()` picks the patient build
+ * budget while `next build` prerenders and the short interactive one once a
+ * visitor is waiting on the response.
  */
 export function publicQuery<T>(
   document: string,
   variables: Record<string, unknown>,
 ): Promise<T> {
-  return client.query<T>(document, variables, { public: true, retry: {} });
+  return client.query<T>(document, variables, {
+    public: true,
+    retry: nextRetryMode(),
+  });
 }
 
 export const SITE_CONFIG_QUERY = `query PublicSiteConfig($workspaceSlug: String!) {
@@ -57,4 +62,3 @@ export const PAGE_META_QUERY = `query PublicPageMeta($workspaceSlug: String!, $s
     }
   }
 }`;
-

@@ -12,22 +12,22 @@
     "typecheck": "astro check"
   },
   "dependencies": {
-    "@astrojs/react": "^4.2.0",
-    "@astrojs/vercel": "^8.0.0",
-    "@cmssy/astro": "^12.6.0",
-    "@cmssy/core": "^12.6.0",
-    "@cmssy/react": "^12.6.0",
-    "astro": "^5.2.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "@astrojs/react": "^6.0.2",
+    "@astrojs/vercel": "^11.0.5",
+    "@cmssy/astro": "^12.12.0",
+    "@cmssy/core": "^12.12.0",
+    "@cmssy/react": "^12.12.0",
+    "astro": "^7.2.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
-    "@astrojs/node": "^9.0.0",
-    "@types/node": "^26.1.1",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "typescript": "^5.7.0"
+    "@astrojs/check": "^0.9.10",
+    "@astrojs/node": "^11.1.2",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "typescript": "^5.9.3"
   },
   "description": "A cmssy site on Astro: the catch-all route, block registry and verified edit mode with the Astro adapter.",
   "packageManager": "pnpm@11.1.2"
