@@ -4,7 +4,7 @@
   "private": true,
   "description": "A small cmssy site on Next.js: a blog listing block with a server loader, plus hero, prose and testimonials blocks.",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "dev": "next dev",
