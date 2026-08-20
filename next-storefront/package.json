@@ -4,7 +4,7 @@
   "private": true,
   "description": "A storefront on cmssy: products, categories, cart, checkout, member accounts and orders as Server Actions.",
   "engines": {
-    "node": ">=22.13.0"
+    "node": "22.x"
   },
   "packageManager": "pnpm@11.1.2",
   "scripts": {
