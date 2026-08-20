@@ -15,9 +15,9 @@
     "smoke:edit": "node --env-file-if-exists=.env.local scripts/smoke-edit.mjs"
   },
   "dependencies": {
-    "@cmssy/core": "^12.12.0",
-    "@cmssy/react": "^12.12.0",
-    "@cmssy/remix": "^12.12.0",
+    "@cmssy/core": "^12.13.0",
+    "@cmssy/react": "^12.13.0",
+    "@cmssy/remix": "^12.13.0",
     "@react-router/node": "^8.3.0",
     "@react-router/serve": "^8.3.0",
     "@vercel/react-router": "^1.3.4",
