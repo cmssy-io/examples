@@ -87,7 +87,7 @@ export const productGridBlock = defineBlock({
       items: await loadProducts(
         { current: context.locale.current, default: context.locale.default },
         {
-          categorySlug: content.categorySlug,
+          categoryId: content.category?.id,
           sort: content.sort,
           limit: content.limit,
         },
