@@ -1,8 +1,6 @@
 import { pickLocalized } from "../lib/locale-path";
+import { CATEGORY_MODEL, PRODUCT_MODEL } from "./catalog-models";
 import { client, MODEL_RECORDS_QUERY } from "./gateway";
-
-const CATEGORY_MODEL = "category";
-const PRODUCT_MODEL = "product";
 
 export interface Category {
   id: string;
@@ -75,16 +73,14 @@ export async function loadCategories(locales: Locales): Promise<Category[]> {
 
 export async function loadProducts(
   locales: Locales,
-  options: { categorySlug?: string; sort?: string; limit?: number } = {},
+  options: { categoryId?: string; sort?: string; limit?: number } = {},
 ): Promise<Product[]> {
   const limit = options.limit ?? 8;
-  const categories = options.categorySlug ? await loadCategories(locales) : [];
-  const category = categories.find((c) => c.slug === options.categorySlug);
 
   const items = await records(PRODUCT_MODEL, locales, {
     sort: options.sort ?? "title",
     limit,
-    ...(category ? { filter: { category: category.id } } : {}),
+    ...(options.categoryId ? { filter: { category: options.categoryId } } : {}),
   });
 
   return items.slice(0, limit).map((item) => ({

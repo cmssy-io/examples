@@ -1,10 +1,12 @@
 import { fields, type BlockProps } from "@cmssy/react";
+import { CATEGORY_MODEL } from "../services/catalog-models";
 import type { Product } from "../services/catalog";
 
 export const productGridProps = {
   heading: fields.text({ label: "Heading", defaultValue: "Popular lines" }),
-  categorySlug: fields.text({
-    label: "Category slug",
+  category: fields.relation({
+    label: "Category",
+    model: CATEGORY_MODEL,
     helperText: "Leave empty to pull from the whole catalog",
   }),
   sort: fields.select({

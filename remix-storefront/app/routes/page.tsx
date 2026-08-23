@@ -3,6 +3,7 @@ import {
   buildBlockContext,
   buildBlockMap,
   resolveEditorBlockData,
+  type EditorBlockData,
 } from "@cmssy/react";
 import { createCmssyHeaders, createCmssyLoader } from "@cmssy/remix";
 import { cmssy } from "../../cmssy.config";
@@ -16,22 +17,21 @@ const cmssyLoader = createCmssyLoader(cmssy);
 
 export async function loader(args: Route.LoaderArgs) {
   const data = await cmssyLoader(args);
-  const blockData = data.isEdit
-    ? {}
-    : (
-        await resolveEditorBlockData({
-          page: data.page,
-          blocks,
-          locale: data.locale,
-          defaultLocale: data.defaultLocale,
-          enabledLocales: data.enabledLocales,
-          config: cmssy,
-        })
-      ).data;
+  const resolved: EditorBlockData = data.isEdit
+    ? { data: {}, content: {} }
+    : await resolveEditorBlockData({
+        page: data.page,
+        blocks,
+        locale: data.locale,
+        defaultLocale: data.defaultLocale,
+        enabledLocales: data.enabledLocales,
+        config: cmssy,
+      });
 
   return {
     ...data,
-    blockData,
+    blockData: resolved.data,
+    blockContent: resolved.content,
     meta: data.page?.slug ? await fetchPageMeta(data.page.slug) : null,
   };
 }
@@ -66,6 +66,7 @@ export default function CmssyPage({ loaderData }: Route.ComponentProps) {
     isEdit,
     editorOrigin,
     blockData,
+    blockContent,
   } = loaderData;
 
   // A verified editor request renders the same page through the edit bridge.
@@ -102,6 +103,7 @@ export default function CmssyPage({ loaderData }: Route.ComponentProps) {
           locale={locale}
           defaultLocale={defaultLocale}
           context={context}
+          resolvedContent={blockContent[block.id]}
           data={blockData[block.id]}
         />
       ))}

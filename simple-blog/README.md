@@ -173,7 +173,7 @@ It then appears in the editor's block picker automatically. Full guide:
 
 ## Deploy
 
-Use the **Deploy with Vercel** button above, or push to any Node 22.12+ host. Set the three
+Use the **Deploy with Vercel** button above, or push to any Node 22.13+ host. Set the three
 environment variables in your host's dashboard, then point the workspace at the deployed
 origin (`npx @cmssy/cli link --preview-url https://your-site.example`) and open the site
 in the cmssy editor to start editing visually.

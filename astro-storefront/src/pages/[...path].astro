@@ -20,7 +20,7 @@ if (!page) {
   Astro.response.status = 404;
 }
 
-const { data: blockData } = await resolveEditorBlockData({
+const { data: blockData, content: blockContent } = await resolveEditorBlockData({
   page,
   blocks,
   locale,
@@ -52,6 +52,7 @@ const description = pickLocalized(meta?.seoDescription, locale, defaultLocale);
           defaultLocale={defaultLocale}
           enabledLocales={enabledLocales}
           blockData={blockData}
+          blockContent={blockContent}
         />
       ) : (
         <main><h1>Not found</h1></main>

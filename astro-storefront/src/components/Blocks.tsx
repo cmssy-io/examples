@@ -12,12 +12,14 @@ export function Blocks({
   defaultLocale,
   enabledLocales,
   blockData,
+  blockContent,
 }: {
   page: CmssyPageData;
   locale: string;
   defaultLocale: string;
   enabledLocales: string[];
   blockData: Record<string, unknown>;
+  blockContent: Record<string, Record<string, unknown>>;
 }) {
   const blockMap = buildBlockMap(blocks);
   const context = buildBlockContext(locale, defaultLocale, enabledLocales);
@@ -32,6 +34,7 @@ export function Blocks({
           locale={locale}
           defaultLocale={defaultLocale}
           context={context}
+          resolvedContent={blockContent[block.id]}
           data={blockData[block.id]}
         />
       ))}

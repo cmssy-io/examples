@@ -7,7 +7,7 @@ cp .env.example .env.local
 pnpm install && pnpm dev
 ```
 
-Needs Node 22.12 or newer - the astro 7 compiler says so itself.
+Needs Node 22.13 or newer - the astro 7 compiler asks for 22.12, and the pinned pnpm refuses to run below 22.13.
 
 This app talks to cmssy through `@cmssy/astro`, which depends on `@cmssy/core`
 and nothing else - no React in the data path, no Next anywhere. A test in the SDK
