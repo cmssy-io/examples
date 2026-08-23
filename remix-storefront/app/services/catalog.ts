@@ -1,7 +1,6 @@
 import { pickLocalized } from "../lib/localized";
-import { client, MODEL_RECORDS_QUERY } from "./gateway";
-
 import { CATEGORY_MODEL, PRODUCT_MODEL } from "./catalog-models";
+import { client, MODEL_RECORDS_QUERY } from "./gateway";
 
 export interface Category {
   id: string;
