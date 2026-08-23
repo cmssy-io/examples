@@ -3,8 +3,8 @@ import {
   buildBlockContext,
   buildBlockMap,
   resolveEditorBlockData,
+  type EditorBlockData,
 } from "@cmssy/react";
-import type { EditorBlockData } from "@cmssy/react";
 import { createCmssyHeaders, createCmssyLoader } from "@cmssy/remix";
 import { cmssy } from "../../cmssy.config";
 import { blocks } from "../cmssy/blocks";
