@@ -28,9 +28,10 @@ jobs:
       matrix:
         # Both ends of the range in engines.node, because nothing else enforces
         # it: there is no engine-strict anywhere, so the floor is a promise the
-        # README makes and no job keeps. 22.12.0 is the floor sanitize-html
-        # measures; 22 is what Vercel upgrades the build to on its own.
-        node: ["22.12.0", "22"]
+        # README makes and no job keeps. 22.13.0 is what pnpm@11.1.2 itself
+        # refuses to run below, which is above the floor the dependencies
+        # measure; 22 is what Vercel upgrades the build to on its own.
+        node: ["22.13.0", "22"]
     steps:
       - uses: actions/checkout@v4
 
