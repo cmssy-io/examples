@@ -1,0 +1,62 @@
+name: simple-blog
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "simple-blog/**"
+      - ".github/workflows/simple-blog.yml"
+  push:
+    branches: [main]
+    paths:
+      - "simple-blog/**"
+      - ".github/workflows/simple-blog.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: simple-blog
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both ends of the range in engines.node, because nothing else enforces
+        # it: there is no engine-strict anywhere, so the floor is a promise the
+        # README makes and no job keeps. 22.12.0 is the floor sanitize-html
+        # measures; 22 is what Vercel upgrades the build to on its own.
+        node: ["22.12.0", "22"]
+    steps:
+      - uses: actions/checkout@v4
+
+      # `defaults.run.working-directory` applies to `run` steps only, never to
+      # `uses` ones - and this action reads packageManager from a path relative
+      # to the repository root, which has no package.json.
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: simple-blog/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+          cache-dependency-path: simple-blog/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+      # Unlike the other two examples this one prerenders the workspace's pages,
+      # so the build reads the public demo workspace. The draft secret only has
+      # to exist for the draft route to compile - it guards nothing in a build,
+      # so a placeholder keeps a real secret out of CI.
+      - name: Build against the public demo workspace
+        env:
+          CMSSY_ORG_SLUG: cmssy
+          CMSSY_WORKSPACE_SLUG: cmssy-demo
+          CMSSY_DRAFT_SECRET: ci-placeholder-not-a-secret
+        run: pnpm build

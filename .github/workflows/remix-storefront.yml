@@ -1,0 +1,59 @@
+name: remix-storefront
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "remix-storefront/**"
+      - ".github/workflows/remix-storefront.yml"
+  push:
+    branches: [main]
+    paths:
+      - "remix-storefront/**"
+      - ".github/workflows/remix-storefront.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: remix-storefront
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both ends of the range in engines.node, because nothing else enforces
+        # it: there is no engine-strict anywhere, so the floor is a promise the
+        # README makes and no job keeps. 22.22.0 is the floor react-router 8
+        # measures; 22 is what Vercel upgrades the build to on its own.
+        node: ["22.22.0", "22"]
+    steps:
+      - uses: actions/checkout@v4
+
+      # `defaults.run.working-directory` applies to `run` steps only, never to
+      # `uses` ones - and this action reads packageManager from a path relative
+      # to the repository root, which has no package.json.
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: remix-storefront/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+          cache-dependency-path: remix-storefront/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      # typecheck runs `react-router typegen` first: the generated route types
+      # are gitignored, so a fresh checkout has none and tsc would quietly skip
+      # them.
+      - run: pnpm typecheck
+
+      # This example reads the workspace at request time, not at build time, so
+      # the build needs no CMS credentials and can run on every PR.
+      - run: pnpm build
