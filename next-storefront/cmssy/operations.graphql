@@ -93,7 +93,7 @@ query PublicPageLayouts($workspaceSlug: String!, $pageSlug: String!, $previewSec
       layouts(workspaceSlug: $workspaceSlug, pageSlug: $pageSlug, previewSecret: $previewSecret) {
         position
         blocks { id type content style advanced order isActive }
-        settings { desktopWidth mobileBehavior }
+        settings
       }
     }
   }

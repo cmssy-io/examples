@@ -45,18 +45,6 @@ export type FormFieldType =
   | 'textarea'
   | 'url';
 
-export type LayoutMobileBehavior =
-  | 'collapse'
-  | 'keep';
-
-export type LayoutPosition =
-  | 'bottom'
-  | 'footer'
-  | 'header'
-  | 'sidebar_left'
-  | 'sidebar_right'
-  | 'top';
-
 /** Postal address for the order, frozen on the order at checkout (CMS-913). */
 export type ShippingAddressInput = {
   city: string;
@@ -145,7 +133,7 @@ export type PublicPageLayoutsQueryVariables = Exact<{
 }>;
 
 
-export type PublicPageLayoutsQuery = { public: { page: { layouts: Array<{ position: LayoutPosition, blocks: Array<{ id: string, type: string, content: unknown, style: unknown, advanced: unknown, order: number, isActive: boolean }>, settings: { desktopWidth: number | null, mobileBehavior: LayoutMobileBehavior } | null }> } } };
+export type PublicPageLayoutsQuery = { public: { page: { layouts: Array<{ position: string, settings: unknown, blocks: Array<{ id: string, type: string, content: unknown, style: unknown, advanced: unknown, order: number, isActive: boolean }> }> } } };
 
 export type PublicModelRecordsQueryVariables = Exact<{
   workspaceId: string;
@@ -482,10 +470,7 @@ export const PublicPageLayoutsDocument = new TypedDocumentString(`
           order
           isActive
         }
-        settings {
-          desktopWidth
-          mobileBehavior
-        }
+        settings
       }
     }
   }
