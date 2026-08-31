@@ -39,11 +39,11 @@ export default async function ShopLayout({
   // edit-mode one, cost this layout nothing: it is dynamic regardless, because
   // it renders the signed-in member and their cart. On a cacheable route they
   // would not be free, which is why the slot no longer does either itself.
-  const slot = (position: "header" | "footer") => (
+  const slot = (region: "header" | "footer") => (
     <CmssyLayoutSlot
       config={cmssy}
       blocks={blocks}
-      position={position}
+      region={region}
       page={CHROME_PAGE}
       locale={locale}
       editMode={editMode}

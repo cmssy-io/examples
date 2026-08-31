@@ -26,11 +26,11 @@ export default async function EditLayout({
   // free here - this segment is dynamic either way.
   const editMode = await isCmssyEditMode();
 
-  const slot = (position: "header" | "footer") => (
+  const slot = (region: "header" | "footer") => (
     <CmssyLayoutSlot
       config={cmssy}
       blocks={blocks}
-      position={position}
+      region={region}
       path={path ?? []}
       editMode={editMode}
       editable={EditableLayout}

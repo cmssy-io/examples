@@ -25,11 +25,11 @@ export default async function SiteLayout({
   const { path } = await params;
   const { locale } = splitLocaleFromPath(path, await resolveSiteLocales());
 
-  const slot = (position: "header" | "footer") => (
+  const slot = (region: "header" | "footer") => (
     <CmssyLayoutSlot
       config={cmssy}
       blocks={blocks}
-      position={position}
+      region={region}
       path={path ?? []}
       editMode={false}
       editable={EditableLayout}
