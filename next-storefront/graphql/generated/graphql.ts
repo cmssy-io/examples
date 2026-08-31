@@ -133,7 +133,7 @@ export type PublicPageLayoutsQueryVariables = Exact<{
 }>;
 
 
-export type PublicPageLayoutsQuery = { public: { page: { layouts: Array<{ position: string, settings: unknown, blocks: Array<{ id: string, type: string, content: unknown, style: unknown, advanced: unknown, order: number, isActive: boolean }> }> } } };
+export type PublicPageLayoutsQuery = { public: { page: { layouts: Array<{ region: string, settings: unknown, blocks: Array<{ id: string, type: string, content: unknown, style: unknown, advanced: unknown, order: number, isActive: boolean }> }> } } };
 
 export type PublicModelRecordsQueryVariables = Exact<{
   workspaceId: string;
@@ -460,7 +460,7 @@ export const PublicPageLayoutsDocument = new TypedDocumentString(`
         pageSlug: $pageSlug
         previewSecret: $previewSecret
       ) {
-        position
+        region
         blocks {
           id
           type
