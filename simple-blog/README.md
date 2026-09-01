@@ -2,7 +2,7 @@
 
 A small, runnable [Next.js](https://nextjs.org) (App Router) site powered by the
 headless [cmssy](https://www.cmssy.com) CMS: a blog listing block that loads published
-pages on the server, plus hero, prose and testimonials blocks.
+pages on the server, plus a sanitized rich-text block.
 
 Runs against the public cmssy demo workspace out of the box, so a fresh clone shows real
 content with no cmssy account:
@@ -13,7 +13,10 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Open http://localhost:3000/blog.
+Open http://localhost:3000/blog - the blog section is what this example serves. The demo
+workspace it points at is a commerce demo, so `/` is a storefront homepage built from
+blocks this example does not register; it renders empty here.
+[`next-storefront`](../next-storefront) is the example that serves it.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcmssy-io%2Fexamples%2Ftree%2Fmain%2Fsimple-blog&env=CMSSY_ORG_SLUG,CMSSY_WORKSPACE_SLUG,CMSSY_DRAFT_SECRET,NEXT_PUBLIC_SITE_URL&envDescription=Your%20cmssy%20org%20slug%2C%20workspace%20slug%20and%20draft%20secret%20from%20Settings%20-%20Headless&envLink=https%3A%2F%2Fwww.cmssy.com%2Fdocs%2Fstart%2Finstallation&project-name=cmssy-simple-blog&repository-name=cmssy-simple-blog)
 
@@ -29,14 +32,14 @@ Open http://localhost:3000/blog.
   Only a request that proves itself with the workspace draft secret ever enters edit mode.
 - **Schema-typed blocks** - each block exports its field schema and the component is typed
   `BlockProps<typeof props>`, so a renamed field is a compile error, not an empty block.
-- **Four example blocks** that back the [block recipes](https://www.cmssy.com/docs/blocks):
-  - `hero` - a content block with scalar fields and optional image/video, no loader.
+- **Two example blocks** that back the [block recipes](https://www.cmssy.com/docs/blocks):
   - `prose` - rich text, sanitized on the server with `sanitize-html` (XSS-safe).
   - `blog-index` - lists published child pages via the delivery API (`public.page.byType`).
-  - `testimonials` - the "models for data, blocks for view" reference: records of a
-    `testimonial` model (fields `quote`, `author`, `role`, `order`) bound with
-    `fields.relation({ mode: "all", sort: "order_asc" })` and resolved server-side -
-    no loader, no ids in the component, no record data trapped in block props.
+
+  Two, not a gallery: this example registers exactly the blocks the pages it serves
+  actually use, so every block here renders against real content. The wider set -
+  media, relations to model records, layout header and footer - lives in
+  [`next-storefront`](../next-storefront), which serves the pages that use them.
 
 ## Quickstart
 
@@ -86,7 +89,7 @@ Three cmssy values plus your own origin (cmssy cloud handles the rest):
 ```
 app/
   [[...path]]/page.tsx        catch-all: createCmssyPage + your generateMetadata
-  [[...path]]/layout.tsx      public root layout: header/footer via CmssyLayoutSlot
+  [[...path]]/layout.tsx      public root layout: lang from the routed locale
   cmssy-edit/[[...path]]/     dedicated dynamic route for verified editor requests
   api/draft/route.ts          draft preview enter/exit (createDraftRoute)
   sitemap.ts, robots.ts       SEO from the workspace's published pages
@@ -94,14 +97,11 @@ app/
 lib/locale-path.ts            locale prefix helpers (yours, not the SDK's)
 services/                     delivery queries, site config, sitemap data, SEO metadata
 blocks/                       each block is self-styled with a co-located CSS Module
-  hero/                       Hero.tsx (schema + component) + block.ts + Hero.module.css
   prose/                      sanitize-html runs in the server loader
   blog-index/                 delivery-API query in a server-only loader helper
-  testimonials/               model records bound with fields.relation, no loader
 cmssy/
   blocks.ts                   the block registry (single source of truth)
   editor.tsx                  lazy-loads blocks for the visual editor
-  editable-layout.tsx         mounts layout blocks through the edit bridge
 cmssy.config.ts               org + workspaceSlug + draftSecret
 proxy.ts                      createCmssyProxy: locale, verified edit rewrite, CSP
 styles/globals.css            plain base styles - cmssy does not control styling (no Tailwind)
@@ -123,11 +123,14 @@ styles/globals.css            plain base styles - cmssy does not control styling
 - **Drafts** - `/api/draft?secret=<CMSSY_DRAFT_SECRET>&redirect=/` enables Next draft
   mode for reviewing unpublished content on the public routes, without the editor.
   Exit with `/api/draft?disable=1`.
-- **Layout blocks** - the header and footer are cmssy layout blocks, fetched by
-  `CmssyLayoutSlot` itself. Both root layouts call it and differ only in `editMode`: the
-  public one passes `false` and gets server-rendered markup, the edit route passes what
-  `isCmssyEditMode()` returns and gets the same blocks through `cmssy/editable-layout.tsx`.
-  A header still server-rendered in edit mode is one the editor can select but not fill.
+- **Layout blocks** - deliberately absent. A workspace's header and footer are ordinary
+  cmssy blocks living in the `header` and `footer` regions, and rendering them takes one
+  `CmssyLayoutSlot` per region in the root layout. This example does not, because the
+  demo workspace's are the storefront's: a category mega-menu, a cart and a trade
+  sign-in, none of which a blog has. See [`next-storefront`](../next-storefront) for the
+  slot in use. Register a block for a region you do not render and the page ships it as
+  `data-cmssy-unknown-block` - visible to no one, and caught by
+  `scripts/assert-render.mjs`.
 - **Server loaders** - a block's `loader` runs only on the server (never in the browser
   or the editor), so dependencies like `sanitize-html` and the GraphQL client stay out
   of the client bundle. See `blocks/prose` and `blocks/blog-index`.
