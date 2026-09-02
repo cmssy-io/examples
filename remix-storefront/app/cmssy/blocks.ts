@@ -9,6 +9,8 @@ import { ProductGrid, productGridProps } from "./product-grid";
 import { PromoStrip, promoStripProps } from "./promo-strip";
 import { Prose, proseProps } from "./prose";
 import { ShopHero, shopHeroProps } from "./shop-hero";
+import { SiteFooter, siteFooterProps } from "./site-footer";
+import { SiteHeader, siteHeaderProps } from "./site-header";
 import { StatsBand, statsBandProps } from "./stats-band";
 
 export const heroBlock = defineBlock({
@@ -153,6 +155,35 @@ export const blogIndexBlock = defineBlock({
   },
 });
 
+// Layout blocks, not page blocks: the workspace puts these in the header and
+// footer regions of the homepage and every page inherits them. `category` is
+// what tells the editor to file them under Layout rather than the block picker.
+export const siteHeaderBlock = defineBlock({
+  type: "site-header",
+  label: "Site header",
+  category: "Layout",
+  component: SiteHeader,
+  props: siteHeaderProps,
+  loader: async ({ context }) => {
+    if (!context) return { categories: [] };
+    const { loadCategories } = await import("../services/catalog");
+    return {
+      categories: await loadCategories({
+        current: context.locale.current,
+        default: context.locale.default,
+      }),
+    };
+  },
+});
+
+export const siteFooterBlock = defineBlock({
+  type: "site-footer",
+  label: "Site footer",
+  category: "Layout",
+  component: SiteFooter,
+  props: siteFooterProps,
+});
+
 export const blocks = [
   heroBlock,
   shopHeroBlock,
@@ -165,6 +196,8 @@ export const blocks = [
   productGridBlock,
   proseBlock,
   blogIndexBlock,
+  siteHeaderBlock,
+  siteFooterBlock,
 ];
 
 export default blocks;

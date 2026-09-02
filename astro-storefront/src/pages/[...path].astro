@@ -1,20 +1,22 @@
 ---
 import { loadCmssyPage } from "@cmssy/astro";
-import { resolveEditorBlockData } from "@cmssy/react";
+import {
+  resolveEditorBlockData,
+  resolveEditorLayoutBlockData,
+} from "@cmssy/react";
 import { blocks } from "../cmssy/blocks";
 import { cmssy } from "../cmssy.config";
 import { Blocks } from "../components/Blocks";
+import { Region } from "../components/Region";
 import { pickLocalized } from "../lib/locale-path";
 import { fetchPageMeta } from "../services/seo";
 
 export const prerender = false;
 
-const { page, locale, defaultLocale, enabledLocales } = await loadCmssyPage(
-  cmssy,
-  Astro.request,
-  Astro.url,
-  { prerendered: Astro.isPrerendered },
-);
+const { page, layouts, pageContext, locale, defaultLocale, enabledLocales } =
+  await loadCmssyPage(cmssy, Astro.request, Astro.url, {
+    prerendered: Astro.isPrerendered,
+  });
 
 if (!page) {
   Astro.response.status = 404;
@@ -28,6 +30,24 @@ const { data: blockData, content: blockContent } = await resolveEditorBlockData(
   enabledLocales,
   config: cmssy,
 });
+
+// The header and the footer live in the workspace, on the homepage, and every
+// page inherits them - so they are content, resolved the same way the page's own
+// blocks are, not chrome hard-coded into this layout.
+const [header, footer] = await Promise.all(
+  (["header", "footer"] as const).map((region) =>
+    resolveEditorLayoutBlockData({
+      groups: layouts,
+      blocks,
+      region,
+      page: pageContext,
+      locale,
+      defaultLocale,
+      enabledLocales,
+      config: cmssy,
+    }),
+  ),
+);
 
 const meta = page?.slug ? await fetchPageMeta(page.slug) : null;
 const title =
@@ -44,6 +64,15 @@ const description = pickLocalized(meta?.seoDescription, locale, defaultLocale);
     {description ? <meta name="description" content={description} /> : null}
   </head>
   <body>
+    <Region
+      groups={layouts}
+      region="header"
+      locale={locale}
+      defaultLocale={defaultLocale}
+      enabledLocales={enabledLocales}
+      blockData={header.data}
+      blockContent={header.content}
+    />
     {
       page ? (
         <Blocks
@@ -58,5 +87,14 @@ const description = pickLocalized(meta?.seoDescription, locale, defaultLocale);
         <main><h1>Not found</h1></main>
       )
     }
+    <Region
+      groups={layouts}
+      region="footer"
+      locale={locale}
+      defaultLocale={defaultLocale}
+      enabledLocales={enabledLocales}
+      blockData={footer.data}
+      blockContent={footer.content}
+    />
   </body>
 </html>

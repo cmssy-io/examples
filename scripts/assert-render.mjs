@@ -12,13 +12,16 @@
  * for the one thing that must be true of any example worth publishing - every
  * block the CMS sent has a component behind it.
  *
- * The one exception is `lang`, and it is structural too: a locale prefix that
- * does not reach `<html lang>` is a routing bug the block count cannot see -
- * /no answers 200 with the same block structure whether it served Norwegian or
- * fell back to English.
+ * `lang` and `elements` are structural too, and both cover a claim the block
+ * count cannot see. A locale prefix that never reaches `<html lang>` leaves /no
+ * answering 200 with the same blocks whether it served Norwegian or fell back
+ * to English. And a page that renders no layout region at all is not a page
+ * with a broken block - it is a page one <header> short, which nothing above
+ * counts, so `elements` names the tags that have to be on it.
  *
  * Usage: node scripts/assert-render.mjs <baseUrl> <target> [...targets]
- * where a target is a path, or {"path": "/no", "lang": "no"} as JSON.
+ * where a target is a path, or an object as JSON:
+ *   {"path": "/no", "lang": "no", "elements": ["header", "footer"]}
  */
 
 const [baseUrl, ...args] = process.argv.slice(2);
@@ -57,7 +60,7 @@ const HTML_LANG = /<html[^>]*\slang="([^"]*)"/;
 
 const failures = [];
 
-for (const { path, lang } of targets) {
+for (const { path, lang, elements = [] } of targets) {
   const url = new URL(path, baseUrl).toString();
   let res;
   try {
@@ -97,6 +100,16 @@ for (const { path, lang } of targets) {
     continue;
   }
 
+  const missing = elements.filter(
+    (name) => !new RegExp(`<${name}[\\s>]`, "i").test(html),
+  );
+  if (missing.length > 0) {
+    failures.push(
+      `${path}: renders ${blocks} blocks but no <${missing.join(">, no <")}> - a layout region that renders nothing looks exactly like one that has nothing to render`,
+    );
+    continue;
+  }
+
   if (lang) {
     const served = html.match(HTML_LANG)?.[1];
     if (served !== lang) {
@@ -108,7 +121,7 @@ for (const { path, lang } of targets) {
   }
 
   console.log(
-    `  ${path}: ${blocks} blocks, ${text.length} characters${lang ? `, lang="${lang}"` : ""}`,
+    `  ${path}: ${blocks} blocks, ${text.length} characters${lang ? `, lang="${lang}"` : ""}${elements.length ? `, <${elements.join(">, <")}>` : ""}`,
   );
 }
 
