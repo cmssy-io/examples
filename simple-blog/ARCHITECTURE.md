@@ -15,6 +15,9 @@ Next):
 - `proxy.ts` - `createCmssyProxy` from `@cmssy/next/middleware`. In order: resolves the locale,
   rewrites a **verified** editor request onto `/cmssy-edit`, applies the CSP `frame-ancestors` for
   the cmssy admin. The order matters, which is why it is a preset and not hand-rolled here.
+  Wrapped here to send the site root to `/blog`, before the preset and after the edit check: the
+  locale comes from the workspace, so `/no` lands on `/no/blog`, and an editor framing `/` still
+  gets the page it selected rather than a redirect.
 - `app/[[...path]]/page.tsx` - public catch-all (`createCmssyPage`); `generateMetadata` calls the
   app's own `services/seo.ts`, because the SDK ships no SEO helper
 - `app/cmssy-edit/[[...path]]/page.tsx` - the dynamic route verified editor traffic lands on
