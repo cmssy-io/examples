@@ -1,4 +1,5 @@
 import { defineBlock } from "@cmssy/react";
+import { BlogIndex, blogIndexProps } from "./blog-index";
 import { CategoryGrid, categoryGridProps } from "./category-grid";
 import { CtaBanner, ctaBannerProps } from "./cta-banner";
 import { Faq, faqProps } from "./faq";
@@ -6,6 +7,7 @@ import { FeatureMedia, featureMediaProps } from "./feature-media";
 import { Hero, heroProps } from "./hero";
 import { ProductGrid, productGridProps } from "./product-grid";
 import { PromoStrip, promoStripProps } from "./promo-strip";
+import { Prose, proseProps } from "./prose";
 import { ShopHero, shopHeroProps } from "./shop-hero";
 import { StatsBand, statsBandProps } from "./stats-band";
 
@@ -96,6 +98,61 @@ export const productGridBlock = defineBlock({
   },
 });
 
+export const proseBlock = defineBlock({
+  type: "prose",
+  label: "Prose",
+  component: Prose,
+  props: proseProps,
+  // Sanitized in the loader, which runs only on the server: the allow-list and
+  // sanitize-html itself stay out of the client bundle, and the browser is
+  // never the thing deciding which tags were safe.
+  loader: async ({ content }) => {
+    const html = content.body ?? "";
+    if (!html) return { html: "" };
+    const { default: sanitizeHtml } = await import("sanitize-html");
+    return {
+      html: sanitizeHtml(html, {
+        allowedTags: [
+          "p",
+          "strong",
+          "em",
+          "ul",
+          "ol",
+          "li",
+          "a",
+          "h2",
+          "h3",
+          "br",
+        ],
+        allowedAttributes: { a: ["href", "target", "rel"] },
+        allowedSchemes: ["http", "https", "mailto", "tel"],
+      }),
+    };
+  },
+});
+
+export const blogIndexBlock = defineBlock({
+  type: "blog-index",
+  label: "Blog index",
+  component: BlogIndex,
+  props: blogIndexProps,
+  loader: async ({ content, context }) => {
+    // `parentPage`, never `parentSlug`: the field was renamed when it became a
+    // page selector, and content still holding the old key is what made this
+    // block render an empty list in simple-blog for weeks (CMS-1088). The SDK
+    // collapses a single-select selector to one PageRef before it gets here.
+    const parentSlug = content.parentPage?.slug;
+    if (!parentSlug || !context) return { items: [] };
+    const { loadPosts } = await import("../services/posts");
+    return {
+      items: await loadPosts(
+        { current: context.locale.current, default: context.locale.default },
+        { parentSlug, limit: content.postsPerPage ?? 9 },
+      ),
+    };
+  },
+});
+
 export const blocks = [
   heroBlock,
   shopHeroBlock,
@@ -106,6 +163,8 @@ export const blocks = [
   featureMediaBlock,
   categoryGridBlock,
   productGridBlock,
+  proseBlock,
+  blogIndexBlock,
 ];
 
 export default blocks;
