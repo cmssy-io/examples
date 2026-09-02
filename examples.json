@@ -1,12 +1,16 @@
 {
-  "$comment": "What CI does with each example, and the only place that says it. scripts/serve-and-assert.mjs is the single reader of `build`, `start`, `port` and `assertRender`; every workflow in .github/workflows calls it with a directory name and keeps no copy of any of this. Edit an entry here and CI follows. An `assertRender` item is a path, or an object with that `path` plus `lang` when the URL also has to prove which language it served and `elements` when tags have to be on it - `header` and `footer` are the layout regions, and nothing else notices a page that renders none. `assertSitemap` turns on scripts/assert-sitemap.mjs, which checks that every URL the sitemap lists is a URL the app serves. `buildOnly` is a debt marker, not a category - the script skips such an example and prints `buildOnlyReason`, every example is meant to end up asserted, and the marker names what has to happen for it to go away.",
+  "$comment": "What CI does with each example, and the only place that says it. scripts/serve-and-assert.mjs is the single reader of `build`, `start`, `port` and `assertRender`; every workflow in .github/workflows calls it with a directory name and keeps no copy of any of this. Edit an entry here and CI follows. An `assertRender` item is a path, or an object with that `path` plus `lang` when the URL also has to prove which language it served , `elements` when tags have to be on it - `header` and `footer` are the layout regions, and nothing else notices a page that renders none - and `status` when the URL is meant to answer something other than 200. `assertSitemap` turns on scripts/assert-sitemap.mjs, which checks that every URL the sitemap lists is a URL the app serves. `buildOnly` is a debt marker, not a category - the script skips such an example and prints `buildOnlyReason`, every example is meant to end up asserted, and the marker names what has to happen for it to go away.",
   "examples": [
     {
       "dir": "next-storefront",
       "build": "pnpm build",
       "start": "pnpm start",
       "port": 3000,
-      "assertRender": [{ "path": "/", "elements": ["header", "footer"] }]
+      "assertRender": [
+        { "path": "/", "elements": ["header", "footer"] },
+        { "path": "/no-page-lives-here", "status": 404 }
+      ],
+      "$assertComment": "No `elements` on the 404: this example answers 404 correctly but streams the body client-side, so the served HTML carries neither region. astro and remix render theirs server-side and are asserted for it."
     },
     {
       "dir": "simple-blog",
@@ -25,7 +29,12 @@
         { "path": "/blog", "elements": ["header", "footer"] },
         "/blog/hello-cmssy",
         { "path": "/no", "lang": "no", "elements": ["header", "footer"] },
-        { "path": "/no/blog", "lang": "no" }
+        { "path": "/no/blog", "lang": "no" },
+        {
+          "path": "/no-page-lives-here",
+          "status": 404,
+          "elements": ["header", "footer"]
+        }
       ],
       "assertSitemap": true
     },
@@ -39,7 +48,12 @@
         { "path": "/blog", "elements": ["header", "footer"] },
         "/blog/hello-cmssy",
         { "path": "/no", "lang": "no", "elements": ["header", "footer"] },
-        { "path": "/no/blog", "lang": "no" }
+        { "path": "/no/blog", "lang": "no" },
+        {
+          "path": "/no-page-lives-here",
+          "status": 404,
+          "elements": ["header", "footer"]
+        }
       ],
       "assertSitemap": true
     }

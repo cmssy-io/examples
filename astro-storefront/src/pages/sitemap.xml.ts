@@ -57,13 +57,18 @@ export const GET: APIRoute = async ({ request, url }) => {
     .flatMap((page) => {
       const hrefFor = (locale: string) =>
         `${siteUrl}${localizedPath(page.slug, locale, defaultLocale)}`;
-      const alternates: SitemapAlternate[] = [
-        ...locales.map((locale) => ({
-          hreflang: locale,
-          href: hrefFor(locale),
-        })),
-        { hreflang: "x-default", href: hrefFor(defaultLocale) },
-      ];
+      // One language means no alternates worth listing, and an `x-default`
+      // pointing at the only URL on the entry tells a crawler nothing.
+      const alternates: SitemapAlternate[] =
+        locales.length > 1
+          ? [
+              ...locales.map((locale) => ({
+                hreflang: locale,
+                href: hrefFor(locale),
+              })),
+              { hreflang: "x-default", href: hrefFor(defaultLocale) },
+            ]
+          : [];
 
       return locales.map((locale) => ({
         loc: hrefFor(locale),
