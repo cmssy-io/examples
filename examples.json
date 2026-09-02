@@ -1,24 +1,19 @@
 {
-  "$comment": "What CI does with each example, and the only place that says it. scripts/serve-and-assert.mjs is the single reader of `build`, `start`, `port` and `assertRender`; every workflow in .github/workflows calls it with a directory name and keeps no copy of any of this. Edit an entry here and CI follows. `buildOnly` is a debt marker, not a category - the script skips such an example and prints `buildOnlyReason`, every example is meant to end up asserted, and the marker names what has to happen for it to go away.",
+  "$comment": "What CI does with each example, and the only place that says it. scripts/serve-and-assert.mjs is the single reader of `build`, `start`, `port` and `assertRender`; every workflow in .github/workflows calls it with a directory name and keeps no copy of any of this. Edit an entry here and CI follows. An `assertRender` item is a path, or an object with that `path` plus `lang` when the URL also has to prove which language it served. `assertSitemap` turns on scripts/assert-sitemap.mjs, which checks that every URL the sitemap lists is a URL the app serves. `buildOnly` is a debt marker, not a category - the script skips such an example and prints `buildOnlyReason`, every example is meant to end up asserted, and the marker names what has to happen for it to go away.",
   "examples": [
     {
       "dir": "next-storefront",
       "build": "pnpm build",
       "start": "pnpm start",
       "port": 3000,
-      "assertRender": [
-        "/"
-      ]
+      "assertRender": ["/"]
     },
     {
       "dir": "simple-blog",
       "build": "pnpm build",
       "start": "pnpm start",
       "port": 3000,
-      "assertRender": [
-        "/blog",
-        "/blog/hello-cmssy"
-      ]
+      "assertRender": ["/blog", "/blog/hello-cmssy"]
     },
     {
       "dir": "astro-storefront",
@@ -28,8 +23,11 @@
       "assertRender": [
         "/",
         "/blog",
-        "/blog/hello-cmssy"
-      ]
+        "/blog/hello-cmssy",
+        { "path": "/no", "lang": "no" },
+        { "path": "/no/blog", "lang": "no" }
+      ],
+      "assertSitemap": true
     },
     {
       "dir": "remix-storefront",
@@ -39,8 +37,11 @@
       "assertRender": [
         "/",
         "/blog",
-        "/blog/hello-cmssy"
-      ]
+        "/blog/hello-cmssy",
+        { "path": "/no", "lang": "no" },
+        { "path": "/no/blog", "lang": "no" }
+      ],
+      "assertSitemap": true
     }
   ]
 }
