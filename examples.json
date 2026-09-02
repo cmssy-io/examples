@@ -17,7 +17,12 @@
       "build": "pnpm build",
       "start": "pnpm start",
       "port": 3000,
-      "assertRender": ["/blog", "/blog/hello-cmssy"]
+      "assertRender": [
+        "/",
+        "/blog",
+        "/blog/hello-cmssy",
+        { "path": "/no", "lang": "no" }
+      ]
     },
     {
       "dir": "astro-storefront",

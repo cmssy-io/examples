@@ -13,10 +13,11 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Open http://localhost:3000/blog - the blog section is what this example serves. The demo
-workspace it points at is a commerce demo, so `/` is a storefront homepage built from
-blocks this example does not register; it renders empty here.
-[`next-storefront`](../next-storefront) is the example that serves it.
+Open http://localhost:3000 - the root redirects to `/blog`, which is the section this
+example serves. The demo workspace it points at is a commerce demo, so the page actually
+at `/` there is a storefront homepage built from blocks a blog has no business
+registering; [`next-storefront`](../next-storefront) is the example that serves it. The
+redirect lives in `proxy.ts` and is locale-aware, so `/no` lands on `/no/blog`.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcmssy-io%2Fexamples%2Ftree%2Fmain%2Fsimple-blog&env=CMSSY_ORG_SLUG,CMSSY_WORKSPACE_SLUG,CMSSY_DRAFT_SECRET,NEXT_PUBLIC_SITE_URL&envDescription=Your%20cmssy%20org%20slug%2C%20workspace%20slug%20and%20draft%20secret%20from%20Settings%20-%20Headless&envLink=https%3A%2F%2Fwww.cmssy.com%2Fdocs%2Fstart%2Finstallation&project-name=cmssy-simple-blog&repository-name=cmssy-simple-blog)
 
@@ -103,7 +104,7 @@ cmssy/
   blocks.ts                   the block registry (single source of truth)
   editor.tsx                  lazy-loads blocks for the visual editor
 cmssy.config.ts               org + workspaceSlug + draftSecret
-proxy.ts                      createCmssyProxy: locale, verified edit rewrite, CSP
+proxy.ts                      createCmssyProxy: locale, verified edit rewrite, CSP; / -> /blog
 styles/globals.css            plain base styles - cmssy does not control styling (no Tailwind)
 ```
 
