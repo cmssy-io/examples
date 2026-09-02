@@ -98,3 +98,18 @@ jobs:
             echo "::error::run pnpm codegen and commit graphql/generated"
             exit 1
           fi
+
+      # This job never built the example at all - it typechecked one and checked
+      # that generated files were current. So this step is also the first thing
+      # here that compiles it, and then it does what a build cannot: asks the
+      # running app whether it knows the blocks the workspace sends. Two
+      # published demos once served pages where every block came back as an
+      # invisible `data-cmssy-unknown-block` over a green build and a 200. The
+      # script reads `build`, `start`, `port` and `assertRender` from
+      # examples.json, which until now no CI read at all.
+      - name: The app renders what the workspace sends
+        working-directory: .
+        env:
+          CMSSY_ORG_SLUG: cmssy
+          CMSSY_WORKSPACE_SLUG: cmssy-demo
+        run: node scripts/serve-and-assert.mjs next-storefront

@@ -1,5 +1,5 @@
 {
-  "$comment": "What CI does with each example. Each example's own workflow in .github/workflows reads its entry and passes `assertRender` to scripts/assert-render.mjs; only simple-blog does so far, and the other three are asserted by hand until their workflows follow. An earlier version of this line credited an examples job in cmssy-sdk, which does not exist. `buildOnly` and `blocked` are debt markers, not categories - every example here is meant to end up asserted, and each marker names what has to happen for it to go away.",
+  "$comment": "What CI does with each example, and the only place that says it. scripts/serve-and-assert.mjs is the single reader of `build`, `start`, `port` and `assertRender`; every workflow in .github/workflows calls it with a directory name and keeps no copy of any of this. Edit an entry here and CI follows. `buildOnly` is a debt marker, not a category - the script skips such an example and prints `buildOnlyReason`, every example is meant to end up asserted, and the marker names what has to happen for it to go away.",
   "examples": [
     {
       "dir": "next-storefront",

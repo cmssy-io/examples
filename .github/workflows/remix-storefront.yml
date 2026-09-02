@@ -55,5 +55,22 @@ jobs:
       - run: pnpm typecheck
 
       # This example reads the workspace at request time, not at build time, so
-      # the build needs no CMS credentials and can run on every PR.
+      # the build needs no CMS credentials and can run on every PR. Kept beside
+      # the assertion below, which builds with `build:local`: this line is the
+      # one that proves `pnpm build` still emits what Vercel deploys, and
+      # `vercelPreset()` writes a server entry `react-router-serve` cannot read,
+      # which is why the two differ.
       - run: pnpm build
+
+      # A build proves the app compiles and says nothing about whether it knows
+      # the blocks the workspace sends - two published demos once served pages
+      # where every block came back as an invisible `data-cmssy-unknown-block`
+      # over a green build and a 200. The script builds, serves and asserts,
+      # reading `build`, `start`, `port` and `assertRender` from examples.json,
+      # which until now no CI read at all.
+      - name: The app renders what the workspace sends
+        working-directory: .
+        env:
+          CMSSY_ORG_SLUG: cmssy
+          CMSSY_WORKSPACE_SLUG: cmssy-demo
+        run: node scripts/serve-and-assert.mjs remix-storefront
