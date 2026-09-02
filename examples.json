@@ -6,28 +6,41 @@
       "build": "pnpm build",
       "start": "pnpm start",
       "port": 3000,
-      "assertRender": ["/"]
+      "assertRender": [
+        "/"
+      ]
     },
     {
       "dir": "simple-blog",
       "build": "pnpm build",
       "start": "pnpm start",
       "port": 3000,
-      "assertRender": ["/blog", "/blog/hello-cmssy"]
+      "assertRender": [
+        "/blog",
+        "/blog/hello-cmssy"
+      ]
     },
     {
       "dir": "astro-storefront",
       "build": "pnpm build:local",
       "start": "pnpm start",
       "port": 4321,
-      "assertRender": ["/"]
+      "assertRender": [
+        "/",
+        "/blog",
+        "/blog/hello-cmssy"
+      ]
     },
     {
       "dir": "remix-storefront",
       "build": "pnpm build:local",
       "start": "pnpm start",
       "port": 3000,
-      "assertRender": ["/"]
+      "assertRender": [
+        "/",
+        "/blog",
+        "/blog/hello-cmssy"
+      ]
     }
   ]
 }

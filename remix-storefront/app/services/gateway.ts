@@ -48,6 +48,27 @@ export const PAGE_META_QUERY = `query PublicPageMeta($workspaceSlug: String!, $s
   }
 }`;
 
+// Posts are the published children of a page, so a blog index is this query
+// with the parent's slug - there is no post type and no model behind it.
+export const PAGES_BY_TYPE_QUERY = `query PublicPagesByType($workspaceId: String!, $parentSlug: String, $limit: Int, $offset: Int) {
+  public {
+    page {
+      byType(workspaceId: $workspaceId, parentSlug: $parentSlug, limit: $limit, offset: $offset) {
+        items {
+          id
+          slug
+          fullSlug
+          publishedAt
+          displayName
+          seoTitle
+          seoDescription
+        }
+        hasMore
+      }
+    }
+  }
+}`;
+
 export const MODEL_RECORDS_QUERY = `query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int) {
   public {
     model {
