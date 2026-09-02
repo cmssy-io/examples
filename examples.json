@@ -1,5 +1,5 @@
 {
-  "$comment": "What CI does with each example. Consumed by scripts/assert-render.mjs and by the examples job in cmssy-sdk. `buildOnly` and `blocked` are debt markers, not categories - every example here is meant to end up asserted, and each marker names what has to happen for it to go away.",
+  "$comment": "What CI does with each example. Each example's own workflow in .github/workflows reads its entry and passes `assertRender` to scripts/assert-render.mjs; only simple-blog does so far, and the other three are asserted by hand until their workflows follow. An earlier version of this line credited an examples job in cmssy-sdk, which does not exist. `buildOnly` and `blocked` are debt markers, not categories - every example here is meant to end up asserted, and each marker names what has to happen for it to go away.",
   "examples": [
     {
       "dir": "next-storefront",
