@@ -122,4 +122,9 @@ jobs:
         env:
           CMSSY_ORG_SLUG: cmssy
           CMSSY_WORKSPACE_SLUG: cmssy-demo
+          # The build needs no credentials here, but the server refuses to boot
+          # without this one: defineCmssyConfig throws on a missing draftSecret.
+          # It guards drafts and edit mode, neither of which this step touches,
+          # so a placeholder keeps a real secret out of CI.
+          CMSSY_DRAFT_SECRET: ci-placeholder-not-a-secret
         run: node scripts/serve-and-assert.mjs next-storefront
