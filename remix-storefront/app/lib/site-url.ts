@@ -21,3 +21,16 @@ export function siteUrlFor(config: CmssyConfig, request: Request): string {
     "cmssy: set CMSSY_SITE_URL to this site's public origin. Any other host on the request comes from the client, and this value is published in sitemap.xml and robots.txt.",
   );
 }
+
+// A `*.vercel.app` origin is a demo or a staging one, never a site's real home.
+// Vercel marks *preview* deployments noindex on its own and leaves production
+// ones alone, so a demo published there is as indexable as anything else - and
+// this example is deployed on exactly such a host. Whatever is served from one
+// must not compete with a real domain in a search index.
+export function isDemoOrigin(siteUrl: string): boolean {
+  try {
+    return new URL(siteUrl).hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
