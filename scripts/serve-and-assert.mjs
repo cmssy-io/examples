@@ -91,9 +91,15 @@ await run(entry.build);
 // PORT so the port in examples.json is the one the server listens on rather
 // than a note about the framework's default: next start, react-router-serve and
 // the astro node entry all read it.
+//
+// `detached` puts the shell and everything it spawns in one process group, so
+// the kill below reaches the server itself. Signalling the shell alone can
+// leave the node process holding the port: the step then hangs, or the next
+// example finds the port taken and asserts against the wrong app.
 const server = spawn(entry.start, {
   cwd,
   shell: true,
+  detached: true,
   env: { ...process.env, PORT: String(entry.port) },
   stdio: ["ignore", "pipe", "pipe"],
 });
@@ -110,9 +116,20 @@ server.on("exit", (code) => {
   serverExited = true;
   if (code !== 0) serverOutput += `\n[server exited with ${code}]`;
 });
+server.on("error", (error) => {
+  serverExited = true;
+  serverOutput += `\n[\`${entry.start}\` could not be spawned: ${error.message}]`;
+});
 
 function stopServer() {
-  if (!serverExited) server.kill("SIGTERM");
+  if (serverExited || server.pid === undefined) return;
+  try {
+    // Negative pid: the whole process group from `detached` above, not just the
+    // shell that happens to sit at the top of it.
+    process.kill(-server.pid, "SIGTERM");
+  } catch {
+    // Already gone, or the group went with it.
+  }
 }
 
 async function waitForReady() {

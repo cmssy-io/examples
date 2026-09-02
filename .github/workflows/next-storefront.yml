@@ -8,6 +8,11 @@ on:
     paths:
       - "next-storefront/**"
       - ".github/workflows/next-storefront.yml"
+      # The assertion step below is driven by these two, so a change to either
+      # has to run this job. Without them a PR touching only the shared script
+      # or the paths in examples.json changes what CI asserts and runs nothing.
+      - "examples.json"
+      - "scripts/**"
   # Also on main. A PR that touches no next-storefront file never runs this job, so
   # without a push trigger the branch has no green run of its own - and a
   # required check that can never report blocks such a PR forever.
@@ -16,6 +21,11 @@ on:
     paths:
       - "next-storefront/**"
       - ".github/workflows/next-storefront.yml"
+      # The assertion step below is driven by these two, so a change to either
+      # has to run this job. Without them a PR touching only the shared script
+      # or the paths in examples.json changes what CI asserts and runs nothing.
+      - "examples.json"
+      - "scripts/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
