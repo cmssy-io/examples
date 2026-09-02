@@ -6,35 +6,28 @@
       "build": "pnpm build",
       "start": "pnpm start",
       "port": 3000,
-      "assertRender": [
-        "/"
-      ]
+      "assertRender": ["/"]
     },
     {
       "dir": "simple-blog",
       "build": "pnpm build",
       "start": "pnpm start",
       "port": 3000,
-      "buildOnly": true,
-      "buildOnlyReason": "Registers hero, prose, blog-index and testimonials. The demo workspace uses none of those on `/` (10 of 10 blocks have no component) and its site-header/site-footer layout blocks are unregistered, so `/blog` renders 2 of 4. Flip to assertRender once the block sets line up."
+      "assertRender": ["/blog", "/blog/hello-cmssy"]
     },
     {
       "dir": "astro-storefront",
       "build": "pnpm build:local",
       "start": "pnpm start",
       "port": 4321,
-      "assertRender": [
-        "/"
-      ]
+      "assertRender": ["/"]
     },
     {
       "dir": "remix-storefront",
       "build": "pnpm build:local",
       "start": "pnpm start",
       "port": 3000,
-      "assertRender": [
-        "/"
-      ]
+      "assertRender": ["/"]
     }
   ]
 }
