@@ -23,10 +23,9 @@ Next):
 - `app/api/draft/route.ts` - draft preview (`createDraftRoute`); enter with
   `?secret=<CMSSY_DRAFT_SECRET>`, exit with `?disable=1`
 - `app/[[...path]]/layout.tsx` + `app/cmssy-edit/[[...path]]/layout.tsx` - two root layouts, one
-  per route tree. Both render header/footer through `CmssyLayoutSlot` and differ only in
-  `editMode`: the public one passes `false`, the edit one passes `isCmssyEditMode()` and gets
-  the blocks through `cmssy/editable-layout.tsx`. A server-rendered header cannot be edited,
-  and a client-mounted one cannot be static
+  per route tree, each setting `lang` from the routed locale. Neither renders layout regions:
+  the demo workspace's header and footer are the storefront's blocks, and `next-storefront` is
+  where `CmssyLayoutSlot` is shown
 - `app/sitemap.ts` + `app/robots.ts` - written here, from `services/pages.ts`: a sitemap is a
   query plus a mapping, and the CMS has no business owning your route files
 - `lib/locale-path.ts` + `services/` - the app's own locale helpers, delivery queries and
@@ -34,9 +33,8 @@ Next):
 - `cmssy/blocks.ts` - block registry
 - `cmssy/editor.tsx` - lazy editor (blocks load on the client, server-only loader code stays out
   of the browser bundle)
-- `cmssy/editable-layout.tsx` - mounts header/footer layout blocks through the edit bridge; used
-  by the edit route's layout
-- `blocks/**` - example blocks (`hero`, `prose`, `blog-index`); each exports its field schema next
+- `blocks/**` - example blocks (`prose`, `blog-index`) - exactly the ones the pages this
+  example serves actually use; each exports its field schema next
   to the component (`BlockProps<typeof props>`, `BlockProps<typeof props, Data>` for loader
   blocks) and is self-styled with a co-located CSS Module (no Tailwind - cmssy does not impose a
   styling system)

@@ -61,3 +61,48 @@ jobs:
           CMSSY_WORKSPACE_SLUG: cmssy-demo
           CMSSY_DRAFT_SECRET: ci-placeholder-not-a-secret
         run: pnpm build
+
+      # A build proves the app compiles and says nothing about whether it knows
+      # the blocks the workspace sends - two published demos once served pages
+      # where every block came back as an invisible `data-cmssy-unknown-block`
+      # over a green build and a 200. `examples.json` has carried the answer for
+      # this example since then, and nothing read it: no workflow here ran the
+      # script, and the cmssy-sdk job its comment credited does not exist.
+      #
+      # The paths come from `examples.json`, not from a second copy here. A list
+      # that has to be kept equal to another list is the drift this repo keeps
+      # finding in blocks; a workflow is no better a place for it.
+      - name: The app renders what the workspace sends
+        env:
+          CMSSY_ORG_SLUG: cmssy
+          CMSSY_WORKSPACE_SLUG: cmssy-demo
+          CMSSY_DRAFT_SECRET: ci-placeholder-not-a-secret
+        run: |
+          set -euo pipefail
+          paths=()
+          while IFS= read -r path; do paths+=("$path"); done < <(node -e '
+            const all = require("../examples.json").examples;
+            const one = all.find((e) => e.dir === "simple-blog");
+            if (!one?.assertRender?.length) {
+              console.error("simple-blog has no assertRender paths in examples.json");
+              process.exit(1);
+            }
+            for (const p of one.assertRender) console.log(p);
+          ')
+          pnpm start > /tmp/simple-blog-server.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          # `until`, not `curl ... && break` inside a loop: under `set -e` the
+          # failing half of an && list is the body's last command, so the step
+          # would die on the first probe, a second into a boot that takes more.
+          tries=0
+          until curl -sf -o /dev/null "http://localhost:3000${paths[0]}"; do
+            tries=$((tries + 1))
+            if [ "$tries" -ge 60 ]; then
+              echo "::error::the example never answered on ${paths[0]}"
+              cat /tmp/simple-blog-server.log
+              exit 1
+            fi
+            sleep 1
+          done
+          node ../scripts/assert-render.mjs http://localhost:3000 "${paths[@]}"

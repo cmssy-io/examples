@@ -1,40 +1,33 @@
 {
-  "$comment": "What CI does with each example. Consumed by scripts/assert-render.mjs and by the examples job in cmssy-sdk. `buildOnly` and `blocked` are debt markers, not categories - every example here is meant to end up asserted, and each marker names what has to happen for it to go away.",
+  "$comment": "What CI does with each example. Each example's own workflow in .github/workflows reads its entry and passes `assertRender` to scripts/assert-render.mjs; only simple-blog does so far, and the other three are asserted by hand until their workflows follow. An earlier version of this line credited an examples job in cmssy-sdk, which does not exist. `buildOnly` and `blocked` are debt markers, not categories - every example here is meant to end up asserted, and each marker names what has to happen for it to go away.",
   "examples": [
     {
       "dir": "next-storefront",
       "build": "pnpm build",
       "start": "pnpm start",
       "port": 3000,
-      "assertRender": [
-        "/"
-      ]
+      "assertRender": ["/"]
     },
     {
       "dir": "simple-blog",
       "build": "pnpm build",
       "start": "pnpm start",
       "port": 3000,
-      "buildOnly": true,
-      "buildOnlyReason": "Registers hero, prose, blog-index and testimonials. The demo workspace uses none of those on `/` (10 of 10 blocks have no component) and its site-header/site-footer layout blocks are unregistered, so `/blog` renders 2 of 4. Flip to assertRender once the block sets line up."
+      "assertRender": ["/blog", "/blog/hello-cmssy"]
     },
     {
       "dir": "astro-storefront",
       "build": "pnpm build:local",
       "start": "pnpm start",
       "port": 4321,
-      "assertRender": [
-        "/"
-      ]
+      "assertRender": ["/"]
     },
     {
       "dir": "remix-storefront",
       "build": "pnpm build:local",
       "start": "pnpm start",
       "port": 3000,
-      "assertRender": [
-        "/"
-      ]
+      "assertRender": ["/"]
     }
   ]
 }

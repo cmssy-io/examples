@@ -1,15 +1,12 @@
 import type { ReactNode } from "react";
-import { CmssyLayoutSlot } from "@cmssy/next/server";
-import { cmssy } from "@/cmssy.config";
-import { blocks } from "@/cmssy/blocks";
-import { EditableLayout } from "@/cmssy/editable-layout";
 import { fetchSiteConfig, resolveSiteLocales } from "@/services/site";
 import { splitLocaleFromPath } from "@/lib/locale-path";
 import "@/styles/globals.css";
 
-// One root layout for both modes now: CmssyLayoutSlot renders the header and
-// footer server-side for visitors and through the edit bridge in edit mode, so
-// the edit route no longer needs a layout of its own.
+// No layout regions here. The demo workspace's header and footer are the
+// storefront's own blocks - a category mega-menu, a cart and a trade sign-in -
+// and next-storefront is where they are implemented. This example renders page
+// body blocks, which is what a blog has.
 export async function generateMetadata() {
   const favicon = (await fetchSiteConfig())?.branding?.faviconUrl;
   return favicon ? { icons: { icon: favicon } } : {};
@@ -25,25 +22,12 @@ export default async function SiteLayout({
   const { path } = await params;
   const { locale } = splitLocaleFromPath(path, await resolveSiteLocales());
 
-  const slot = (region: "header" | "footer") => (
-    <CmssyLayoutSlot
-      config={cmssy}
-      blocks={blocks}
-      region={region}
-      path={path ?? []}
-      editMode={false}
-      editable={EditableLayout}
-    />
-  );
-
   // `lang` must be the language actually rendered - screen readers and the
   // editor smoke test both read it.
   return (
     <html lang={locale}>
       <body>
-        {slot("header")}
         <main>{children}</main>
-        {slot("footer")}
       </body>
     </html>
   );
