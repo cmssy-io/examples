@@ -12,17 +12,33 @@
  * for the one thing that must be true of any example worth publishing - every
  * block the CMS sent has a component behind it.
  *
- * Usage: node scripts/assert-render.mjs <baseUrl> <path> [...paths]
+ * The one exception is `lang`, and it is structural too: a locale prefix that
+ * does not reach `<html lang>` is a routing bug the block count cannot see -
+ * /no answers 200 with the same block structure whether it served Norwegian or
+ * fell back to English.
+ *
+ * Usage: node scripts/assert-render.mjs <baseUrl> <target> [...targets]
+ * where a target is a path, or {"path": "/no", "lang": "no"} as JSON.
  */
 
-const [baseUrl, ...paths] = process.argv.slice(2);
+const [baseUrl, ...args] = process.argv.slice(2);
 
-if (!baseUrl || paths.length === 0) {
+if (!baseUrl || args.length === 0) {
   console.error(
-    "usage: node scripts/assert-render.mjs <baseUrl> <path> [...paths]",
+    'usage: node scripts/assert-render.mjs <baseUrl> <target> [...targets]\n  target: /blog  or  {"path": "/no", "lang": "no"}',
   );
   process.exit(1);
 }
+
+const targets = args.map((raw) => {
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    parsed = raw;
+  }
+  return typeof parsed === "string" ? { path: parsed } : parsed;
+});
 
 const BLOCK = /data-block-id="/g;
 const UNKNOWN = /data-cmssy-unknown-block="([^"]*)"/g;
@@ -37,9 +53,11 @@ function textOf(html) {
     .trim();
 }
 
+const HTML_LANG = /<html[^>]*\slang="([^"]*)"/;
+
 const failures = [];
 
-for (const path of paths) {
+for (const { path, lang } of targets) {
   const url = new URL(path, baseUrl).toString();
   let res;
   try {
@@ -79,7 +97,19 @@ for (const path of paths) {
     continue;
   }
 
-  console.log(`  ${path}: ${blocks} blocks, ${text.length} characters`);
+  if (lang) {
+    const served = html.match(HTML_LANG)?.[1];
+    if (served !== lang) {
+      failures.push(
+        `${path}: served <html lang="${served ?? ""}">, expected "${lang}" - the locale prefix in the URL never reached the page`,
+      );
+      continue;
+    }
+  }
+
+  console.log(
+    `  ${path}: ${blocks} blocks, ${text.length} characters${lang ? `, lang="${lang}"` : ""}`,
+  );
 }
 
 if (failures.length > 0) {

@@ -68,11 +68,13 @@ if (!entry.assertRender?.length) {
 const cwd = resolve(REPO_ROOT, dir);
 const baseUrl = `http://localhost:${entry.port}`;
 
-function run(command, options = {}) {
+// `args` omitted means the command is a shell line from examples.json; passing
+// args means an argv, and no shell gets to reinterpret what is in them.
+function run(command, args, options = {}) {
   return new Promise((resolvePromise, reject) => {
-    const child = spawn(command, {
+    const child = spawn(command, args ?? [], {
       cwd,
-      shell: true,
+      shell: args === undefined,
       stdio: "inherit",
       ...options,
     });
@@ -100,7 +102,15 @@ const server = spawn(entry.start, {
   cwd,
   shell: true,
   detached: true,
-  env: { ...process.env, PORT: String(entry.port) },
+  // CMSSY_SITE_URL because sitemap.xml and robots.txt refuse to guess their own
+  // origin - taking it from the request would let a client's Host header decide
+  // what the site publishes about itself. Under CI there is no real origin to
+  // give them, so the one we are about to fetch is the truthful answer.
+  env: {
+    CMSSY_SITE_URL: baseUrl,
+    ...process.env,
+    PORT: String(entry.port),
+  },
   stdio: ["ignore", "pipe", "pipe"],
 });
 
@@ -132,8 +142,14 @@ function stopServer() {
   }
 }
 
+// An `assertRender` item is a path, or an object carrying that path plus what
+// else must be true of it. Only the path is any of this script's business.
+function pathOf(target) {
+  return typeof target === "string" ? target : target.path;
+}
+
 async function waitForReady() {
-  const probe = new URL(entry.assertRender[0], baseUrl).toString();
+  const probe = new URL(pathOf(entry.assertRender[0]), baseUrl).toString();
   const deadline = Date.now() + READY_TIMEOUT_MS;
   while (Date.now() < deadline) {
     if (serverExited) {
@@ -161,14 +177,28 @@ try {
   await waitForReady();
   console.log(`${dir}: serving on ${baseUrl}`);
   await run(
+    "node",
     [
-      "node",
-      JSON.stringify(resolve(REPO_ROOT, "scripts/assert-render.mjs")),
-      JSON.stringify(baseUrl),
-      ...entry.assertRender.map((p) => JSON.stringify(p)),
-    ].join(" "),
+      resolve(REPO_ROOT, "scripts/assert-render.mjs"),
+      baseUrl,
+      ...entry.assertRender.map((target) => JSON.stringify(target)),
+    ],
     { cwd: REPO_ROOT },
   );
+  if (entry.assertSitemap) {
+    await run(
+      "node",
+      [
+        resolve(REPO_ROOT, "scripts/assert-sitemap.mjs"),
+        baseUrl,
+        typeof entry.assertSitemap === "string"
+          ? entry.assertSitemap
+          : "/sitemap.xml",
+        ...entry.assertRender.map(pathOf),
+      ],
+      { cwd: REPO_ROOT },
+    );
+  }
 } catch (error) {
   console.error(`\n${error.message}`);
   stopServer();
