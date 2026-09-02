@@ -143,6 +143,9 @@ async function waitForReady() {
     }
     try {
       const res = await fetch(probe, { redirect: "follow" });
+      // Undici holds the socket until the body is read or cancelled, and a slow
+      // boot polls this a hundred times over the deadline below.
+      await res.body?.cancel();
       if (res.ok) return;
     } catch {
       // not listening yet
