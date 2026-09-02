@@ -1,9 +1,15 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL } from "@/services/seo";
+import { isDemoOrigin, SITE_URL } from "@/services/seo";
 
 export const dynamic = "force-dynamic";
 
 export default function robots(): MetadataRoute.Robots {
+  // Nothing published on a demo host belongs in a search index, and a sitemap
+  // would be an invitation - so that branch says one thing and stops.
+  if (isDemoOrigin(SITE_URL)) {
+    return { rules: { userAgent: "*", disallow: "/" } };
+  }
+
   return {
     rules: {
       userAgent: "*",
