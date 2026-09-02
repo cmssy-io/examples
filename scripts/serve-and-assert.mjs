@@ -148,8 +148,15 @@ function pathOf(target) {
   return typeof target === "string" ? target : target.path;
 }
 
+// A target that is meant to answer 404 would never satisfy the readiness poll,
+// so the probe is the first one that expects a 200.
+const readyTarget =
+  entry.assertRender.find(
+    (target) => typeof target === "string" || (target.status ?? 200) === 200,
+  ) ?? entry.assertRender[0];
+
 async function waitForReady() {
-  const probe = new URL(pathOf(entry.assertRender[0]), baseUrl).toString();
+  const probe = new URL(pathOf(readyTarget), baseUrl).toString();
   const deadline = Date.now() + READY_TIMEOUT_MS;
   while (Date.now() < deadline) {
     if (serverExited) {
@@ -194,7 +201,14 @@ try {
         typeof entry.assertSitemap === "string"
           ? entry.assertSitemap
           : "/sitemap.xml",
-        ...entry.assertRender.map(pathOf),
+        // Only the URLs that are meant to exist: a path asserted to 404 is one
+        // the sitemap had better not be listing.
+        ...entry.assertRender
+          .filter(
+            (target) =>
+              typeof target === "string" || (target.status ?? 200) === 200,
+          )
+          .map(pathOf),
       ],
       { cwd: REPO_ROOT },
     );

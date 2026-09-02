@@ -19,9 +19,15 @@
  * with a broken block - it is a page one <header> short, which nothing above
  * counts, so `elements` names the tags that have to be on it.
  *
+ * `status` says what the URL is supposed to answer, and defaults to 200. Give
+ * it another code and the block checks step aside - a 404 has nothing to prove
+ * about the workspace's blocks - while `elements` and `lang` still apply, so a
+ * missing page can be required to keep the site's chrome.
+ *
  * Usage: node scripts/assert-render.mjs <baseUrl> <target> [...targets]
  * where a target is a path, or an object as JSON:
  *   {"path": "/no", "lang": "no", "elements": ["header", "footer"]}
+ *   {"path": "/no-such-page", "status": 404}
  */
 
 const [baseUrl, ...args] = process.argv.slice(2);
@@ -60,7 +66,7 @@ const HTML_LANG = /<html[^>]*\slang="([^"]*)"/;
 
 const failures = [];
 
-for (const { path, lang, elements = [] } of targets) {
+for (const { path, lang, elements = [], status = 200 } of targets) {
   const url = new URL(path, baseUrl).toString();
   let res;
   try {
@@ -70,8 +76,12 @@ for (const { path, lang, elements = [] } of targets) {
     continue;
   }
 
-  if (!res.ok) {
-    failures.push(`${path}: HTTP ${res.status}`);
+  if (res.status !== status) {
+    failures.push(
+      status === 200
+        ? `${path}: HTTP ${res.status}`
+        : `${path}: HTTP ${res.status}, expected ${status}${res.status === 200 ? " - a soft 404 gets indexed and keeps a monitor green" : ""}`,
+    );
     continue;
   }
 
@@ -80,24 +90,26 @@ for (const { path, lang, elements = [] } of targets) {
   const unknown = [...html.matchAll(UNKNOWN)].map((m) => m[1]);
   const text = textOf(html);
 
-  if (blocks === 0) {
-    failures.push(`${path}: the page carries no cmssy blocks at all`);
-    continue;
-  }
+  if (status === 200) {
+    if (blocks === 0) {
+      failures.push(`${path}: the page carries no cmssy blocks at all`);
+      continue;
+    }
 
-  if (unknown.length > 0) {
-    const types = [...new Set(unknown)].join(", ");
-    failures.push(
-      `${path}: ${unknown.length} of ${blocks} blocks have no component - ${types}`,
-    );
-    continue;
-  }
+    if (unknown.length > 0) {
+      const types = [...new Set(unknown)].join(", ");
+      failures.push(
+        `${path}: ${unknown.length} of ${blocks} blocks have no component - ${types}`,
+      );
+      continue;
+    }
 
-  if (text.length < 200) {
-    failures.push(
-      `${path}: renders ${blocks} blocks but only ${text.length} characters of text`,
-    );
-    continue;
+    if (text.length < 200) {
+      failures.push(
+        `${path}: renders ${blocks} blocks but only ${text.length} characters of text`,
+      );
+      continue;
+    }
   }
 
   const missing = elements.filter(
@@ -121,7 +133,7 @@ for (const { path, lang, elements = [] } of targets) {
   }
 
   console.log(
-    `  ${path}: ${blocks} blocks, ${text.length} characters${lang ? `, lang="${lang}"` : ""}${elements.length ? `, <${elements.join(">, <")}>` : ""}`,
+    `  ${path}: HTTP ${res.status}, ${blocks} blocks, ${text.length} characters${lang ? `, lang="${lang}"` : ""}${elements.length ? `, <${elements.join(">, <")}>` : ""}`,
   );
 }
 

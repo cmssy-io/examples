@@ -1,6 +1,7 @@
 ---
 import { loadCmssyPage } from "@cmssy/astro";
 import {
+  resolveCmssyLayoutSlot,
   resolveEditorBlockData,
   resolveEditorLayoutBlockData,
 } from "@cmssy/react";
@@ -34,10 +35,26 @@ const { data: blockData, content: blockContent } = await resolveEditorBlockData(
 // The header and the footer live in the workspace, on the homepage, and every
 // page inherits them - so they are content, resolved the same way the page's own
 // blocks are, not chrome hard-coded into this layout.
+//
+// A URL with no page behind it inherits nothing, which would leave the 404 the
+// only page on the site with no way off it. The regions of "/" are the site's
+// own, so that is what it gets.
+const regionGroups = page
+  ? layouts
+  : (
+      await resolveCmssyLayoutSlot(cmssy, {
+        region: "header",
+        blocks,
+        editMode: false,
+        path: [],
+        locale,
+      })
+    ).groups;
+
 const [header, footer] = await Promise.all(
   (["header", "footer"] as const).map((region) =>
     resolveEditorLayoutBlockData({
-      groups: layouts,
+      groups: regionGroups,
       blocks,
       region,
       page: pageContext,
@@ -65,7 +82,7 @@ const description = pickLocalized(meta?.seoDescription, locale, defaultLocale);
   </head>
   <body>
     <Region
-      groups={layouts}
+      groups={regionGroups}
       region="header"
       locale={locale}
       defaultLocale={defaultLocale}
@@ -88,7 +105,7 @@ const description = pickLocalized(meta?.seoDescription, locale, defaultLocale);
       )
     }
     <Region
-      groups={layouts}
+      groups={regionGroups}
       region="footer"
       locale={locale}
       defaultLocale={defaultLocale}
