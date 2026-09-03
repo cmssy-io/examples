@@ -163,7 +163,7 @@ export type PublicFormQueryVariables = Exact<{
 }>;
 
 
-export type PublicFormQuery = { public: { form: { get: { id: string, name: string, slug: string, description: string | null, fields: Array<{ id: string, name: string, fieldType: FormFieldType, label: unknown, placeholder: unknown, helpText: unknown, defaultValue: string | null, width: string, order: number, showWhen: unknown, requiredWhen: unknown, options: Array<{ value: string, label: unknown, disabled: boolean }>, validation: { required: boolean, minLength: number | null, maxLength: number | null, minValue: number | null, maxValue: number | null, pattern: string | null, customMessage: string | null } }>, settings: { actionType: FormActionType, submitButtonLabel: unknown, successMessage: unknown, errorMessage: unknown, redirectUrl: string | null, requireLogin: boolean, enableCaptcha: boolean } } | null } } };
+export type PublicFormQuery = { public: { form: { get: { id: string, name: string, slug: string, description: string | null, fields: Array<{ id: string, name: string, fieldType: FormFieldType, label: unknown, placeholder: unknown, helpText: unknown, defaultValue: string | null, width: string, order: number, showWhen: unknown, requiredWhen: unknown, options: Array<{ value: string, label: unknown, disabled: boolean }>, validation: { required: boolean, minLength: number | null, maxLength: number | null, minValue: number | null, maxValue: number | null, pattern: string | null, customMessage: string | null } }>, settings: { actionType: FormActionType, submitButtonLabel: unknown, successMessage: unknown, errorMessage: unknown, redirectUrl: string | null, requireLogin: boolean } } | null } } };
 
 export type SubmitFormMutationVariables = Exact<{
   formId: string | number;
@@ -564,7 +564,6 @@ export const PublicFormDocument = new TypedDocumentString(`
           errorMessage
           redirectUrl
           requireLogin
-          enableCaptcha
         }
       }
     }
