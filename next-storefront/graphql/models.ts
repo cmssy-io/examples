@@ -143,8 +143,6 @@ export type ServiceRecord = CmssyRecordOf<ServiceData>;
 export interface ShopmemberData {
   /** Email */
   email: string;
-  /** Password */
-  password?: string;
   /** Name */
   name?: string;
   /** Contact name */
