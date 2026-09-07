@@ -9,14 +9,14 @@ importers:
   .:
     dependencies:
       '@cmssy/core':
-        specifier: ^16.1.1
-        version: 16.1.1
+        specifier: ^16.2.0
+        version: 16.2.0
       '@cmssy/react':
-        specifier: ^16.1.1
-        version: 16.1.1(react@19.2.8)
+        specifier: ^16.2.0
+        version: 16.2.0(react@19.2.8)
       '@cmssy/remix':
-        specifier: ^16.1.1
-        version: 16.1.1(@cmssy/react@16.1.1(react@19.2.8))(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))
+        specifier: ^16.2.0
+        version: 16.2.0(@cmssy/react@16.2.0(react@19.2.8))(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))
       '@react-router/node':
         specifier: ^8.3.0
         version: 8.3.0(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(typescript@5.9.3)
@@ -195,22 +195,22 @@ packages:
     resolution: {integrity: sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA==}
     engines: {node: '>=6.9.0'}
 
-  '@cmssy/core@16.1.1':
-    resolution: {integrity: sha512-WCOx5/5oVumpG+r00Sr8vDAyCqfQO3g3xdTsFHggI1EJmREJp60OS4bhQu6/9q7JiZoolZJgzb3W0SQYP9vOMg==}
+  '@cmssy/core@16.2.0':
+    resolution: {integrity: sha512-FxjNDTcgzEMMaO9gHaRZaTqLE28g8XkEBbsx96VlYeJQ4HOvWo0myJnUjHv2YrjkfTFPMwdYi7NV2OtMZT/DSw==}
 
-  '@cmssy/react@16.1.1':
-    resolution: {integrity: sha512-ow51w2ZxYiGpWcPXGF7PoXTB7HqEbYMqwYuWSqMxnKg9wMkPoshWSlXN2DDF/rAtT1uuAiY8dnyDkFpjiufzyQ==}
+  '@cmssy/react@16.2.0':
+    resolution: {integrity: sha512-s0m99szQNOqDDnPAEu62dSa9C5zzfqT5D4trbIpODSPks6UAUnLWPdBVm5i8cgMPGmPLqcq4/D1GpDvqkbqGzA==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
 
-  '@cmssy/remix@16.1.1':
-    resolution: {integrity: sha512-J5fepZ7R5HzEA6IQt3l3ql7LUCPVHFGJWkxCbFh7k4kfbOl1LTzscQOtSDoAKlODx/2l2zq3fmWyzES/GdhY4w==}
+  '@cmssy/remix@16.2.0':
+    resolution: {integrity: sha512-lATKbky7nGypxGuLZauKq4ykxJaFzsBTUy0vbfmQTpWArYm91ppei9GehzGhjMHERp0H/pYGHkCE8YdGUPrh2g==}
     peerDependencies:
-      '@cmssy/react': ^16.1.1
+      '@cmssy/react': ^16.2.0
       react-router: '>=7'
 
-  '@cmssy/types@0.41.0':
-    resolution: {integrity: sha512-ReZJ2+2yGN+ojLMllvSaiQPKEHtCQyDP4IATS10JKoLfl5MV24Z6Yu1FIvnTpkE+7iOcdkzXLgg979Xdk8KdsQ==}
+  '@cmssy/types@0.43.0':
+    resolution: {integrity: sha512-ZCkrfN+067OTDbdtQdfxl+hsO03ImtlVrWC61zeLzpr/Ne9QcQwRTP8AHkrmwwtslrNOFK8lSDAlKl2kciGSGw==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -1445,24 +1445,24 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@cmssy/core@16.1.1':
+  '@cmssy/core@16.2.0':
     dependencies:
-      '@cmssy/types': 0.41.0
+      '@cmssy/types': 0.43.0
       jose: 6.2.8
 
-  '@cmssy/react@16.1.1(react@19.2.8)':
+  '@cmssy/react@16.2.0(react@19.2.8)':
     dependencies:
-      '@cmssy/core': 16.1.1
-      '@cmssy/types': 0.41.0
+      '@cmssy/core': 16.2.0
+      '@cmssy/types': 0.43.0
       react: 19.2.8
 
-  '@cmssy/remix@16.1.1(@cmssy/react@16.1.1(react@19.2.8))(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))':
+  '@cmssy/remix@16.2.0(@cmssy/react@16.2.0(react@19.2.8))(react-router@8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))':
     dependencies:
-      '@cmssy/core': 16.1.1
-      '@cmssy/react': 16.1.1(react@19.2.8)
+      '@cmssy/core': 16.2.0
+      '@cmssy/react': 16.2.0(react@19.2.8)
       react-router: 8.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
 
-  '@cmssy/types@0.41.0': {}
+  '@cmssy/types@0.43.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
