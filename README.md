@@ -29,11 +29,12 @@ clone renders real content without a cmssy account. Point one at your own worksp
 All four point at the same `cmssy-demo` workspace - one set of content, four unrelated frontends,
 none of which the CMS knows about.
 
-The two Next examples mount `app/api/cmssy/block-data/route.ts`. Without it the editor cannot run a
-block's `loader`, so a block that fetches - a product grid, a blog index - stays frozen while you
-configure it: changing the category changes nothing until the page is saved and the frame reloads,
-and a block you have just added has no data at all. The route answers only a verified editor
-request. The Astro and React Router adapters cannot mount it yet (CMS-1803).
+Neither example mounts `createCmssyBlockDataRoute` yet, so a block with a `loader` - a product grid,
+a blog index - stays frozen in the editor: changing the category changes nothing until the page is
+saved and the frame reloads. The route shipped in SDK 16.7.0 guards itself with `isCmssyEditMode()`,
+which reads a header the proxy sets - and the proxy matcher excludes `/api/*`, so on an API route
+that header is whatever the caller sent. It is mounted again once the SDK carries a signal a caller
+cannot forge (CMS-1804).
 
 All four also declare a field or two as `localized: false`: a footer link's target, the category a
 navigation entry points at, the page a blog index lists under. None of those carry language, so
