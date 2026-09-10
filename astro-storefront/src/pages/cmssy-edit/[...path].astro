@@ -8,7 +8,8 @@ import CmssyEditor from "../../cmssy/editor";
 // must be dynamic: a prerendered page never sees the query string.
 export const prerender = false;
 
-const { page, locale, defaultLocale, enabledLocales } = await loadCmssyPage(
+const { page, locale, defaultLocale, enabledLocales, blockDataToken } =
+  await loadCmssyPage(
   cmssy,
   Astro.request,
   Astro.url,
@@ -29,7 +30,7 @@ const editorOrigin = resolveEditorOrigin(cmssy.editorOrigin);
       locale={locale}
       defaultLocale={defaultLocale}
       enabledLocales={enabledLocales}
-      edit={{ editorOrigin }}
+      edit={{ editorOrigin, blockDataToken }}
     />
   </body>
 </html>

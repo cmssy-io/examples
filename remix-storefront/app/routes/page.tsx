@@ -112,6 +112,7 @@ export default function CmssyPage({ loaderData }: Route.ComponentProps) {
     enabledLocales,
     isEdit,
     editorOrigin,
+    blockDataToken,
     blockData,
     blockContent,
     layouts,
@@ -128,7 +129,7 @@ export default function CmssyPage({ loaderData }: Route.ComponentProps) {
         locale={locale}
         defaultLocale={defaultLocale}
         enabledLocales={enabledLocales}
-        edit={{ editorOrigin }}
+        edit={{ editorOrigin, blockDataToken }}
       />
     );
   }

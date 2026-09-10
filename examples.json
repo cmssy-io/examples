@@ -55,8 +55,16 @@
           "path": "/no-page-lives-here",
           "status": 404,
           "elements": ["header", "footer"]
+        },
+        {
+          "path": "/api/cmssy/block-data",
+          "method": "POST",
+          "headers": { "x-cmssy-edit": "1" },
+          "body": { "page": { "slug": "" }, "blocks": [] },
+          "status": 403
         }
       ],
+      "$blockDataComment": "No GET row here, unlike the Next examples: Astro answers 404 for a GET on a POST-only endpoint and React Router answers 400, so 405 is a Next-ism. The forged POST covers both claims anyway - an unmounted route 404s on the POST too, so 403 proves mounted AND refusing.",
       "assertSitemap": true
     },
     {
@@ -74,8 +82,16 @@
           "path": "/no-page-lives-here",
           "status": 404,
           "elements": ["header", "footer"]
+        },
+        {
+          "path": "/api/cmssy/block-data",
+          "method": "POST",
+          "headers": { "x-cmssy-edit": "1" },
+          "body": { "page": { "slug": "" }, "blocks": [] },
+          "status": 403
         }
       ],
+      "$blockDataComment": "No GET row here, unlike the Next examples: Astro answers 404 for a GET on a POST-only endpoint and React Router answers 400, so 405 is a Next-ism. The forged POST covers both claims anyway - an unmounted route 404s on the POST too, so 403 proves mounted AND refusing.",
       "assertSitemap": true
     }
   ]

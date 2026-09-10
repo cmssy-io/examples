@@ -8,7 +8,7 @@ export function CmssyEditor(props: {
   locale: string;
   defaultLocale: string;
   enabledLocales: string[];
-  edit: { editorOrigin: string | string[] };
+  edit: { editorOrigin: string | string[]; blockDataToken?: string };
 }) {
   return <CmssyLazyEditor {...props} load={() => import("./blocks")} />;
 }

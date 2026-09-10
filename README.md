@@ -29,14 +29,12 @@ clone renders real content without a cmssy account. Point one at your own worksp
 All four point at the same `cmssy-demo` workspace - one set of content, four unrelated frontends,
 none of which the CMS knows about.
 
-The two Next examples mount `app/api/cmssy/block-data/route.ts`. Without it the editor cannot run a
-block's `loader`, so a block that fetches - a product grid, a blog index - stays frozen while you
-configure it: changing the category changes nothing until the page is saved and the frame reloads,
-and a block you have just added has no data at all. The route answers only a request carrying an
-edit token that `createCmssyPage` minted from `draftSecret` for that exact page; a forged
-`x-cmssy-edit` header gets a 403 (CMS-1804). The Astro and React Router examples do not mount it -
-those adapters have no route helper, though `mintCmssyEditToken`/`verifyCmssyEditToken` are exported
-from `@cmssy/core` for a hand-written one (CMS-1803).
+All four mount the block data route - one helper per adapter, same path. Without it the editor
+cannot run a block's `loader`, so a block that fetches - a product grid, a blog index - stays frozen
+while you configure it: changing the category changes nothing until the page is saved and the frame
+reloads, and a block you have just added has no data at all. The route answers only a request
+carrying an edit token the page was rendered with, minted from `draftSecret` and bound to that exact
+page; a forged `x-cmssy-edit` header gets a 403, which is what CI asserts (CMS-1804, CMS-1803).
 
 All four also declare a field or two as `localized: false`: a footer link's target, the category a
 navigation entry points at, the page a blog index lists under. None of those carry language, so
