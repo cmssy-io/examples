@@ -29,6 +29,11 @@ clone renders real content without a cmssy account. Point one at your own worksp
 All four point at the same `cmssy-demo` workspace - one set of content, four unrelated frontends,
 none of which the CMS knows about.
 
+All four also declare a field or two as `localized: false`: a footer link's target, the category a
+navigation entry points at, the page a blog index lists under. None of those carry language, so
+cmssy stores them once instead of once per locale and folds them back in before delivery - the
+components read them unchanged.
+
 That is the goal, not yet the state. **Today only `next-storefront` implements the blocks that
 workspace uses.** `simple-blog` renders its `/blog` listing but a blank home page; the Astro and
 React Router examples register a single `hero` block that no page uses, so they render nothing at

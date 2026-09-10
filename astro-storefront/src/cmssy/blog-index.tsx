@@ -6,6 +6,7 @@ export const blogIndexProps = {
     label: "Parent page",
     multiple: false,
     helperText: "Posts are the children of this page.",
+    localized: false,
   }),
   postsPerPage: fields.number({ label: "Posts per page", defaultValue: 9 }),
 };

@@ -21,7 +21,11 @@ export const siteFooterProps = {
         addButtonLabel: "Add link",
         itemSchema: {
           label: fields.text({ label: "Label", required: true }),
-          url: fields.link({ label: "URL", required: true }),
+          url: fields.link({
+            label: "URL",
+            required: true,
+            localized: false,
+          }),
         },
       }),
     },
