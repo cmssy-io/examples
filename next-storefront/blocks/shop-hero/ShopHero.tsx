@@ -28,9 +28,9 @@ export default function ShopHero({
     heading,
     text,
     primaryButtonText,
-    primaryButtonUrl = "#",
+    primaryButtonUrl,
     secondaryButtonText,
-    secondaryButtonUrl = "#",
+    secondaryButtonUrl,
   } = content;
 
   if (!heading) return null;
@@ -42,9 +42,10 @@ export default function ShopHero({
       <div>
         <h1 className={styles.title}>{heading}</h1>
         {text ? <p className={styles.text}>{text}</p> : null}
-        {primaryButtonText || secondaryButtonText ? (
+        {(primaryButtonText && primaryButtonUrl) ||
+        (secondaryButtonText && secondaryButtonUrl) ? (
           <div className={styles.actions}>
-            {primaryButtonText ? (
+            {primaryButtonText && primaryButtonUrl ? (
               <CmssyLink
                 href={primaryButtonUrl}
                 className="shop-btn shop-btn-primary"
@@ -52,7 +53,7 @@ export default function ShopHero({
                 {primaryButtonText}
               </CmssyLink>
             ) : null}
-            {secondaryButtonText ? (
+            {secondaryButtonText && secondaryButtonUrl ? (
               <CmssyLink href={secondaryButtonUrl} className="shop-btn">
                 {secondaryButtonText}
               </CmssyLink>

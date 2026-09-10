@@ -19,11 +19,8 @@ function pickLocale(
 ): string {
   if (!value) return "";
   if (typeof value === "string") return value;
-  const keys = locale ? [locale.current, locale.default] : ["en"];
-  for (const key of keys) {
-    if (value[key]) return value[key];
-  }
-  return Object.values(value)[0] ?? "";
+  if (!locale) return "";
+  return value[locale.current] ?? value[locale.default] ?? "";
 }
 
 export default function BlogIndex({

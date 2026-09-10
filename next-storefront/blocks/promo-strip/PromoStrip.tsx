@@ -11,13 +11,13 @@ export const promoStripProps = {
 export default function PromoStrip({
   content,
 }: BlockProps<typeof promoStripProps>) {
-  const { text, linkText, linkUrl = "#" } = content;
+  const { text, linkText, linkUrl } = content;
   if (!text) return null;
 
   return (
     <aside className={styles.strip}>
       <span>{text}</span>
-      {linkText ? (
+      {linkText && linkUrl ? (
         <CmssyLink href={linkUrl} className={styles.link}>
           {linkText}
         </CmssyLink>
