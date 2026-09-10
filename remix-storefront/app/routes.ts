@@ -5,6 +5,7 @@ import { type RouteConfig, index, route } from "@react-router/dev/routes";
 export default [
   route("sitemap.xml", "routes/sitemap.ts"),
   route("robots.txt", "routes/robots.ts"),
+  route("api/cmssy/block-data", "routes/block-data.ts"),
   index("routes/page.tsx"),
   route("*", "routes/page.tsx", { id: "cmssy-catch-all" }),
 ] satisfies RouteConfig;
