@@ -24,10 +24,18 @@
  * about the workspace's blocks - while `elements` and `lang` still apply, so a
  * missing page can be required to keep the site's chrome.
  *
+ * `method`, `headers` and `body` shape the request rather than the answer, and
+ * exist for one target the GET checks above cannot express: an endpoint that is
+ * supposed to REFUSE. A route asserted only by the code it returns to a browser
+ * is a route nobody ever asked to say no - which is how the block data route
+ * shipped in SDK 16.7.0 reading an edit header any caller could send. The
+ * forged-header POST below is that request, and 403 is the whole assertion.
+ *
  * Usage: node scripts/assert-render.mjs <baseUrl> <target> [...targets]
  * where a target is a path, or an object as JSON:
  *   {"path": "/no", "lang": "no", "elements": ["header", "footer"]}
  *   {"path": "/no-such-page", "status": 404}
+ *   {"path": "/api/x", "method": "POST", "headers": {"x-y": "1"}, "body": {}, "status": 403}
  */
 
 const [baseUrl, ...args] = process.argv.slice(2);
@@ -66,21 +74,44 @@ const HTML_LANG = /<html[^>]*\slang="([^"]*)"/;
 
 const failures = [];
 
-for (const { path, lang, elements = [], status = 200 } of targets) {
+for (const {
+  path,
+  lang,
+  elements = [],
+  status = 200,
+  method = "GET",
+  headers,
+  body,
+} of targets) {
   const url = new URL(path, baseUrl).toString();
+  const label = method === "GET" ? path : `${method} ${path}`;
   let res;
   try {
-    res = await fetch(url, { redirect: "follow" });
+    res = await fetch(url, {
+      redirect: "follow",
+      method,
+      ...(headers || body !== undefined
+        ? {
+            headers: {
+              ...(body !== undefined
+                ? { "content-type": "application/json" }
+                : {}),
+              ...headers,
+            },
+          }
+        : {}),
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    });
   } catch (error) {
-    failures.push(`${path}: request failed - ${error.message}`);
+    failures.push(`${label}: request failed - ${error.message}`);
     continue;
   }
 
   if (res.status !== status) {
     failures.push(
       status === 200
-        ? `${path}: HTTP ${res.status}`
-        : `${path}: HTTP ${res.status}, expected ${status}${res.status === 200 ? " - a soft 404 gets indexed and keeps a monitor green" : ""}`,
+        ? `${label}: HTTP ${res.status}`
+        : `${label}: HTTP ${res.status}, expected ${status}${res.status === 200 && status === 404 ? " - a soft 404 gets indexed and keeps a monitor green" : ""}`,
     );
     continue;
   }
@@ -92,21 +123,21 @@ for (const { path, lang, elements = [], status = 200 } of targets) {
 
   if (status === 200) {
     if (blocks === 0) {
-      failures.push(`${path}: the page carries no cmssy blocks at all`);
+      failures.push(`${label}: the page carries no cmssy blocks at all`);
       continue;
     }
 
     if (unknown.length > 0) {
       const types = [...new Set(unknown)].join(", ");
       failures.push(
-        `${path}: ${unknown.length} of ${blocks} blocks have no component - ${types}`,
+        `${label}: ${unknown.length} of ${blocks} blocks have no component - ${types}`,
       );
       continue;
     }
 
     if (text.length < 200) {
       failures.push(
-        `${path}: renders ${blocks} blocks but only ${text.length} characters of text`,
+        `${label}: renders ${blocks} blocks but only ${text.length} characters of text`,
       );
       continue;
     }
@@ -117,7 +148,7 @@ for (const { path, lang, elements = [], status = 200 } of targets) {
   );
   if (missing.length > 0) {
     failures.push(
-      `${path}: renders ${blocks} blocks but no <${missing.join(">, no <")}> - a layout region that renders nothing looks exactly like one that has nothing to render`,
+      `${label}: renders ${blocks} blocks but no <${missing.join(">, no <")}> - a layout region that renders nothing looks exactly like one that has nothing to render`,
     );
     continue;
   }
@@ -126,14 +157,14 @@ for (const { path, lang, elements = [], status = 200 } of targets) {
     const served = html.match(HTML_LANG)?.[1];
     if (served !== lang) {
       failures.push(
-        `${path}: served <html lang="${served ?? ""}">, expected "${lang}" - the locale prefix in the URL never reached the page`,
+        `${label}: served <html lang="${served ?? ""}">, expected "${lang}" - the locale prefix in the URL never reached the page`,
       );
       continue;
     }
   }
 
   console.log(
-    `  ${path}: HTTP ${res.status}, ${blocks} blocks, ${text.length} characters${lang ? `, lang="${lang}"` : ""}${elements.length ? `, <${elements.join(">, <")}>` : ""}`,
+    `  ${label}: HTTP ${res.status}, ${blocks} blocks, ${text.length} characters${lang ? `, lang="${lang}"` : ""}${elements.length ? `, <${elements.join(">, <")}>` : ""}`,
   );
 }
 
