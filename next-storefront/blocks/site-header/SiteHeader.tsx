@@ -68,6 +68,7 @@ export const siteHeaderProps = {
         label: "Category",
         model: CATEGORY_MODEL,
         required: true,
+        localized: false,
       }),
     },
   }),

@@ -15,14 +15,14 @@ importers:
         specifier: ^11.0.5
         version: 11.0.5(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3)(yaml@2.9.0))(react@19.2.8)
       '@cmssy/astro':
-        specifier: ^16.1.1
-        version: 16.1.1(@cmssy/react@16.1.1(react@19.2.8))(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3)(yaml@2.9.0))
+        specifier: ^16.6.0
+        version: 16.6.0(@cmssy/react@16.6.0(react@19.2.8))(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3)(yaml@2.9.0))
       '@cmssy/core':
-        specifier: ^16.1.1
-        version: 16.1.1
+        specifier: ^16.6.0
+        version: 16.6.0
       '@cmssy/react':
-        specifier: ^16.1.1
-        version: 16.1.1(react@19.2.8)
+        specifier: ^16.6.0
+        version: 16.6.0(react@19.2.8)
       astro:
         specifier: ^7.2.2
         version: 7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3)(yaml@2.9.0)
@@ -326,22 +326,22 @@ packages:
     resolution: {integrity: sha512-y7/yvZ2TPAnR9+jnc00klvNNLkJiXFFrQA/hlLCcxA9a2A4zQIOimyFQ9XfwYKiGD1fb5GY8vbKIIgO8d5Tb2A==}
     engines: {node: '>= 20.12.0'}
 
-  '@cmssy/astro@16.1.1':
-    resolution: {integrity: sha512-2tP7xSkz3NncfmYtJfif4G3umednlTexglCv4H52V/lJv+kGkFY6U+zod3vJ0N6cNAM+ZCd0J2IaTzJP2xI4nQ==}
+  '@cmssy/astro@16.6.0':
+    resolution: {integrity: sha512-cdqpPjDtS3xhcBNA+r7lcT2HdSkWjouNL5qF+SLeGX19eMj6JRifA75EKhupiRHP0MXCKyRXBrxEvo6YXZ96mA==}
     peerDependencies:
-      '@cmssy/react': ^16.1.1
+      '@cmssy/react': ^16.6.0
       astro: '>=4.16'
 
-  '@cmssy/core@16.1.1':
-    resolution: {integrity: sha512-WCOx5/5oVumpG+r00Sr8vDAyCqfQO3g3xdTsFHggI1EJmREJp60OS4bhQu6/9q7JiZoolZJgzb3W0SQYP9vOMg==}
+  '@cmssy/core@16.6.0':
+    resolution: {integrity: sha512-JNnYFp38yCbiDRfouGsNpmKeqhimrry6y+VdSqZQ4HA9kbPlTUj/2LezAUk3q8lUQ6PBq/PA7IB00DzaX/8X+w==}
 
-  '@cmssy/react@16.1.1':
-    resolution: {integrity: sha512-ow51w2ZxYiGpWcPXGF7PoXTB7HqEbYMqwYuWSqMxnKg9wMkPoshWSlXN2DDF/rAtT1uuAiY8dnyDkFpjiufzyQ==}
+  '@cmssy/react@16.6.0':
+    resolution: {integrity: sha512-kK1uuxeM7ohq3GX2zs7Fo65upZlDUXpYCI3V34Sj8aYQQgqoeHabwkdDFPDuFNaWiuu9fZToeMvMZwcpcIzv3A==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
 
-  '@cmssy/types@0.41.0':
-    resolution: {integrity: sha512-ReZJ2+2yGN+ojLMllvSaiQPKEHtCQyDP4IATS10JKoLfl5MV24Z6Yu1FIvnTpkE+7iOcdkzXLgg979Xdk8KdsQ==}
+  '@cmssy/types@0.49.0':
+    resolution: {integrity: sha512-4agm9gmKA2b5+skLlQ4QblVQDfcJCttesvb3BUJEgE7D7e987gCGyjS2Dxc58nEbnQR9M4vwUB+2FXAWm8aZJQ==}
 
   '@emmetio/abbreviation@2.3.3':
     resolution: {integrity: sha512-mgv58UrU3rh4YgbE/TzgLQwJ3pFsHHhCLqY20aJq+9comytTXUDNGG/SMtSeMJdkpxgXSXunBGLD8Boka3JyVA==}
@@ -2761,24 +2761,24 @@ snapshots:
       fast-wrap-ansi: 0.2.2
       sisteransi: 1.0.5
 
-  '@cmssy/astro@16.1.1(@cmssy/react@16.1.1(react@19.2.8))(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3)(yaml@2.9.0))':
+  '@cmssy/astro@16.6.0(@cmssy/react@16.6.0(react@19.2.8))(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3)(yaml@2.9.0))':
     dependencies:
-      '@cmssy/core': 16.1.1
-      '@cmssy/react': 16.1.1(react@19.2.8)
+      '@cmssy/core': 16.6.0
+      '@cmssy/react': 16.6.0(react@19.2.8)
       astro: 7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3)(yaml@2.9.0)
 
-  '@cmssy/core@16.1.1':
+  '@cmssy/core@16.6.0':
     dependencies:
-      '@cmssy/types': 0.41.0
+      '@cmssy/types': 0.49.0
       jose: 6.2.8
 
-  '@cmssy/react@16.1.1(react@19.2.8)':
+  '@cmssy/react@16.6.0(react@19.2.8)':
     dependencies:
-      '@cmssy/core': 16.1.1
-      '@cmssy/types': 0.41.0
+      '@cmssy/core': 16.6.0
+      '@cmssy/types': 0.49.0
       react: 19.2.8
 
-  '@cmssy/types@0.41.0': {}
+  '@cmssy/types@0.49.0': {}
 
   '@emmetio/abbreviation@2.3.3':
     dependencies:
