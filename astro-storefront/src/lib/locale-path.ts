@@ -20,5 +20,5 @@ export function pickLocalized(
 ): string {
   if (!value) return "";
   if (typeof value === "string") return value;
-  return value[locale] ?? value[defaultLocale] ?? Object.values(value)[0] ?? "";
+  return value[locale] ?? value[defaultLocale] ?? "";
 }

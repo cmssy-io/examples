@@ -18,9 +18,9 @@ export default function CtaBanner({
     heading,
     text,
     primaryButtonText,
-    primaryButtonUrl = "#",
+    primaryButtonUrl,
     secondaryButtonText,
-    secondaryButtonUrl = "#",
+    secondaryButtonUrl,
   } = content;
 
   if (!heading) return null;
@@ -31,9 +31,10 @@ export default function CtaBanner({
         <h2 className={styles.heading}>{heading}</h2>
         {text ? <p className={styles.text}>{text}</p> : null}
       </div>
-      {primaryButtonText || secondaryButtonText ? (
+      {(primaryButtonText && primaryButtonUrl) ||
+      (secondaryButtonText && secondaryButtonUrl) ? (
         <div className={styles.actions}>
-          {primaryButtonText ? (
+          {primaryButtonText && primaryButtonUrl ? (
             <CmssyLink
               href={primaryButtonUrl}
               className="shop-btn shop-btn-primary"
@@ -41,7 +42,7 @@ export default function CtaBanner({
               {primaryButtonText}
             </CmssyLink>
           ) : null}
-          {secondaryButtonText ? (
+          {secondaryButtonText && secondaryButtonUrl ? (
             <CmssyLink href={secondaryButtonUrl} className="shop-btn">
               {secondaryButtonText}
             </CmssyLink>

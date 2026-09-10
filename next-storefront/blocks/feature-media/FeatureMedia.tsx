@@ -28,7 +28,7 @@ export const featureMediaProps = {
 export default function FeatureMedia({
   content,
 }: BlockProps<typeof featureMediaProps>) {
-  const { heading, text, buttonText, buttonUrl = "#", media } = content;
+  const { heading, text, buttonText, buttonUrl, media } = content;
   const mediaSrc = mediaUrl(media);
   if (!heading) return null;
 
@@ -49,7 +49,7 @@ export default function FeatureMedia({
             ))}
           </ul>
         ) : null}
-        {buttonText ? (
+        {buttonText && buttonUrl ? (
           <CmssyLink href={buttonUrl} className="shop-btn shop-btn-primary">
             {buttonText}
           </CmssyLink>

@@ -24,9 +24,9 @@ export default function Hero({ content }: BlockProps<typeof heroProps>) {
     headingHighlight,
     subheading,
     primaryButtonText,
-    primaryButtonUrl = "#",
+    primaryButtonUrl,
     secondaryButtonText,
-    secondaryButtonUrl = "#",
+    secondaryButtonUrl,
     media,
   } = content;
   const mediaSrc = mediaUrl(media);
@@ -50,9 +50,10 @@ export default function Hero({ content }: BlockProps<typeof heroProps>) {
 
         {subheading && <p className={styles.subheading}>{subheading}</p>}
 
-        {(primaryButtonText || secondaryButtonText) && (
+        {((primaryButtonText && primaryButtonUrl) ||
+          (secondaryButtonText && secondaryButtonUrl)) && (
           <div className={styles.actions}>
-            {primaryButtonText && (
+            {primaryButtonText && primaryButtonUrl && (
               <CmssyLink
                 href={primaryButtonUrl}
                 className={styles.buttonPrimary}
@@ -60,7 +61,7 @@ export default function Hero({ content }: BlockProps<typeof heroProps>) {
                 {primaryButtonText}
               </CmssyLink>
             )}
-            {secondaryButtonText && (
+            {secondaryButtonText && secondaryButtonUrl && (
               <CmssyLink
                 href={secondaryButtonUrl}
                 className={styles.buttonSecondary}
