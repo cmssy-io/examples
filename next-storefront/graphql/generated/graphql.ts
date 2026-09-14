@@ -304,7 +304,7 @@ export type MyOrdersQueryVariables = Exact<{
 }>;
 
 
-export type MyOrdersQuery = { account: { orders: { total: number, hasMore: boolean, items: Array<{ id: string, status: string, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, refundedAmount: number, paymentStatus: string, paymentProvider: string | null, fulfillmentStatus: string, amountPaid: number, balanceDue: number, trackingNumber: string | null, trackingCarrier: string | null, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }> }> } } };
+export type MyOrdersQuery = { account: { orders: { total: number, hasMore: boolean, items: Array<{ id: string, status: string, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, refundedAmount: number, paymentStatus: string, fulfillmentStatus: string, amountPaid: number, balanceDue: number, trackingNumber: string | null, trackingCarrier: string | null, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }> }> } } };
 
 export type MyOrderQueryVariables = Exact<{
   workspaceId: string | number;
@@ -1401,7 +1401,6 @@ export const MyOrdersDocument = new TypedDocumentString(`
         customerEmail
         refundedAmount
         paymentStatus
-        paymentProvider
         fulfillmentStatus
         amountPaid
         balanceDue
