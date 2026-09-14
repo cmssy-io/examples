@@ -16,17 +16,14 @@ query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int) {
         currency
         customerEmail
         refundedAmount
-        paymentProvider
         paymentStatus
         fulfillmentStatus
         amountPaid
         balanceDue
-        paymentReference
         trackingNumber
         trackingCarrier
         invoiceNumber
         invoiceUrl
-        invoiceProvider
         paidAt
         fulfilledAt
         createdAt
@@ -37,7 +34,6 @@ query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int) {
         shippingMethod { id label price }
         shippingAddress { name company line1 line2 postalCode city region country phone vatId }
         items { name price listPrice tierMinQty currency quantity sku }
-        payments { amount reference provider at }
       }
     }
   }
@@ -58,17 +54,14 @@ query MyOrder($workspaceId: ID!, $id: ID!) {
       currency
       customerEmail
       refundedAmount
-      paymentProvider
       paymentStatus
       fulfillmentStatus
       amountPaid
       balanceDue
-      paymentReference
       trackingNumber
       trackingCarrier
       invoiceNumber
       invoiceUrl
-      invoiceProvider
       paidAt
       fulfilledAt
       createdAt
@@ -79,7 +72,6 @@ query MyOrder($workspaceId: ID!, $id: ID!) {
       shippingMethod { id label price }
       shippingAddress { name company line1 line2 postalCode city region country phone vatId }
       items { name price listPrice tierMinQty currency quantity sku }
-      payments { amount reference provider at }
     }
   }
 }

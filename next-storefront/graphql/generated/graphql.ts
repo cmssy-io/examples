@@ -304,7 +304,7 @@ export type MyOrdersQueryVariables = Exact<{
 }>;
 
 
-export type MyOrdersQuery = { account: { orders: { total: number, hasMore: boolean, items: Array<{ id: string, status: string, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, refundedAmount: number, paymentProvider: string | null, paymentStatus: string, fulfillmentStatus: string, amountPaid: number, balanceDue: number, paymentReference: string | null, trackingNumber: string | null, trackingCarrier: string | null, invoiceNumber: string | null, invoiceUrl: string | null, invoiceProvider: string | null, paidAt: string | null, fulfilledAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }>, payments: Array<{ amount: number, reference: string, provider: string | null, at: string }> }> } } };
+export type MyOrdersQuery = { account: { orders: { total: number, hasMore: boolean, items: Array<{ id: string, status: string, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, refundedAmount: number, paymentStatus: string, fulfillmentStatus: string, amountPaid: number, balanceDue: number, trackingNumber: string | null, trackingCarrier: string | null, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }> }> } } };
 
 export type MyOrderQueryVariables = Exact<{
   workspaceId: string | number;
@@ -312,7 +312,7 @@ export type MyOrderQueryVariables = Exact<{
 }>;
 
 
-export type MyOrderQuery = { account: { order: { id: string, status: string, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, refundedAmount: number, paymentProvider: string | null, paymentStatus: string, fulfillmentStatus: string, amountPaid: number, balanceDue: number, paymentReference: string | null, trackingNumber: string | null, trackingCarrier: string | null, invoiceNumber: string | null, invoiceUrl: string | null, invoiceProvider: string | null, paidAt: string | null, fulfilledAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }>, payments: Array<{ amount: number, reference: string, provider: string | null, at: string }> } | null } };
+export type MyOrderQuery = { account: { order: { id: string, status: string, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, refundedAmount: number, paymentStatus: string, fulfillmentStatus: string, amountPaid: number, balanceDue: number, trackingNumber: string | null, trackingCarrier: string | null, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }> } | null } };
 
 export type PublicPagesByTypeQueryVariables = Exact<{
   workspaceId: string;
@@ -1400,17 +1400,14 @@ export const MyOrdersDocument = new TypedDocumentString(`
         currency
         customerEmail
         refundedAmount
-        paymentProvider
         paymentStatus
         fulfillmentStatus
         amountPaid
         balanceDue
-        paymentReference
         trackingNumber
         trackingCarrier
         invoiceNumber
         invoiceUrl
-        invoiceProvider
         paidAt
         fulfilledAt
         createdAt
@@ -1444,12 +1441,6 @@ export const MyOrdersDocument = new TypedDocumentString(`
           quantity
           sku
         }
-        payments {
-          amount
-          reference
-          provider
-          at
-        }
       }
     }
   }
@@ -1482,17 +1473,14 @@ export const MyOrderDocument = new TypedDocumentString(`
       currency
       customerEmail
       refundedAmount
-      paymentProvider
       paymentStatus
       fulfillmentStatus
       amountPaid
       balanceDue
-      paymentReference
       trackingNumber
       trackingCarrier
       invoiceNumber
       invoiceUrl
-      invoiceProvider
       paidAt
       fulfilledAt
       createdAt
@@ -1525,12 +1513,6 @@ export const MyOrderDocument = new TypedDocumentString(`
         currency
         quantity
         sku
-      }
-      payments {
-        amount
-        reference
-        provider
-        at
       }
     }
   }
