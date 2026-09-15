@@ -98,7 +98,14 @@ jobs:
       # the step above checks. Without this, an SDK bump that changes a selection
       # set passes CI while the app keeps sending the old one - the drift the
       # vendored operations exist to remove, moved one file along.
+      # The slugs are the public demo workspace's, same as the step above:
+      # codegen resolves the delivery endpoint from them, so this step now
+      # checks the documents against the surface the app actually queries
+      # rather than against the wider admin schema.
       - name: Generated documents are up to date
+        env:
+          CMSSY_ORG_SLUG: cmssy
+          CMSSY_WORKSPACE_SLUG: cmssy-demo
         run: |
           pnpm codegen
           # status, not diff: codegen adding a FILE leaves `git diff` empty, and
