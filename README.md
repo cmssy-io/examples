@@ -25,6 +25,7 @@ clone renders real content without a cmssy account. Point one at your own worksp
 | [next-storefront](./next-storefront) | Next.js | Commerce: products, categories, cart, checkout, member accounts and orders as Server Actions |
 | [astro-storefront](./astro-storefront) | Astro | The catch-all route, block registry and verified edit mode on the Astro adapter |
 | [remix-storefront](./remix-storefront) | React Router 7 | The same, on React Router (Remix) |
+| [catalog-import](./catalog-import) | Node script | Writing: a wholesale catalog moved from SQL Server through the admin API, kept in step with patches |
 
 All four point at the same `cmssy-demo` workspace - one set of content, four unrelated frontends,
 none of which the CMS knows about.

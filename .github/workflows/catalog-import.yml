@@ -1,0 +1,45 @@
+name: catalog-import
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "catalog-import/**"
+      - ".github/workflows/catalog-import.yml"
+  push:
+    branches: [main]
+    paths:
+      - "catalog-import/**"
+      - ".github/workflows/catalog-import.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: catalog-import
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22.13.0", "22"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: catalog-import/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+          cache-dependency-path: catalog-import/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
