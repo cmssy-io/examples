@@ -27,6 +27,9 @@ const config: CmssyConfig = {
 };
 const replay = process.argv.includes("--replay");
 const concurrency = Number(process.env.REPLAY_CONCURRENCY ?? 8);
+if (!Number.isInteger(concurrency) || concurrency < 1) {
+  throw new Error("REPLAY_CONCURRENCY must be a positive integer");
+}
 
 const client = createClient(config);
 const source = await openSource(env("WWI_SQL_URL"));
@@ -116,6 +119,7 @@ try {
       return !stored || Object.keys(recordPatch(stored.data, toData(row), ownedKeys(MODELS.products))).length > 0;
     });
     console.log(`[${elapsed()}] products differing from the source after replay: ${drift.length}`);
+    if (drift.length > 0) process.exitCode = 1;
   }
 
   console.log(`[${elapsed()}] API calls`, client.stats);

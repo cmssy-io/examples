@@ -102,6 +102,9 @@ export async function upsert(
       console.error(`import row ${start + error.row}: ${error.message}`);
     }
   }
+  if (stats.failed > 0) {
+    throw new Error(`${stats.failed} rows were not imported - fix them and run the sync again`);
+  }
 
   for (const row of rows) {
     const stored = index.get(String(row[key]));

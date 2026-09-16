@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createClient } from "./cmssy.js";
+import { createClient, retryAfterSeconds } from "./cmssy.js";
 
 const config = { apiUrl: "https://api.test/graphql", token: "cs_test", workspaceId: "ws1" };
 
@@ -55,5 +55,18 @@ describe("createClient", () => {
     const client = createClient(config, async () => {}, send);
 
     await expect(client.request("query { x }")).rejects.toThrow("a; b");
+  });
+});
+
+describe("retryAfterSeconds", () => {
+  it.each([
+    ["0", 0],
+    ["12", 12],
+    [null, 1],
+    ["", 1],
+    ["-5", 1],
+    ["soon", 1],
+  ])("reads %j as %d seconds", (header, seconds) => {
+    expect(retryAfterSeconds(header)).toBe(seconds);
   });
 });

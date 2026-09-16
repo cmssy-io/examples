@@ -60,7 +60,8 @@ where the source is. It is the closest a static dataset gets to an ERP deliverin
 time.
 
 The client waits out a `429` for as long as its `Retry-After` says and tries again, up to five
-times. A workspace accepts a bounded number of record writes a minute from API tokens; an import
+times. The sync fails when any row is refused, and the replay exits non-zero when a product still differs
+from the source afterwards. A workspace accepts a bounded number of record writes a minute from API tokens; an import
 costs one per row.
 
 ## What it does not handle
@@ -76,4 +77,6 @@ costs one per row.
 - **Scale.** Matching reads every record of a model first, 100 per call, because `record.import`
   does not return the ids it created and there is no upsert by key. Fine for thousands of rows, slow
   for hundreds of thousands.
+- **Historical group membership.** `Warehouse.StockItemStockGroups` is not a temporal table, so
+  the replay applies today's groups to every old version. Colours are read as of each version.
 - **Concurrent writers to the same field.** Two patches to one field are last-write-wins.

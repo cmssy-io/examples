@@ -46,7 +46,8 @@ export async function openSource(connectionString: string) {
       const result = await pool.query<HistoryRow>(`
         SELECT ${ITEM_COLUMNS}, si.ValidFrom
         FROM Warehouse.StockItems FOR SYSTEM_TIME ALL si
-        LEFT JOIN Warehouse.Colors c ON c.ColorID = si.ColorID
+        LEFT JOIN Warehouse.Colors FOR SYSTEM_TIME ALL c
+          ON c.ColorID = si.ColorID AND c.ValidFrom <= si.ValidFrom AND si.ValidFrom < c.ValidTo
         ORDER BY si.ValidFrom, si.StockItemID`);
       return result.recordset;
     },

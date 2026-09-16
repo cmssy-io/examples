@@ -42,7 +42,7 @@ export function createClient(
       });
 
       if (response.status === 429 && attempt < MAX_ATTEMPTS) {
-        const seconds = Number(response.headers.get("retry-after")) || 1;
+        const seconds = retryAfterSeconds(response.headers.get("retry-after"));
         stats.throttled += 1;
         stats.waitedMs += seconds * 1000;
         await sleep(seconds * 1000);
@@ -64,3 +64,8 @@ export function createClient(
 }
 
 export type CmssyClient = ReturnType<typeof createClient>;
+
+export function retryAfterSeconds(header: string | null): number {
+  const seconds = header === null || header.trim() === "" ? Number.NaN : Number(header);
+  return Number.isFinite(seconds) && seconds >= 0 ? seconds : 1;
+}
