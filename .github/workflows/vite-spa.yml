@@ -1,0 +1,64 @@
+name: vite-spa
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "vite-spa/**"
+      - ".github/workflows/vite-spa.yml"
+      # The assertion step below is driven by these two, so a change to either
+      # has to run this job. Without them a PR touching only the shared script
+      # or the paths in examples.json changes what CI asserts and runs nothing.
+      - "examples.json"
+      - "scripts/**"
+  push:
+    branches: [main]
+    paths:
+      - "vite-spa/**"
+      - ".github/workflows/vite-spa.yml"
+      - "examples.json"
+      - "scripts/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: vite-spa
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22.22.0", "22"]
+    steps:
+      - uses: actions/checkout@v4
+
+      # `defaults.run.working-directory` applies to `run` steps only, never to
+      # `uses` ones - and this action reads packageManager from a path relative
+      # to the repository root, which has no package.json.
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: vite-spa/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+          cache-dependency-path: vite-spa/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
+      # Unlike the server examples, the slugs are baked in at build time: they
+      # are public, the bundle holds no secret, and the config throws without
+      # them rather than shipping an app that asks the wrong workspace.
+      - name: The app builds and serves
+        working-directory: .
+        env:
+          VITE_CMSSY_ORG_SLUG: cmssy
+          VITE_CMSSY_WORKSPACE_SLUG: cmssy-demo
+        run: node scripts/serve-and-assert.mjs vite-spa
