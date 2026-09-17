@@ -82,6 +82,7 @@ for (const {
   method = "GET",
   headers,
   body,
+  clientRendered = false,
 } of targets) {
   const url = new URL(path, baseUrl).toString();
   const label = method === "GET" ? path : `${method} ${path}`;
@@ -121,7 +122,28 @@ for (const {
   const unknown = [...html.matchAll(UNKNOWN)].map((m) => m[1]);
   const text = textOf(html);
 
-  if (status === 200) {
+  // A client-only app serves a shell and nothing else: the blocks arrive with
+  // the JavaScript, which nothing here runs. So the served HTML is graded on
+  // being a mount point the bundle can fill, and what it renders is proven in
+  // a browser instead.
+  if (status === 200 && clientRendered) {
+    if (!/<div[^>]*\sid="root"/.test(html)) {
+      failures.push(`${label}: serves no <div id="root"> for the app to mount`);
+      continue;
+    }
+    if (!/<script[^>]*\stype="module"/.test(html)) {
+      failures.push(`${label}: the shell loads no module script`);
+      continue;
+    }
+    if (blocks > 0) {
+      failures.push(
+        `${label}: carries ${blocks} server-rendered blocks - this target is marked clientRendered, so drop the flag and assert the content`,
+      );
+      continue;
+    }
+  }
+
+  if (status === 200 && !clientRendered) {
     if (blocks === 0) {
       failures.push(`${label}: the page carries no cmssy blocks at all`);
       continue;

@@ -1,5 +1,5 @@
 {
-  "$comment": "What CI does with each example, and the only place that says it. scripts/serve-and-assert.mjs is the single reader of `build`, `start`, `port` and `assertRender`; every workflow in .github/workflows calls it with a directory name and keeps no copy of any of this. Edit an entry here and CI follows. An `assertRender` item is a path, or an object with that `path` plus `lang` when the URL also has to prove which language it served , `elements` when tags have to be on it - `header` and `footer` are the layout regions, and nothing else notices a page that renders none - and `status` when the URL is meant to answer something other than 200 - a POST-only route is asserted as 405, which is what distinguishes mounted from missing (404). `method`, `headers` and `body` shape the request instead of the answer, and are here for the one target a GET cannot express: a POST carrying the forged `x-cmssy-edit` header that used to be enough to run every block loader, which now has to come back 403 (CMS-1804). `assertSitemap` turns on scripts/assert-sitemap.mjs, which checks that every URL the sitemap lists is a URL the app serves. `buildOnly` is a debt marker, not a category - the script skips such an example and prints `buildOnlyReason`, every example is meant to end up asserted, and the marker names what has to happen for it to go away.",
+  "$comment": "What CI does with each example, and the only place that says it. scripts/serve-and-assert.mjs is the single reader of `build`, `start`, `port` and `assertRender`; every workflow in .github/workflows calls it with a directory name and keeps no copy of any of this. Edit an entry here and CI follows. An `assertRender` item is a path, or an object with that `path` plus `lang` when the URL also has to prove which language it served , `elements` when tags have to be on it - `header` and `footer` are the layout regions, and nothing else notices a page that renders none - and `status` when the URL is meant to answer something other than 200 - a POST-only route is asserted as 405, which is what distinguishes mounted from missing (404). `method`, `headers` and `body` shape the request instead of the answer, and are here for the one target a GET cannot express: a POST carrying the forged `x-cmssy-edit` header that used to be enough to run every block loader, which now has to come back 403 (CMS-1804). `clientRendered` marks a target whose app renders in the browser: the shell is graded instead of the blocks, because nothing here runs the bundle. `assertSitemap` turns on scripts/assert-sitemap.mjs, which checks that every URL the sitemap lists is a URL the app serves. `buildOnly` is a debt marker, not a category - the script skips such an example and prints `buildOnlyReason`, every example is meant to end up asserted, and the marker names what has to happen for it to go away.",
   "examples": [
     {
       "dir": "next-storefront",
@@ -7,14 +7,33 @@
       "start": "pnpm start",
       "port": 3000,
       "assertRender": [
-        { "path": "/", "elements": ["header", "footer"] },
-        { "path": "/no-page-lives-here", "status": 404 },
-        { "path": "/api/cmssy/block-data", "status": 405 },
+        {
+          "path": "/",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/no-page-lives-here",
+          "status": 404
+        },
+        {
+          "path": "/api/cmssy/block-data",
+          "status": 405
+        },
         {
           "path": "/api/cmssy/block-data",
           "method": "POST",
-          "headers": { "x-cmssy-edit": "1" },
-          "body": { "page": { "slug": "" }, "blocks": [] },
+          "headers": {
+            "x-cmssy-edit": "1"
+          },
+          "body": {
+            "page": {
+              "slug": ""
+            },
+            "blocks": []
+          },
           "status": 403
         }
       ],
@@ -29,13 +48,26 @@
         "/",
         "/blog",
         "/blog/hello-cmssy",
-        { "path": "/no", "lang": "no" },
-        { "path": "/api/cmssy/block-data", "status": 405 },
+        {
+          "path": "/no",
+          "lang": "no"
+        },
+        {
+          "path": "/api/cmssy/block-data",
+          "status": 405
+        },
         {
           "path": "/api/cmssy/block-data",
           "method": "POST",
-          "headers": { "x-cmssy-edit": "1" },
-          "body": { "page": { "slug": "" }, "blocks": [] },
+          "headers": {
+            "x-cmssy-edit": "1"
+          },
+          "body": {
+            "page": {
+              "slug": ""
+            },
+            "blocks": []
+          },
           "status": 403
         }
       ]
@@ -46,21 +78,53 @@
       "start": "pnpm start",
       "port": 4321,
       "assertRender": [
-        { "path": "/", "elements": ["header", "footer"] },
-        { "path": "/blog", "elements": ["header", "footer"] },
+        {
+          "path": "/",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/blog",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
         "/blog/hello-cmssy",
-        { "path": "/no", "lang": "no", "elements": ["header", "footer"] },
-        { "path": "/no/blog", "lang": "no" },
+        {
+          "path": "/no",
+          "lang": "no",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/no/blog",
+          "lang": "no"
+        },
         {
           "path": "/no-page-lives-here",
           "status": 404,
-          "elements": ["header", "footer"]
+          "elements": [
+            "header",
+            "footer"
+          ]
         },
         {
           "path": "/api/cmssy/block-data",
           "method": "POST",
-          "headers": { "x-cmssy-edit": "1" },
-          "body": { "page": { "slug": "" }, "blocks": [] },
+          "headers": {
+            "x-cmssy-edit": "1"
+          },
+          "body": {
+            "page": {
+              "slug": ""
+            },
+            "blocks": []
+          },
           "status": 403
         }
       ],
@@ -73,26 +137,71 @@
       "start": "pnpm start",
       "port": 3000,
       "assertRender": [
-        { "path": "/", "elements": ["header", "footer"] },
-        { "path": "/blog", "elements": ["header", "footer"] },
+        {
+          "path": "/",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/blog",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
         "/blog/hello-cmssy",
-        { "path": "/no", "lang": "no", "elements": ["header", "footer"] },
-        { "path": "/no/blog", "lang": "no" },
+        {
+          "path": "/no",
+          "lang": "no",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/no/blog",
+          "lang": "no"
+        },
         {
           "path": "/no-page-lives-here",
           "status": 404,
-          "elements": ["header", "footer"]
+          "elements": [
+            "header",
+            "footer"
+          ]
         },
         {
           "path": "/api/cmssy/block-data",
           "method": "POST",
-          "headers": { "x-cmssy-edit": "1" },
-          "body": { "page": { "slug": "" }, "blocks": [] },
+          "headers": {
+            "x-cmssy-edit": "1"
+          },
+          "body": {
+            "page": {
+              "slug": ""
+            },
+            "blocks": []
+          },
           "status": 403
         }
       ],
       "$blockDataComment": "No GET row here, unlike the Next examples: Astro answers 404 for a GET on a POST-only endpoint and React Router answers 400, so 405 is a Next-ism. The forged POST covers both claims anyway - an unmounted route 404s on the POST too, so 403 proves mounted AND refusing.",
       "assertSitemap": true
+    },
+    {
+      "dir": "vite-spa",
+      "build": "pnpm build",
+      "start": "pnpm start",
+      "port": 4173,
+      "assertRender": [
+        {
+          "path": "/",
+          "clientRendered": true
+        }
+      ],
+      "$assertComment": "One row, `clientRendered`: this app is client-only, so the served HTML is a shell and every block arrives after the JavaScript does. The flag grades the shell - a mount point and a module script, and no server-rendered blocks - instead of the content, which is proven in a browser. An SPA also has no 404 to assert: every path answers 200."
     }
   ]
 }
