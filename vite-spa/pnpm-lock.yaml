@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@cmssy/core':
-        specifier: ^16.10.0
-        version: 16.10.0
+        specifier: ^16.11.1
+        version: 16.11.1
       '@cmssy/react':
-        specifier: ^16.10.0
-        version: 16.10.0(react@19.3.0)
+        specifier: ^16.11.1
+        version: 16.11.1(react@19.3.0)
       react:
         specifier: ^19.2.8
         version: 19.3.0
@@ -45,11 +45,11 @@ importers:
 
 packages:
 
-  '@cmssy/core@16.10.0':
-    resolution: {integrity: sha512-umfGuzL2A44JQqkq1e+2yd6eitFMEXbGL4FnzSIxmBi+Olx2a069nhMvNTacAL6TLvV69IG3XJFPs5ni6MOFVg==}
+  '@cmssy/core@16.11.1':
+    resolution: {integrity: sha512-6m/zocwiWqX8xO2CwAFGNq+oUxHGe9MMxp0mNiZK300P5+QAVNshJPJHIZ2EFbcSLuWoWO/pscOEXwQBLk9fdA==}
 
-  '@cmssy/react@16.10.0':
-    resolution: {integrity: sha512-CMBOIRcHpEYgidBsw04cJN9+Ii9SrQdc0+hRUFD5B/KyQ0MYApriqR9+UnuOChfv3Drva1DrPGFYyTuRcQGQWg==}
+  '@cmssy/react@16.11.1':
+    resolution: {integrity: sha512-T+rG8KeOthg4IPcwZlgy0FZaNwEYr28WcfMaijyaE9pO9sB1XEHfIhUidefNaP4VyqBE3Pv7TmNBV6nIbuGaDA==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
 
@@ -447,14 +447,14 @@ packages:
 
 snapshots:
 
-  '@cmssy/core@16.10.0':
+  '@cmssy/core@16.11.1':
     dependencies:
       '@cmssy/types': 0.49.0
       jose: 6.2.12
 
-  '@cmssy/react@16.10.0(react@19.3.0)':
+  '@cmssy/react@16.11.1(react@19.3.0)':
     dependencies:
-      '@cmssy/core': 16.10.0
+      '@cmssy/core': 16.11.1
       '@cmssy/types': 0.49.0
       react: 19.3.0
 
