@@ -37,6 +37,7 @@ const config: CodegenConfig = {
       config: {
         documentMode: "string",
 
+        strictScalars: true,
         scalars: {
           DateTime: "string",
           JSON: "unknown",
