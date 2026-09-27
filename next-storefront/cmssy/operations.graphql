@@ -152,7 +152,7 @@ mutation SubmitForm($formId: ID!, $input: SubmitFormInput!) {
   public {
     form {
       submit(formId: $formId, input: $input) {
-        success message submissionId redirectUrl accessToken customer
+        success message submissionId redirectUrl
       }
     }
   }
