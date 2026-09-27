@@ -171,7 +171,7 @@ export type SubmitFormMutationVariables = Exact<{
 }>;
 
 
-export type SubmitFormMutation = { public: { form: { submit: { success: boolean, message: string, submissionId: string | null, redirectUrl: string | null, accessToken: string | null, customer: unknown } } } };
+export type SubmitFormMutation = { public: { form: { submit: { success: boolean, message: string, submissionId: string | null, redirectUrl: string | null } } } };
 
 export type AddToCartMutationVariables = Exact<{
   input: AddToCartInput;
@@ -579,8 +579,6 @@ export const SubmitFormDocument = new TypedDocumentString(`
         message
         submissionId
         redirectUrl
-        accessToken
-        customer
       }
     }
   }

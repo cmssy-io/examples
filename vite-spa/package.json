@@ -14,8 +14,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@cmssy/core": "17.0.0",
-    "@cmssy/react": "17.0.0",
+    "@cmssy/core": "18.0.0",
+    "@cmssy/react": "18.0.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "sanitize-html": "^2.17.7"
