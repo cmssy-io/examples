@@ -82,36 +82,70 @@ const EVIDENCE_HEADERS = [
   "retry-after",
 ];
 const EVIDENCE_BODY_CHARS = 2000;
+const EVIDENCE_READ_MS = 5000;
+
+async function readEvidenceBody(res) {
+  if (!res.body) return { shown: "", stopped: null };
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let stall;
+  const stalled = new Promise((resolve) => {
+    stall = setTimeout(() => resolve("stalled"), EVIDENCE_READ_MS);
+  });
+  let shown = "";
+  let stopped = null;
+  try {
+    while (shown.length < EVIDENCE_BODY_CHARS) {
+      const step = await Promise.race([reader.read(), stalled]);
+      if (step === "stalled") {
+        stopped = `stopped after ${EVIDENCE_READ_MS / 1000}s with the body still open`;
+        break;
+      }
+      if (step.done) break;
+      shown += decoder.decode(step.value, { stream: true });
+    }
+    if (stopped === null && shown.length >= EVIDENCE_BODY_CHARS) {
+      stopped = `first ${EVIDENCE_BODY_CHARS} characters`;
+      shown = shown.slice(0, EVIDENCE_BODY_CHARS);
+    }
+  } catch (error) {
+    stopped = `could not be read: ${error.message}`;
+  } finally {
+    clearTimeout(stall);
+    await reader.cancel().catch(() => {});
+  }
+  return { shown, stopped };
+}
 
 async function evidenceOf(res) {
-  let body;
-  try {
-    body = await res.text();
-  } catch (error) {
-    body = `<body could not be read: ${error.message}>`;
-  }
+  const size = res.headers.get("content-length");
+  const { shown, stopped } = await readEvidenceBody(res);
   return {
     headers: EVIDENCE_HEADERS.flatMap((name) => {
       const value = res.headers.get(name);
       return value === null ? [] : [`${name}: ${value}`];
     }),
-    body,
+    shown,
+    stopped,
+    size: size === null ? null : Number(size),
   };
 }
 
-function describeResponse({ headers, body }) {
+function describeResponse({ headers, shown, stopped, size }) {
   const lines = headers.map((header) => `      ${header}`);
-  const trimmed = body.trim();
-  if (trimmed === "") {
+  const trimmed = shown.trim();
+  if (trimmed === "" && stopped === null) {
     lines.push("      body: <empty>");
-  } else {
-    const shown = trimmed.slice(0, EVIDENCE_BODY_CHARS);
-    const rest = trimmed.length - shown.length;
-    lines.push(
-      `      body (${trimmed.length} characters${rest > 0 ? `, first ${EVIDENCE_BODY_CHARS} shown` : ""}):`,
-      ...shown.split("\n").map((line) => `      | ${line}`),
-    );
+    return lines.join("\n");
   }
+  const whole =
+    size === null ? "" : `, ${size} byte${size === 1 ? "" : "s"} in all`;
+  lines.push(
+    stopped === null
+      ? `      body (${trimmed.length} characters):`
+      : `      body (${stopped}${whole}):`,
+    ...trimmed.split("\n").map((line) => `      | ${line}`),
+  );
   return lines.join("\n");
 }
 
