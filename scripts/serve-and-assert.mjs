@@ -215,6 +215,12 @@ try {
   }
 } catch (error) {
   console.error(`\n${error.message}`);
+  const written = serverOutput.trim();
+  console.error(
+    written === ""
+      ? `\n${entry.start} wrote nothing while it served.`
+      : `\nWhat ${entry.start} wrote while it served:\n${written}`,
+  );
   stopServer();
   process.exit(1);
 }

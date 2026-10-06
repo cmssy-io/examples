@@ -74,6 +74,47 @@ const HTML_LANG = /<html[^>]*\slang="([^"]*)"/;
 
 const failures = [];
 
+const EVIDENCE_HEADERS = [
+  "content-type",
+  "cache-control",
+  "x-vercel-error",
+  "x-matched-path",
+  "retry-after",
+];
+const EVIDENCE_BODY_CHARS = 2000;
+
+async function evidenceOf(res) {
+  let body;
+  try {
+    body = await res.text();
+  } catch (error) {
+    body = `<body could not be read: ${error.message}>`;
+  }
+  return {
+    headers: EVIDENCE_HEADERS.flatMap((name) => {
+      const value = res.headers.get(name);
+      return value === null ? [] : [`${name}: ${value}`];
+    }),
+    body,
+  };
+}
+
+function describeResponse({ headers, body }) {
+  const lines = headers.map((header) => `      ${header}`);
+  const trimmed = body.trim();
+  if (trimmed === "") {
+    lines.push("      body: <empty>");
+  } else {
+    const shown = trimmed.slice(0, EVIDENCE_BODY_CHARS);
+    const rest = trimmed.length - shown.length;
+    lines.push(
+      `      body (${trimmed.length} characters${rest > 0 ? `, first ${EVIDENCE_BODY_CHARS} shown` : ""}):`,
+      ...shown.split("\n").map((line) => `      | ${line}`),
+    );
+  }
+  return lines.join("\n");
+}
+
 for (const {
   path,
   lang,
@@ -109,10 +150,15 @@ for (const {
   }
 
   if (res.status !== status) {
+    const soft =
+      res.status === 200 && status === 404
+        ? " - a soft 404 gets indexed and keeps a monitor green"
+        : "";
     failures.push(
-      status === 200
+      (status === 200
         ? `${label}: HTTP ${res.status}`
-        : `${label}: HTTP ${res.status}, expected ${status}${res.status === 200 && status === 404 ? " - a soft 404 gets indexed and keeps a monitor green" : ""}`,
+        : `${label}: HTTP ${res.status}, expected ${status}${soft}`) +
+        `\n${describeResponse(await evidenceOf(res))}`,
     );
     continue;
   }
