@@ -13,9 +13,10 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Every example ships an `.env.example` pointing at the **public cmssy demo workspace**, so a fresh
-clone renders real content without a cmssy account. Point one at your own workspace with
-`npx @cmssy/cli link --token cs_...`.
+Each of the five apps ships an `.env.example` pointing at the **public cmssy demo workspace**, so a
+fresh clone renders real content without a cmssy account. Point one at your own workspace with
+`npx @cmssy/cli link --token cs_...`. `catalog-import` is the exception: it writes, so it needs a
+workspace id and a token of your own.
 
 ## Examples
 
@@ -25,39 +26,48 @@ clone renders real content without a cmssy account. Point one at your own worksp
 | [next-storefront](./next-storefront) | Next.js | Commerce: products, categories, cart, checkout, member accounts and orders as Server Actions |
 | [astro-storefront](./astro-storefront) | Astro | The catch-all route, block registry and verified edit mode on the Astro adapter |
 | [remix-storefront](./remix-storefront) | React Router 7 | The same, on React Router (Remix) |
+| [vite-spa](./vite-spa) | React + Vite | No adapter package, no server, no proxy: the browser talks to the delivery API directly, so the block registry and `fields` work without a framework adapter |
 | [catalog-import](./catalog-import) | Node script | Writing: a wholesale catalog moved from SQL Server through the admin API, kept in step with patches |
 
-All four point at the same `cmssy-demo` workspace - one set of content, four unrelated frontends,
-none of which the CMS knows about.
+All five apps point at the same `cmssy-demo` workspace - one set of content, five unrelated
+frontends, none of which the CMS knows about.
 
-All four mount the block data route - one helper per adapter, same path. Without it the editor
+The four server-rendered apps - `simple-blog`, `next-storefront`, `astro-storefront` and
+`remix-storefront` - mount the block data route at `/api/cmssy/block-data`, one helper per adapter,
+same path. `vite-spa` has no server to mount it on. Without it the editor
 cannot run a block's `loader`, so a block that fetches - a product grid, a blog index - stays frozen
 while you configure it: changing the category changes nothing until the page is saved and the frame
 reloads, and a block you have just added has no data at all. The route answers only a request
 carrying an edit token the page was rendered with, minted from `draftSecret` and bound to that exact
 page; a forged `x-cmssy-edit` header gets a 403, which is what CI asserts (CMS-1804, CMS-1803).
 
-All four also declare a field or two as `localized: false`: a footer link's target, the category a
-navigation entry points at, the page a blog index lists under. None of those carry language, so
+All five also declare a field or two as `localized: false` - three each, one in `simple-blog`: a
+footer link's target, the category a navigation entry points at, the page a blog index lists under. None of those carry language, so
 cmssy stores them once instead of once per locale and folds them back in before delivery - the
 components read them unchanged.
 
-That is the goal, not yet the state. **Today only `next-storefront` implements the blocks that
-workspace uses.** `simple-blog` renders its `/blog` listing but a blank home page; the Astro and
-React Router examples register a single `hero` block that no page uses, so they render nothing at
-all. `examples.json` records which examples are asserted in CI and why the others are not.
-Bringing them to the same block set is in progress.
+Measured 2026-10-06: four of the five examples register the whole block set -
+`next-storefront` 14 `defineBlock` calls, and `astro-storefront`, `remix-storefront` and
+`vite-spa` 13 each. `simple-blog` registers 2, which is its entire surface: a `/blog` listing and
+a post. Every example carries `assertRender` targets in `examples.json` and none is marked
+`buildOnly`, so all five are asserted in CI - 4, 6, 7, 7 and 1 target respectively, with the Astro
+and React Router storefronts also asserting their sitemap.
 
 ## Why this repo exists
 
 Example code that nobody builds rots. Tutorials on cmssy.com once taught SDK APIs that had never
 existed, because prose has no compiler.
 
-The plan is that every example here is built in CI against the **packed tarballs** of the SDK -
-the artifact you install, not a symlink into a monorepo - with the build asserting that a page
-actually renders, not just that it compiles, so an SDK change that breaks an example turns its
-pull request red. **That CI does not exist yet**; until it does, these examples are verified by
-hand.
+So every example here is built in CI and asserted to **render**, not merely to compile, and a
+change that breaks one turns its pull request red. Each has its own workflow - `pnpm install
+--frozen-lockfile`, `pnpm typecheck`, `pnpm build`, then `node scripts/serve-and-assert.mjs <dir>`,
+which serves the build and asks `scripts/assert-render.mjs` whether the `assertRender` targets
+actually render. They run on pull requests and on pushes to `main`, paths-filtered on the example
+plus `examples.json` and `scripts/**`, across both ends of the Node range in `engines.node`.
+
+Each app installs the SDK from the registry, so what CI exercises is the published artifact rather
+than a symlink into a monorepo. It is not the **packed tarball** of an unreleased SDK, which is the
+remaining gap: a breaking SDK change is caught here once it is published, not before.
 
 ## Related
 
