@@ -161,7 +161,7 @@ async function waitForReady() {
   while (Date.now() < deadline) {
     if (serverExited) {
       throw new Error(
-        `\`${entry.start}\` exited before it served anything:\n${serverOutput}`,
+        `\`${entry.start}\` exited before it served anything.`,
       );
     }
     try {
@@ -176,7 +176,7 @@ async function waitForReady() {
     await new Promise((r) => setTimeout(r, READY_POLL_MS));
   }
   throw new Error(
-    `${dir} never answered on ${probe} within ${READY_TIMEOUT_MS / 1000}s:\n${serverOutput}`,
+    `${dir} never answered on ${probe} within ${READY_TIMEOUT_MS / 1000}s.`,
   );
 }
 
@@ -215,6 +215,12 @@ try {
   }
 } catch (error) {
   console.error(`\n${error.message}`);
+  const written = serverOutput.trim();
+  console.error(
+    written === ""
+      ? `\n${entry.start} wrote nothing while it served.`
+      : `\nWhat ${entry.start} wrote while it served:\n${written}`,
+  );
   stopServer();
   process.exit(1);
 }
