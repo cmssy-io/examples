@@ -333,6 +333,13 @@ export type ProductQueryVariables = Exact<{
 
 export type ProductQuery = { public: { model: { records: { items: Array<{ id: string, data: unknown, priceTiers: Array<{ minQty: number, price: number }>, variants: Array<{ id: string, sku: string | null, price: number, inventory: number | null, tiers: Array<{ minQty: number, price: number }>, selectedOptions: Array<{ name: string, value: string }> }> }> } } } };
 
+export type SiteTaxRatesQueryVariables = Exact<{
+  workspaceSlug: string;
+}>;
+
+
+export type SiteTaxRatesQuery = { public: { siteConfig: { id: string, publicCart: { defaultTaxRateId: string | null, taxRates: Array<{ id: string, rate: number }> } | null } | null } };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -1578,3 +1585,19 @@ export const ProductDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ProductQuery, ProductQueryVariables>;
+export const SiteTaxRatesDocument = new TypedDocumentString(`
+    query SiteTaxRates($workspaceSlug: String!) {
+  public {
+    siteConfig(workspaceSlug: $workspaceSlug) {
+      id
+      publicCart {
+        defaultTaxRateId
+        taxRates {
+          id
+          rate
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SiteTaxRatesQuery, SiteTaxRatesQueryVariables>;
