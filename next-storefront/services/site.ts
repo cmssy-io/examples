@@ -1,5 +1,8 @@
 import { cmssy } from "@/cmssy.config";
-import { PublicSiteConfigDocument } from "@/graphql/generated/graphql";
+import {
+  PublicSiteConfigDocument,
+  SiteTaxRatesDocument,
+} from "@/graphql/generated/graphql";
 import { publicRequest } from "@/services/gateway";
 import type { SiteLocales } from "@/lib/locale-path";
 import type { LocalizedValue } from "@/lib/localized";
@@ -54,5 +57,32 @@ export async function resolveSiteLocales(): Promise<SiteLocales> {
   return {
     defaultLocale,
     locales: enabled.length > 0 ? enabled : [defaultLocale],
+  };
+}
+
+export interface SiteTaxRates {
+  defaultTaxRateId: string | null;
+  rates: Map<string, number>;
+}
+
+let cachedTax: Promise<SiteTaxRates | null> | undefined;
+
+export function fetchTaxRates(): Promise<SiteTaxRates | null> {
+  cachedTax ??= loadTaxRates().catch((error: unknown) => {
+    cachedTax = undefined;
+    throw error;
+  });
+  return cachedTax;
+}
+
+async function loadTaxRates(): Promise<SiteTaxRates | null> {
+  const data = await publicRequest(SiteTaxRatesDocument, {
+    workspaceSlug: cmssy.workspaceSlug,
+  });
+  const cart = data.public?.siteConfig?.publicCart ?? null;
+  if (!cart) return null;
+  return {
+    defaultTaxRateId: cart.defaultTaxRateId ?? null,
+    rates: new Map(cart.taxRates.map((rate) => [rate.id, rate.rate])),
   };
 }

@@ -11,6 +11,7 @@ import type {
   ProductData,
 } from "@/graphql/models";
 import { localizedText } from "@/lib/localized";
+import { fetchTaxRates, type SiteTaxRates } from "@/services/site";
 
 const client = createCmssyClient(cmssy);
 
@@ -98,12 +99,26 @@ export async function loadCategories(locale?: string): Promise<Category[]> {
   });
 }
 
-function toProduct(item: {
-  id: string;
-  data: unknown;
-  priceTiers?: PriceTier[];
-}): Product {
+export function resolveTaxRate(
+  value: unknown,
+  tax: SiteTaxRates | null,
+): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") return tax?.rates.get(value) ?? null;
+  if (value == null && tax?.defaultTaxRateId) {
+    return tax.rates.get(tax.defaultTaxRateId) ?? null;
+  }
+  return null;
+}
 
+function toProduct(
+  item: {
+    id: string;
+    data: unknown;
+    priceTiers?: PriceTier[];
+  },
+  tax: SiteTaxRates | null,
+): Product {
   const data = item.data as ProductData;
 
   return {
@@ -117,7 +132,7 @@ function toProduct(item: {
     description: blank(text(data.description)),
     // The model stores a net price in major units; the app works in cents.
     price: Math.round((data.price ?? 0) * 100),
-    taxRate: data.taxRate ?? null,
+    taxRate: resolveTaxRate(data.taxRate, tax),
     unit: data.unit ?? null,
     packaging: blank(data.packaging),
     inventory: data.inventory ?? 0,
@@ -194,6 +209,7 @@ async function fetchAllProducts(
   locale: string | undefined,
 ): Promise<Product[]> {
   const items: Product[] = [];
+  const tax = await fetchTaxRates();
   let offset = 0;
   for (let guard = 0; guard < 100; guard += 1) {
     const result = await queryProducts({
@@ -203,7 +219,7 @@ async function fetchAllProducts(
       limit: 50,
       offset,
     });
-    items.push(...result.items.map(toProduct));
+    items.push(...result.items.map((item) => toProduct(item, tax)));
     if (!result.hasMore || result.items.length === 0) break;
     offset += result.items.length;
   }
@@ -236,9 +252,12 @@ export async function loadProductBySlug(
   slug: string,
   locale?: string,
 ): Promise<Product | null> {
-  const page = await queryProducts({ filter: { slug }, locale, limit: 1 });
+  const [page, tax] = await Promise.all([
+    queryProducts({ filter: { slug }, locale, limit: 1 }),
+    fetchTaxRates(),
+  ]);
   const record = page.items[0];
-  return record ? toProduct(record) : null;
+  return record ? toProduct(record, tax) : null;
 }
 
 export async function loadBrandFacets(
