@@ -6,4 +6,5 @@ if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 
 export default defineConfig({
   plugins: [reactRouter()],
+  resolve: { noExternal: ["sanitize-html"] },
 });
