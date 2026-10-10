@@ -29,7 +29,11 @@ function parseLines(input: string): Line[] {
     .filter(Boolean)
     .map((row) => {
       const [sku, quantity] = row.split(/[\s,;\t]+/);
-      return { sku: sku.trim(), quantity: Math.max(1, Number(quantity) || 1) };
+      const parsed = Math.floor(Number(quantity));
+      return {
+        sku: sku.trim(),
+        quantity: Number.isFinite(parsed) && parsed > 0 ? parsed : 1,
+      };
     })
     .filter((line) => line.sku.length > 0);
 }

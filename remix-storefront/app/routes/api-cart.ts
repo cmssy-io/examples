@@ -199,14 +199,14 @@ export function loader() {
 export async function action({ request, context }: Route.ActionArgs) {
   const shop = context.get(shopContext);
   const body = record(await request.json().catch(() => null));
-  const auth = shopAuth(shop);
+  const auth = () => shopAuth(shop);
 
   switch (body.intent) {
     case "get":
-      return { cart: await cart.getCart(auth) };
+      return { cart: await cart.getCart(auth()) };
     case "add":
       return settle(
-        cart.addToCart(auth, {
+        cart.addToCart(auth(), {
           recordId: text(body.recordId),
           quantity: quantity(body.quantity),
           variantSelections: body.variantSelections
@@ -216,27 +216,27 @@ export async function action({ request, context }: Route.ActionArgs) {
       );
     case "update":
       return settle(
-        cart.updateItem(auth, {
+        cart.updateItem(auth(), {
           itemId: text(body.itemId),
           quantity: quantity(body.quantity),
         }),
       );
     case "remove":
-      return settle(cart.removeItem(auth, text(body.itemId)));
+      return settle(cart.removeItem(auth(), text(body.itemId)));
     case "clear":
-      return settle(cart.clearCart(auth));
+      return settle(cart.clearCart(auth()));
     case "applyDiscount":
-      return settle(cart.applyDiscount(auth, text(body.code)));
+      return settle(cart.applyDiscount(auth(), text(body.code)));
     case "removeDiscount":
-      return settle(cart.removeDiscount(auth));
+      return settle(cart.removeDiscount(auth()));
     case "setShipping":
       return settle(
-        cart.setShippingMethod(auth, textOrNull(body.shippingMethodId)),
+        cart.setShippingMethod(auth(), textOrNull(body.shippingMethodId)),
       );
     case "merge":
-      return settle(cart.mergeCart(auth));
+      return settle(cart.mergeCart(auth()));
     case "findProduct":
-      return findProduct(auth, body);
+      return findProduct(auth(), body);
     case "checkout":
       return checkout(request, shop, body);
     case "payOrder":

@@ -4,6 +4,9 @@ import { existsSync, readFileSync } from "node:fs";
 // `codegen.ts`, `smoke:edit` - get none of that, so they read the same files
 // themselves or they point somewhere the app never talks to.
 export function loadEnvFiles() {
+  const fromShell = new Set(
+    Object.keys(process.env).filter((name) => process.env[name]),
+  );
   // Both files, `.env.local` last so it wins - a checkout may split the
   // workspace slugs from the secret. Reading only one silently loses half the
   // credentials.
@@ -19,7 +22,7 @@ export function loadEnvFiles() {
       // A real environment variable wins over the file, the way every other
       // dotenv loader works - otherwise CI cannot override what a checkout has.
       const [, name, rest] = match;
-      if (process.env[name]) continue;
+      if (fromShell.has(name)) continue;
       // Balanced quotes only: stripping one lone quote turns a valid secret
       // into an invalid one, and the failure then blames the caller instead.
       const raw = rest.trim();
