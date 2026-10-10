@@ -53,8 +53,12 @@ export const shopMiddleware: Route.MiddlewareFunction = async (
   context.set(shopContext, shop);
 
   const response = await next();
+  const secure = new URL(request.url).protocol === "https:";
   for (const [name, value] of shop.cookies) {
-    response.headers.append("Set-Cookie", serializeShopCookie(name, value));
+    response.headers.append(
+      "Set-Cookie",
+      serializeShopCookie(name, value, secure),
+    );
   }
   return response;
 };
