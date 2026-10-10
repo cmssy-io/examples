@@ -49,15 +49,15 @@ export function SiteFooter({ content }: BlockProps<typeof siteFooterProps>) {
           </div>
 
           {columns.map((column, index) => (
-            <nav key={column.title ?? index} className={styles.col}>
+            <nav key={index} className={styles.col}>
               {column.title ? (
                 <p className={styles.columnTitle}>{column.title}</p>
               ) : null}
               <ul className={styles.links}>
                 {(column.links ?? [])
                   .filter((link) => link.label && link.url)
-                  .map((link) => (
-                    <li key={`${link.url}${link.label}`}>
+                  .map((link, linkIndex) => (
+                    <li key={linkIndex}>
                       <a href={link.url} className={styles.link}>
                         {link.label}
                       </a>

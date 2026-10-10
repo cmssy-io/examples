@@ -56,16 +56,16 @@ export default function SiteFooter({
           </div>
 
           {columns.map((column, index) => (
-            <div key={column.title ?? index} className={styles.col}>
+            <div key={index} className={styles.col}>
               {column.title ? (
                 <p className={styles.columnTitle}>{column.title}</p>
               ) : null}
               <div className={styles.links}>
                 {(column.links ?? [])
                   .filter((link) => link.label && link.url)
-                  .map((link) => (
+                  .map((link, linkIndex) => (
                     <Link
-                      key={`${link.url}${link.label}`}
+                      key={linkIndex}
                       href={
 
                         link.url.startsWith("/")

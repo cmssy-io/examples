@@ -20,8 +20,8 @@ export function StatsBand({ content }: BlockProps<typeof statsBandProps>) {
 
   return (
     <section className={styles.band}>
-      {items.map((item) => (
-        <div key={item.value} className={styles.stat}>
+      {items.map((item, index) => (
+        <div key={index} className={styles.stat}>
           <strong className={styles.value}>{item.value}</strong>
           {item.label ? <span className={styles.label}>{item.label}</span> : null}
         </div>

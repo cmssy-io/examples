@@ -58,8 +58,8 @@ export function ShopHero({ content }: BlockProps<typeof shopHeroProps>) {
 
       {valueProps.length > 0 ? (
         <ul className={styles.props}>
-          {valueProps.map((prop) => (
-            <li key={prop.title}>
+          {valueProps.map((prop, index) => (
+            <li key={index}>
               <strong>{prop.title}</strong>
               {prop.text ? <span>{prop.text}</span> : null}
             </li>

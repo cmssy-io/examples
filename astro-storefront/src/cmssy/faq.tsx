@@ -25,8 +25,8 @@ export function Faq({ content }: BlockProps<typeof faqProps>) {
         <h2 className={styles.heading}>{content.heading}</h2>
       ) : null}
       <div className={styles.list}>
-        {items.map((item) => (
-          <details key={item.question} className={`shop-card ${styles.item}`}>
+        {items.map((item, index) => (
+          <details key={index} className={`shop-card ${styles.item}`}>
             <summary className={styles.question}>{item.question}</summary>
             {item.answer ? <p className={styles.answer}>{item.answer}</p> : null}
           </details>

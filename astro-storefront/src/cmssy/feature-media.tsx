@@ -40,8 +40,8 @@ export function FeatureMedia({ content }: BlockProps<typeof featureMediaProps>) 
         {text ? <p className={styles.text}>{text}</p> : null}
         {bullets.length > 0 ? (
           <ul className={styles.bullets}>
-            {bullets.map((bullet) => (
-              <li key={bullet.text}>{bullet.text}</li>
+            {bullets.map((bullet, index) => (
+              <li key={index}>{bullet.text}</li>
             ))}
           </ul>
         ) : null}

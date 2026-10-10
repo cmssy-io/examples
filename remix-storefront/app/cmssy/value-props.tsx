@@ -25,8 +25,8 @@ export function ValueProps({ content }: BlockProps<typeof valuePropsProps>) {
         <h2 className={styles.heading}>{content.heading}</h2>
       ) : null}
       <div className={styles.grid}>
-        {items.map((item) => (
-          <div key={item.title} className={`shop-card ${styles.card}`}>
+        {items.map((item, index) => (
+          <div key={index} className={`shop-card ${styles.card}`}>
             <strong>{item.title}</strong>
             {item.text ? <span className="shop-muted">{item.text}</span> : null}
           </div>
