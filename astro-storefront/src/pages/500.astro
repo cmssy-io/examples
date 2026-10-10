@@ -1,0 +1,64 @@
+---
+import { localePath } from "../lib/locale-path";
+import { copyFor } from "../lib/shop-copy";
+import { shopLocale } from "../shop/locale";
+import "../styles/shop.css";
+
+const locale = await shopLocale(Astro.request).catch(() => null);
+const code = locale?.locale ?? "en";
+const copy = copyFor(code);
+const retryHref = locale
+  ? localePath(Astro.originPathname, locale.locale, locale.defaultLocale)
+  : "/";
+---
+
+<html lang={code}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{copy.errorTitle}</title>
+  </head>
+  <body>
+    <div class="shop-scope">
+      <main class="shop-main">
+        <div class="shop-card server-error">
+          <div class="code" aria-hidden>500</div>
+          <h1>{copy.errorTitle}</h1>
+          <p class="shop-muted">{copy.errorBody}</p>
+          <a href={retryHref} class="shop-btn shop-btn-primary">{copy.tryAgain}</a>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
+
+<style>
+  .server-error {
+    max-width: 520px;
+    margin: 48px auto;
+    padding: 56px 32px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .code {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--muted-foreground);
+  }
+  h1 {
+    font-size: var(--text-xl);
+    margin: 0;
+  }
+  p {
+    max-width: 42ch;
+    margin: 0;
+  }
+  a {
+    margin-top: 12px;
+  }
+</style>

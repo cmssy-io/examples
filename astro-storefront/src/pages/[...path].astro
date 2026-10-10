@@ -1,129 +1,81 @@
 ---
 import { loadCmssyPage } from "@cmssy/astro";
-import {
-  resolveCmssyLayoutSlot,
-  resolveEditorBlockData,
-  resolveEditorLayoutBlockData,
-} from "@cmssy/react";
+import { resolveEditorBlockData, resolveEditorLayoutBlockData } from "@cmssy/react";
 import { blocks } from "../cmssy/blocks";
 import { cmssy } from "../cmssy.config";
 import { Blocks } from "../components/Blocks";
-import { Region } from "../components/Region";
-import { pickLocalized } from "../lib/locale-path";
+import NotFound from "../components/shop/not-found.astro";
+import ShopLayout from "../layouts/shop-layout.astro";
+import { localizedText } from "../lib/localized";
 import { fetchPageMeta } from "../services/seo";
-import "../styles/shop.css";
+import { loadShopChrome, type ShopChrome } from "../shop/chrome";
+import { shopPageState } from "../shop/page-state";
 
 export const prerender = false;
 
-const { page, layouts, pageContext, locale, defaultLocale, enabledLocales } =
-  await loadCmssyPage(cmssy, Astro.request, Astro.url, {
+const [state, cmssyPage] = await Promise.all([
+  shopPageState(Astro),
+  loadCmssyPage(cmssy, Astro.request, Astro.url, {
     prerendered: Astro.isPrerendered,
-  });
+  }),
+]);
+const { page, layouts, pageContext, locale, defaultLocale, enabledLocales } =
+  cmssyPage;
 
 if (!page) {
   Astro.response.status = 404;
 }
 
-const { data: blockData, content: blockContent } = await resolveEditorBlockData({
-  page,
-  blocks,
-  locale,
-  defaultLocale,
-  enabledLocales,
-  config: cmssy,
-});
-
-// The header and the footer live in the workspace, on the homepage, and every
-// page inherits them - so they are content, resolved the same way the page's own
-// blocks are, not chrome hard-coded into this layout.
-//
-// A URL with no page behind it inherits nothing, which would leave the 404 the
-// only page on the site with no way off it. The regions of "/" are the site's
-// own, so that is what it gets.
-const regionGroups = page
-  ? layouts
-  : (
-      await resolveCmssyLayoutSlot(cmssy, {
-        region: "header",
+async function pageChrome(): Promise<ShopChrome> {
+  const [header, footer] = await Promise.all(
+    (["header", "footer"] as const).map((region) =>
+      resolveEditorLayoutBlockData({
+        groups: layouts,
         blocks,
-        editMode: false,
-        path: [],
+        region,
+        page: pageContext,
         locale,
-      })
-    ).groups;
+        defaultLocale,
+        enabledLocales,
+        config: cmssy,
+      }),
+    ),
+  );
+  return { layouts, header, footer };
+}
 
-const [header, footer] = await Promise.all(
-  (["header", "footer"] as const).map((region) =>
-    resolveEditorLayoutBlockData({
-      groups: regionGroups,
+const [chrome, { data: blockData, content: blockContent }, meta] =
+  await Promise.all([
+    page ? pageChrome() : loadShopChrome(locale),
+    resolveEditorBlockData({
+      page,
       blocks,
-      region,
-      page: pageContext,
       locale,
       defaultLocale,
       enabledLocales,
       config: cmssy,
     }),
-  ),
-);
+    page?.slug ? fetchPageMeta(page.slug) : null,
+  ]);
 
-const meta = page?.slug ? await fetchPageMeta(page.slug) : null;
 const title =
-  pickLocalized(meta?.seoTitle, locale, defaultLocale) ||
-  pickLocalized(meta?.displayName, locale, defaultLocale) ||
+  localizedText(meta?.seoTitle, { locale, defaultLocale }) ||
+  localizedText(meta?.displayName, { locale, defaultLocale }) ||
   "cmssy on Astro";
-const description = pickLocalized(meta?.seoDescription, locale, defaultLocale);
+const description = localizedText(meta?.seoDescription, { locale, defaultLocale });
 ---
 
-<html lang={locale}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-    />
-    <title>{title}</title>
-    {description ? <meta name="description" content={description} /> : null}
-  </head>
-  <body>
-    <div class="shop-scope">
-    <Region
-      groups={regionGroups}
-      region="header"
-      locale={locale}
-      defaultLocale={defaultLocale}
-      enabledLocales={enabledLocales}
-      blockData={header.data}
-      blockContent={header.content}
-    />
-    <main class="shop-main">
-      {
-        page ? (
-          <Blocks
-            page={page}
-            locale={locale}
-            defaultLocale={defaultLocale}
-            enabledLocales={enabledLocales}
-            blockData={blockData}
-            blockContent={blockContent}
-          />
-        ) : (
-          <h1>Not found</h1>
-        )
-      }
-    </main>
-    <Region
-      groups={regionGroups}
-      region="footer"
-      locale={locale}
-      defaultLocale={defaultLocale}
-      enabledLocales={enabledLocales}
-      blockData={footer.data}
-      blockContent={footer.content}
-    />
-    </div>
-  </body>
-</html>
+<ShopLayout state={state} chrome={chrome} title={title} description={description}>
+  {
+    page ? (
+      <Blocks
+        page={page}
+        location={state.location}
+        blockData={blockData}
+        blockContent={blockContent}
+      />
+    ) : (
+      <NotFound location={state.location} />
+    )
+  }
+</ShopLayout>

@@ -1,0 +1,267 @@
+.layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.crumbs {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  margin-bottom: 16px;
+}
+
+.sku {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+}
+
+.title {
+  font-size: 28px;
+  line-height: 1.2;
+  margin: 6px 0 10px;
+}
+
+.brand {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  margin-bottom: 20px;
+}
+
+.details {
+  margin-top: 40px;
+  max-width: 760px;
+}
+
+.prose {
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  margin: 0 0 10px;
+}
+
+.specs {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.specs th,
+.specs td {
+  text-align: left;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.specs th {
+  width: 40%;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.buyBox {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 88px;
+}
+
+.backorder {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: 1px solid var(--warning);
+  background: var(--warning-subtle);
+  color: var(--warning-strong);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: var(--text-sm);
+}
+
+.backorder svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.backorderTitle {
+  font-weight: var(--font-medium);
+  margin-bottom: 2px;
+}
+
+.altLink {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  text-decoration: underline;
+}
+
+/* PDP gallery: square main image + thumbnail strip. */
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: sticky;
+  top: 88px;
+}
+
+.galleryMain {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.heroImg {
+  width: 100%;
+  height: 100%;
+}
+
+.heroBadge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1;
+}
+
+.thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.thumb {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--card);
+}
+
+.thumbActive {
+  border-color: var(--foreground);
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.price {
+  font-size: 30px;
+  font-weight: 750;
+}
+
+.per {
+  display: block;
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+
+.listPrice {
+  font-size: var(--text-lg);
+  color: var(--muted-foreground);
+  text-decoration: line-through;
+}
+
+.gross {
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+.tiers {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tiers th {
+  text-align: left;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+  padding-bottom: 7px;
+  font-weight: 700;
+}
+
+.tiers td {
+  padding: 7px 0;
+  border-top: 1px solid var(--border);
+}
+
+.tierActive td {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.save {
+  text-align: right;
+}
+
+.qtyRow {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.qty {
+  width: 96px;
+}
+
+.lineTotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.lineTotalValue {
+  font-weight: 700;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+/* After the base sticky rules so it wins: stacked mobile scrolls normally. */
+@media (max-width: 900px) {
+  .gallery,
+  .buyBox {
+    position: static;
+    top: auto;
+  }
+}

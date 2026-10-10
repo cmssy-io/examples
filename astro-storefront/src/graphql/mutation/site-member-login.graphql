@@ -1,0 +1,11 @@
+mutation SiteMemberLogin($input: SiteMemberLoginInput!) {
+  siteMember {
+    login(input: $input) {
+      success
+      message
+      accessToken
+      refreshToken
+      accessTokenExpiresIn
+    }
+  }
+}

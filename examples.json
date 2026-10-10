@@ -119,6 +119,50 @@
           "lang": "no"
         },
         {
+          "path": "/c/all",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/no/cart",
+          "lang": "no",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/cart",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/account",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/quick-order",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/xx/cart",
+          "status": 404,
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
           "path": "/no-page-lives-here",
           "status": 404,
           "elements": [
@@ -139,10 +183,33 @@
             "blocks": []
           },
           "status": 403
+        },
+        {
+          "path": "/_actions/cart.add",
+          "method": "POST",
+          "headers": {
+            "content-type": "application/json"
+          },
+          "body": {},
+          "status": 400
+        },
+        {
+          "path": "/api/stripe/webhook",
+          "status": 405
+        },
+        {
+          "path": "/api/stripe/webhook",
+          "method": "POST",
+          "headers": {
+            "content-type": "application/json"
+          },
+          "body": {},
+          "status": 503
         }
       ],
       "$blockDataComment": "No GET row here, unlike the Next examples: Astro answers 404 for a GET on a POST-only endpoint and React Router answers 400, so 405 is a Next-ism. The forged POST covers both claims anyway - an unmounted route 404s on the POST too, so 403 proves mounted AND refusing.",
-      "assertSitemap": true
+      "$shopComment": "The storefront routes are plain Astro pages on the same header and footer as the cmssy pages. The locale prefix is handled once, in the middleware: `cmssyMiddleware(cmssy, { stripLocalePrefix: true })` rewrites `/no/cart` to `/cart` with the locale on the request, so one page file serves both; `/xx/cart` is not a prefix the workspace enables, so it falls through to the cmssy catch-all and is a 404 with the chrome still around it. `/no/cart` rather than `/no/c/all`: the catalogue page is the most expensive render against the demo workspace's delivery budget. The cart and sign-in mutations are Astro Actions under `/_actions/*`. The target is `cart.add` with an empty body, expected 400: Astro mounts `/_actions/[...path]` whether or not the app defines any action, so an unknown action name 404s even with `src/actions/index.ts` deleted, and the cmssy catch-all 404s too - only a known action answering its zod `ActionInputError` (400) can go red when the actions are gone. The two `/api/stripe/webhook` targets prove the route is mounted the way the Next and Remix entries do: GET is 405, and a POST with no Stripe keys in the environment is 503, not 404.",
+      "$sitemapComment": "No `assertSitemap` any more, for the reason next-storefront and remix-storefront have none: the sitemap now lists the catalogue too (148 URLs on cmssy-demo), and the assertion fetches its first 60 in parallel, which is 60 page renders at once against the demo workspace's delivery rate limit - this workflow hit exactly that (`retry after 22s`) on examples #67. Nothing in CI fetches `/sitemap.xml` now, and no row can without a script change: a 200 target demands rendered blocks. What is covered: the locale prefix it emits is the one `/no/cart` and `/no/blog` above route. What is not: the sitemap's own query - a field renamed under `loadProductSlugs` would 500 there with this workflow green."
     },
     {
       "dir": "remix-storefront",

@@ -1,0 +1,232 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.thumbLink {
+  display: block;
+}
+
+.thumb {
+  aspect-ratio: 1.5 / 1;
+  width: 100%;
+}
+
+.thumb .code,
+.thumb span {
+  font-size: 22px;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  flex: 1;
+}
+
+.cardBrand {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+}
+
+.title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.cardSku {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+
+.cardBottom {
+  margin-top: auto;
+  padding-top: 10px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.price {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+}
+
+.cardPer {
+  font-size: 10px;
+  color: var(--muted-foreground);
+}
+
+.tierHint {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.facets {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 88px;
+}
+
+.facetGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.facetTitle {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+}
+
+.facetLink {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+  padding: 3px 0;
+}
+
+.facetLinkActive {
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.facetCount {
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.count {
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+
+.sort {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pager {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.empty {
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.empty h2 {
+  font-size: var(--text-xl);
+}
+
+.empty p {
+  max-width: 46ch;
+}
+
+.add {
+  margin-top: auto;
+  width: 100%;
+  height: 34px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.chipsLabel {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--card);
+  font-size: var(--text-xs);
+  box-shadow: var(--shadow-xs);
+}
+
+.chip:hover {
+  text-decoration: none;
+  border-color: var(--muted-foreground);
+}
+
+.chipsReset {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  text-decoration: underline;
+}
+
+/* Placed after the base .facets rule so it wins in source order: on the
+   stacked mobile layout the facet rail scrolls with the page instead of
+   sticking over the product grid. */
+@media (max-width: 860px) {
+  .facets {
+    position: static;
+    top: auto;
+  }
+}

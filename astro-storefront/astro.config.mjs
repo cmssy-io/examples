@@ -12,4 +12,5 @@ export default defineConfig({
     ? node({ mode: "standalone" })
     : vercel(),
   integrations: [react()],
+  vite: { ssr: { noExternal: ["sanitize-html"] } },
 });

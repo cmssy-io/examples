@@ -1,0 +1,25 @@
+mutation Checkout($input: CheckoutInput!) {
+  cart {
+    checkout(input: $input) {
+      id
+      orderNumber
+      status
+      subtotal
+      discount
+      appliedDiscount { code type value amount }
+      tax
+      total
+      currency
+      customerEmail
+      accessToken
+      poNumber
+      customerNote
+      shippingTotal
+      pricesIncludeTax
+      shippingMethod { id label price }
+      shippingAddress { name company line1 line2 postalCode city region country phone vatId }
+      taxSummary { rateId name rate base amount }
+      items { name sku quantity price listPrice tierMinQty currency taxRate taxAmount }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+query PublicPagesByType(
+  $workspaceId: String!
+  $parentSlug: String
+  $limit: Int
+  $offset: Int
+) {
+  public {
+    page {
+      byType(
+        workspaceId: $workspaceId
+        parentSlug: $parentSlug
+        limit: $limit
+        offset: $offset
+      ) {
+        items {
+          id
+          slug
+          fullSlug
+          publishedAt
+          displayName
+          seoTitle
+          seoDescription
+        }
+        hasMore
+      }
+    }
+  }
+}

@@ -3,19 +3,20 @@ import { loadCmssyPage } from "@cmssy/astro";
 import { resolveEditorOrigin } from "@cmssy/core";
 import { cmssy } from "../../cmssy.config";
 import CmssyEditor from "../../cmssy/editor";
+import { shopPageState } from "../../shop/page-state";
 import "../../styles/shop.css";
 
 // The editor iframe lands here (the middleware rewrites verified requests). It
 // must be dynamic: a prerendered page never sees the query string.
 export const prerender = false;
 
-const { page, locale, defaultLocale, enabledLocales, blockDataToken } =
-  await loadCmssyPage(
-  cmssy,
-  Astro.request,
-  Astro.url,
-  { prerendered: Astro.isPrerendered },
-);
+const [{ page, locale, defaultLocale, enabledLocales, blockDataToken }, shop] =
+  await Promise.all([
+    loadCmssyPage(cmssy, Astro.request, Astro.url, {
+      prerendered: Astro.isPrerendered,
+    }),
+    shopPageState(Astro),
+  ]);
 const editorOrigin = resolveEditorOrigin(cmssy.editorOrigin);
 ---
 
@@ -36,6 +37,7 @@ const editorOrigin = resolveEditorOrigin(cmssy.editorOrigin);
       <main class="shop-main">
         <CmssyEditor
           client:load
+          shop={shop}
           page={page}
           locale={locale}
           defaultLocale={defaultLocale}

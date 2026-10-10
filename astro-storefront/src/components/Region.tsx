@@ -1,34 +1,29 @@
-import { CmssyBlock, buildBlockContext, buildBlockMap } from "@cmssy/react";
+import {
+  CmssyBlock,
+  buildBlockContext,
+  buildBlockMap,
+  type BlockDefinition,
+} from "@cmssy/react";
 import type { CmssyLayoutGroup } from "@cmssy/core";
-import { blocks } from "../cmssy/blocks";
+import { LocaleProvider, type ShopLocation } from "./shop/locale-ui";
 
-/**
- * One layout region - the header or the footer - rendered the same way the page
- * body is: React on the server, no client JS.
- *
- * The SDK has an async component that does this in one call, and Astro cannot
- * render it: an async React component is a server-component feature, and this
- * integration renders through react-dom/server. So the data is resolved in the
- * page's frontmatter, exactly as it already is for the page's own blocks, and
- * what arrives here is synchronous.
- */
-export function Region({
-  groups,
-  region,
-  locale,
-  defaultLocale,
-  enabledLocales,
-  blockData,
-  blockContent,
-}: {
+export interface RegionProps {
+  blocks: BlockDefinition[];
   groups: CmssyLayoutGroup[];
   region: string;
-  locale: string;
-  defaultLocale: string;
-  enabledLocales: string[];
+  location: ShopLocation;
   blockData: Record<string, unknown>;
   blockContent: Record<string, Record<string, unknown>>;
-}) {
+}
+
+export function Region({
+  blocks,
+  groups,
+  region,
+  location,
+  blockData,
+  blockContent,
+}: RegionProps) {
   const group = groups.find((candidate) => candidate.region === region);
   const layoutBlocks = (group?.blocks ?? [])
     .filter((block) => block.isActive !== false)
@@ -37,11 +32,12 @@ export function Region({
 
   if (layoutBlocks.length === 0) return null;
 
+  const { locale, defaultLocale, locales } = location;
   const blockMap = buildBlockMap(blocks);
-  const context = buildBlockContext(locale, defaultLocale, enabledLocales);
+  const context = buildBlockContext(locale, defaultLocale, locales);
 
   return (
-    <>
+    <LocaleProvider value={location}>
       {layoutBlocks.map((block) => (
         <CmssyBlock
           key={block.id}
@@ -54,6 +50,6 @@ export function Region({
           data={blockData[block.id]}
         />
       ))}
-    </>
+    </LocaleProvider>
   );
 }

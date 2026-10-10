@@ -1,0 +1,8 @@
+mutation SiteMemberLogout($refreshToken: String!) {
+  siteMember {
+    logout(refreshToken: $refreshToken) {
+      success
+      message
+    }
+  }
+}

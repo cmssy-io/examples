@@ -8,3 +8,5 @@ export const cmssy = defineCmssyConfig({
   draftSecret: process.env.CMSSY_DRAFT_SECRET,
   siteUrl: process.env.CMSSY_SITE_URL,
 });
+
+export const MEMBER_MODEL_SLUG = "shopmember";

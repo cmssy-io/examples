@@ -1,0 +1,122 @@
+---
+import sanitizeHtml from "sanitize-html";
+import NotFound from "../../components/shop/not-found.astro";
+import styles from "../../components/shop/product-detail.module.css";
+import { ProductGallery } from "../../components/shop/product-gallery";
+import { skuCode } from "../../components/shop/ui/image-placeholder";
+import ShopLayout from "../../layouts/shop-layout.astro";
+import { BuyBoxIsland } from "../../islands/buy-box";
+import { localePath } from "../../lib/locale-path";
+import { stockState } from "../../lib/money";
+import { copyFor } from "../../lib/shop-copy";
+import { loadCategories, loadProductBySlug } from "../../services/catalog";
+import { shopPageState } from "../../shop/page-state";
+
+export const prerender = false;
+
+const state = await shopPageState(Astro);
+const { locale, defaultLocale } = state.location;
+const copy = copyFor(locale);
+const slug = Astro.params.slug ?? "";
+
+const [product, categories] = await Promise.all([
+  loadProductBySlug(slug, locale),
+  loadCategories(locale),
+]);
+if (!product) Astro.response.status = 404;
+
+const category = product
+  ? (categories.find((item) => item.id === product.categoryId) ?? null)
+  : null;
+const descriptionHtml = product?.description
+  ? sanitizeHtml(product.description)
+  : null;
+const descriptionText = product?.description
+  ? sanitizeHtml(product.description, { allowedTags: [] }).slice(0, 160)
+  : undefined;
+const href = (path: string) => localePath(path, locale, defaultLocale);
+const specs = product?.specs ?? null;
+const outOfStock = product ? stockState(product.inventory) === "out" : false;
+const images = product
+  ? product.gallery.length
+    ? product.gallery
+    : product.image
+      ? [product.image]
+      : []
+  : [];
+const title = product
+  ? `${product.title} (${product.sku}) - MACHTEC`
+  : `${copy.notFoundTitle} - MACHTEC`;
+---
+
+<ShopLayout state={state} title={title} description={descriptionText}>
+  {!product ? <NotFound location={state.location} /> : (
+    <>
+      <nav class={styles.crumbs} aria-label={copy.breadcrumbAria}>
+        <a href={href("/")}>{copy.shop}</a> /{" "}
+        {category ? (
+          <>
+            <a href={href(`/c/${category.slug}`)}>{category.name}</a> /{" "}
+          </>
+        ) : null}
+        <span>{product.title}</span>
+      </nav>
+
+      <div class={styles.layout}>
+        <ProductGallery
+          client:load
+          images={images}
+          code={skuCode(product.sku)}
+          alt={product.title}
+          outOfStock={outOfStock}
+          outOfStockLabel={copy.outOfStock}
+        />
+
+        <div>
+          <span class={styles.sku}>{product.sku}</span>
+          <h1 class={styles.title}>{product.title}</h1>
+          {product.brand ? (
+            <p class={styles.brand}>{copy.by} {product.brand}</p>
+          ) : null}
+
+          <BuyBoxIsland
+            client:load
+            shop={state}
+            product={product}
+            categorySlug={category?.slug ?? null}
+          />
+        </div>
+      </div>
+
+      <div class={styles.details}>
+        {descriptionHtml ? <div class={styles.prose} set:html={descriptionHtml} /> : null}
+
+        {specs ? (
+          <section>
+            <h2 class={styles.sectionTitle}>{copy.technicalData}</h2>
+            <table class={styles.specs}>
+              <tbody>
+                {specs.material ? (
+                  <tr><th scope="row">{copy.material}</th><td>{specs.material}</td></tr>
+                ) : null}
+                {specs.dimensions ? (
+                  <tr><th scope="row">{copy.dimensions}</th><td>{specs.dimensions}</td></tr>
+                ) : null}
+                {specs.weightKg ? (
+                  <tr><th scope="row">{copy.weight}</th><td>{specs.weightKg} kg</td></tr>
+                ) : null}
+                {specs.standard ? (
+                  <tr><th scope="row">{copy.standard}</th><td>{specs.standard}</td></tr>
+                ) : null}
+                {specs.operatingTemp ? (
+                  <tr><th scope="row">{copy.operatingTemperature}</th><td>{specs.operatingTemp}</td></tr>
+                ) : null}
+                <tr><th scope="row">{copy.unit}</th><td>{product.unit ?? "pcs"}</td></tr>
+              </tbody>
+            </table>
+          </section>
+        ) : null}
+      </div>
+    </>
+  )}
+</ShopLayout>

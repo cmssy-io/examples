@@ -1,0 +1,16 @@
+---
+import ShopLayout from "../layouts/shop-layout.astro";
+import { CartViewIsland } from "../islands/cart-view";
+import { copyFor } from "../lib/shop-copy";
+import { shopPageState } from "../shop/page-state";
+
+export const prerender = false;
+
+const state = await shopPageState(Astro);
+const copy = copyFor(state.location.locale);
+---
+
+<ShopLayout state={state} title={`${copy.cart} - MACHTEC`} noindex>
+  <h1 style="margin-top: 0">{copy.cartAndCheckout}</h1>
+  <CartViewIsland client:load shop={state} payOnline={state.payOnline} />
+</ShopLayout>
