@@ -210,12 +210,6 @@
   font-weight: var(--font-medium);
 }
 
-/* The full 8-category row already fills the 1240 container, so the dispatch
-   note has no room on this line - it lives in the utility bar instead. */
-.dispatch {
-  display: none;
-}
-
 /* The header owns the mega menu, so hovering off the whole thing closes it. */
 .header {
   position: sticky;
@@ -467,7 +461,8 @@
   }
 
   .utilityNote,
-  .hoursNote {
+  .hoursNote,
+  .dispatchNote {
     display: none;
   }
 

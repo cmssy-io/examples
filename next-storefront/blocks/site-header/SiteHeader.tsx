@@ -95,6 +95,11 @@ export default function SiteHeader({
             {content.hoursNote ? (
               <span className={styles.hoursNote}>{content.hoursNote}</span>
             ) : null}
+            {content.dispatchNote ? (
+              <span className={styles.dispatchNote}>
+                {content.dispatchNote}
+              </span>
+            ) : null}
             <Link href={localePath("/account")}>
               {user ? user.email : signInLabel}
             </Link>
@@ -157,7 +162,6 @@ export default function SiteHeader({
 
         <HeaderNav
           categories={categories}
-          dispatchNote={content.dispatchNote}
           megaOpen={megaOpen}
           activeIndex={activeIndex}
           onOpenChange={setMegaOpen}

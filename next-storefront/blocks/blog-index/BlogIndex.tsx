@@ -49,11 +49,14 @@ export default function BlogIndex({
           <CmssyLink
             key={post.id}
             href={`/${post.fullSlug.replace(/^\/+/, "")}`}
-            className={styles.card}
+            className={`shop-card ${styles.card}`}
           >
             {post.publishedAt && (
               <time dateTime={post.publishedAt} className={styles.date}>
-                {new Date(post.publishedAt).toLocaleDateString()}
+                {new Date(post.publishedAt).toLocaleDateString(
+                  locale?.current,
+                  { timeZone: "UTC" },
+                )}
               </time>
             )}
             <h3 className={styles.title}>{title}</h3>

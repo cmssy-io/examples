@@ -1,15 +1,16 @@
-.hero :global(.shop-btn) {
+.hero :global(.shop-btn),
+.hero :global(.shop-btn):hover:not(:disabled) {
   background: transparent;
   border-color: color-mix(in oklab, var(--primary-foreground) 45%, transparent);
   color: var(--primary-foreground);
 }
 
-.hero :global(.shop-btn):hover {
+.hero :global(.shop-btn):hover:not(:disabled) {
   border-color: var(--primary-foreground);
 }
 
 .hero :global(.shop-btn-primary),
-.hero :global(.shop-btn-primary):hover {
+.hero :global(.shop-btn-primary):hover:not(:disabled) {
   background: var(--primary-foreground);
   border-color: var(--primary-foreground);
   color: var(--foreground);
@@ -64,7 +65,7 @@
   display: flex;
   flex-direction: column;
   padding-left: 14px;
-  border-left: 3px solid var(--foreground);
+  border-left: 3px solid var(--primary-foreground);
 }
 
 .props span {

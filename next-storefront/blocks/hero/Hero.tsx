@@ -56,7 +56,7 @@ export default function Hero({ content }: BlockProps<typeof heroProps>) {
             {primaryButtonText && primaryButtonUrl && (
               <CmssyLink
                 href={primaryButtonUrl}
-                className={styles.buttonPrimary}
+                className="shop-btn shop-btn-primary"
               >
                 {primaryButtonText}
               </CmssyLink>
@@ -64,7 +64,7 @@ export default function Hero({ content }: BlockProps<typeof heroProps>) {
             {secondaryButtonText && secondaryButtonUrl && (
               <CmssyLink
                 href={secondaryButtonUrl}
-                className={styles.buttonSecondary}
+                className="shop-btn"
               >
                 {secondaryButtonText}
               </CmssyLink>

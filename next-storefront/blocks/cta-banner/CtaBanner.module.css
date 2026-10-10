@@ -1,15 +1,16 @@
-.banner :global(.shop-btn) {
+.banner :global(.shop-btn),
+.banner :global(.shop-btn):hover:not(:disabled) {
   background: transparent;
   border-color: color-mix(in oklab, var(--primary-foreground) 45%, transparent);
   color: var(--primary-foreground);
 }
 
-.banner :global(.shop-btn):hover {
+.banner :global(.shop-btn):hover:not(:disabled) {
   border-color: var(--primary-foreground);
 }
 
 .banner :global(.shop-btn-primary),
-.banner :global(.shop-btn-primary):hover {
+.banner :global(.shop-btn-primary):hover:not(:disabled) {
   background: var(--primary-foreground);
   border-color: var(--primary-foreground);
   color: var(--foreground);

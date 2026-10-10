@@ -26,12 +26,12 @@
    link-shaped button drew its label in the colour of its own background -
    dark-on-black, light-on-white. Excluding buttons here keeps one rule for
    both instead of restating the colours per element. */
-.shop-scope a:not([class*="shop-btn"]) {
+.shop-scope :where(a:not([class*="shop-btn"])) {
   color: inherit;
   text-decoration: none;
 }
 
-.shop-scope a:not([class*="shop-btn"]):hover {
+.shop-scope :where(a:not([class*="shop-btn"]):hover) {
   text-decoration: underline;
 }
 

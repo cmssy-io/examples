@@ -31,6 +31,7 @@ export function BlogIndex({
             <time dateTime={post.publishedAt} className={styles.date}>
               {new Date(post.publishedAt).toLocaleDateString(
                 context?.locale.current,
+                { timeZone: "UTC" },
               )}
             </time>
           ) : null}

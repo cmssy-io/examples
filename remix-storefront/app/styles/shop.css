@@ -38,12 +38,12 @@ body {
   line-height: var(--leading-tight);
 }
 
-.shop-scope a:not([class*="shop-btn"]) {
+.shop-scope :where(a:not([class*="shop-btn"])) {
   color: inherit;
   text-decoration: none;
 }
 
-.shop-scope a:not([class*="shop-btn"]):hover {
+.shop-scope :where(a:not([class*="shop-btn"]):hover) {
   text-decoration: underline;
 }
 
