@@ -10,7 +10,7 @@ import { fill } from "@/lib/shop-copy";
 import { useLocalePath, useShopCopy } from "./locale-ui";
 import styles from "./cart.module.css";
 
-export function CartView() {
+export function CartView({ payOnline }: { payOnline: boolean }) {
   const localePath = useLocalePath();
   const copy = useShopCopy();
   const {
@@ -56,7 +56,7 @@ export function CartView() {
     const value = (key: string) => String(form.get(key) ?? "").trim();
 
     try {
-      const order = await checkout({
+      const { order, paymentUrl } = await checkout({
         customerEmail: value("customerEmail"),
         poNumber: value("poNumber") || null,
         customerNote: value("customerNote") || null,
@@ -72,6 +72,11 @@ export function CartView() {
           vatId: value("vatId") || null,
         },
       });
+
+      if (paymentUrl) {
+        window.location.assign(paymentUrl);
+        return;
+      }
 
       const token = order.accessToken;
       router.push(
@@ -364,7 +369,11 @@ export function CartView() {
           className="shop-btn shop-btn-primary"
           disabled={submitting || loading || !cart.shippingMethod}
         >
-          {submitting ? copy.placingOrder : copy.placeOrder}
+          {submitting
+            ? copy.placingOrder
+            : payOnline
+              ? copy.placeOrderAndPay
+              : copy.placeOrder}
         </button>
 
         {!cart.shippingMethod ? (

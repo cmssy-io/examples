@@ -89,6 +89,33 @@ Four values (cmssy cloud handles the rest):
 | `CMSSY_DRAFT_SECRET`   | cmssy dashboard -> Settings -> Headless (generated per workspace - copy the exact value) |
 | `CMSSY_SESSION_SECRET` | Generate one: `openssl rand -base64 32`. Seals the member session cookie.                |
 
+Three more turn on card payment with Stripe Checkout; without them checkout places the order and
+the confirmation page reads "awaiting payment", which is the net-30 flow:
+
+| Variable                | Where to find it                                                                                   |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
+| `STRIPE_SECRET_KEY`     | `sk_test_...` from the Stripe dashboard, Developers -> API keys, test mode                         |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` of a webhook endpoint at `<origin>/api/stripe/webhook` for `checkout.session.completed` |
+| `CMSSY_API_TOKEN`       | `cs_...` with the orders scope, cmssy dashboard -> Settings -> API tokens. Server-only.           |
+
+### Paying an order with Stripe
+
+cmssy is the order record and never holds a payment key. The storefront does the paying and
+reports back:
+
+1. `checkoutAction` places the order through `cart.checkout` - the order exists, unpaid, before any
+   money moves. With `STRIPE_SECRET_KEY` set it then opens a Stripe Checkout Session for the order's
+   total, with the cmssy order id in the session metadata, and the browser is sent to Stripe.
+2. Stripe calls `POST /api/stripe/webhook`. The route verifies the signature with
+   `STRIPE_WEBHOOK_SECRET`, reads the order id back out of the session, and records the payment on
+   the order with the admin mutation `order.recordPayment`, authenticated with `CMSSY_API_TOKEN`.
+   The mutation is idempotent on the payment reference, so a retried webhook records nothing twice.
+3. The confirmation page the buyer returns to reads `paymentStatus` from cmssy, so it shows "Paid"
+   once the webhook has landed, and a "Pay now" button while the balance is still due.
+
+Locally, `stripe listen --forward-to localhost:3000/api/stripe/webhook` prints the webhook secret to
+use. Test cards: `4242 4242 4242 4242`, any future date, any CVC.
+
 ## Project structure
 
 ```

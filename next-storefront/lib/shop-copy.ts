@@ -135,7 +135,12 @@ const en = {
   totalInclVat: "Total (incl. VAT)",
   netTotal: "Net total",
   placeOrder: "Place order",
+  placeOrderAndPay: "Place order and pay",
   placingOrder: "Placing order...",
+  payNow: "Pay now",
+  redirectingToPayment: "Redirecting to payment...",
+  paymentConfirming:
+    "Payment received - the order updates as soon as Stripe confirms it. Refresh in a moment.",
   checkoutFailed: "Checkout failed",
 
   tradeAccount: "Trade account",
@@ -343,7 +348,12 @@ const no: ShopCopy = {
   totalInclVat: "Totalt (inkl. mva.)",
   netTotal: "Sum netto",
   placeOrder: "Send bestilling",
+  placeOrderAndPay: "Send bestilling og betal",
   placingOrder: "Sender bestilling...",
+  payNow: "Betal nå",
+  redirectingToPayment: "Sender deg til betaling...",
+  paymentConfirming:
+    "Betalingen er mottatt - bestillingen oppdateres så snart Stripe bekrefter den. Oppdater siden om et øyeblikk.",
   checkoutFailed: "Bestillingen mislyktes",
 
   tradeAccount: "Bedriftskonto",

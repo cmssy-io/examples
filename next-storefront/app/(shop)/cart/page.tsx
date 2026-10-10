@@ -1,5 +1,6 @@
 import { CartView } from "@/components/shop/cart-view";
 import { shopLocale } from "@/lib/locale";
+import { payOnline } from "@/lib/stripe";
 import { copyFor } from "@/lib/shop-copy";
 
 export async function generateMetadata() {
@@ -14,7 +15,7 @@ export default async function CartPage() {
   return (
     <>
       <h1 style={{ marginTop: 0 }}>{copy.cartAndCheckout}</h1>
-      <CartView />
+      <CartView payOnline={payOnline()} />
     </>
   );
 }
