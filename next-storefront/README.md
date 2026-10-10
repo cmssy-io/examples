@@ -89,13 +89,15 @@ Four values (cmssy cloud handles the rest):
 | `CMSSY_DRAFT_SECRET`   | cmssy dashboard -> Settings -> Headless (generated per workspace - copy the exact value) |
 | `CMSSY_SESSION_SECRET` | Generate one: `openssl rand -base64 32`. Seals the member session cookie.                |
 
-Three more turn on card payment with Stripe Checkout; without them checkout places the order and
-the confirmation page reads "awaiting payment", which is the net-30 flow:
+Three more turn on card payment with Stripe Checkout, and only all three together do: with one or
+two of them set the shop stays on the invoice flow, so a buyer can never pay on Stripe while the
+webhook has no secret or no token to record the payment with. Without them checkout places the
+order and the confirmation page reads "awaiting payment", which is the net-30 flow:
 
 | Variable                | Where to find it                                                                                   |
 | ----------------------- | -------------------------------------------------------------------------------------------------- |
 | `STRIPE_SECRET_KEY`     | `sk_test_...` from the Stripe dashboard, Developers -> API keys, test mode                         |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` of a webhook endpoint at `<origin>/api/stripe/webhook` for `checkout.session.completed` |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` of a webhook endpoint at `<origin>/api/stripe/webhook` subscribed to `checkout.session.completed` and `checkout.session.async_payment_succeeded` |
 | `CMSSY_API_TOKEN`       | `cs_...` from cmssy dashboard -> Settings -> API tokens, created by a member whose role can manage orders; the token acts as that member. Server-only. |
 
 ### Paying an order with Stripe
@@ -113,10 +115,13 @@ reports back:
 3. The confirmation page the buyer returns to reads `paymentStatus` from cmssy, so it shows "Paid"
    once the webhook has landed, and a "Pay now" button while the balance is still due - on the
    guest confirmation page and on a signed-in member's order page alike. "Pay now" reuses the
-   order's open Checkout Session when one exists, expires it when the balance changed, and creates
-   the new one under an idempotency key for that order and amount, so a double click mints one
-   session, not two. Before the browser leaves for Stripe, the confirmation URL is pushed onto the
-   history, so Back from Stripe lands on the order, not on an empty cart.
+   order's open Checkout Session when one exists (looked up among the buyer's open sessions, by
+   `customer_details.email`), expires it when the balance changed, and creates the new one under an
+   idempotency key for that order, amount and the session it supersedes, so a double click mints
+   one session, not two; a concurrent create in another locale trips Stripe's idempotency check and
+   falls back to the session the first request made. Before the browser leaves for Stripe, the
+   confirmation URL is pushed onto the history, so Back from Stripe lands on the order, not on an
+   empty cart.
 
 What cmssy refuses, the webhook does not retry: a canceled order, an amount above the balance or an
 unknown order come back from `recordPayment` as a GraphQL error with `BAD_USER_INPUT` or

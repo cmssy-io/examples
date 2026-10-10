@@ -1,7 +1,7 @@
 import { DEFAULT_CMSSY_API_URL, createCmssyClient } from "@cmssy/core";
 import { cmssy } from "@/cmssy.config";
-import type Stripe from "stripe";
-import { stripeClient } from "@/lib/stripe";
+import Stripe from "stripe";
+import { payOnline, stripeClient } from "@/lib/stripe";
 import { copyFor } from "@/lib/shop-copy";
 
 export const PAYMENT_PROVIDER = "stripe";
@@ -18,9 +18,14 @@ export interface PaymentSessionInput {
   locale: string;
 }
 
-async function openSessionFor(stripe: Stripe, orderId: string) {
+async function openSessionFor(
+  stripe: Stripe,
+  orderId: string,
+  email: string,
+) {
   const open = await stripe.checkout.sessions.list({
     status: "open",
+    customer_details: { email },
     limit: 100,
   });
   return open.data.find(
@@ -28,18 +33,34 @@ async function openSessionFor(stripe: Stripe, orderId: string) {
   );
 }
 
+async function expireQuietly(stripe: Stripe, sessionId: string) {
+  try {
+    await stripe.checkout.sessions.expire(sessionId);
+  } catch (error) {
+    if (!(error instanceof Stripe.errors.StripeInvalidRequestError)) {
+      throw error;
+    }
+  }
+}
+
 export async function createPaymentSession(
   input: PaymentSessionInput,
 ): Promise<string | null> {
   const stripe = stripeClient();
-  if (!stripe || input.amount <= 0) return null;
+  if (!stripe || !payOnline() || input.amount <= 0) return null;
 
-  const existing = await openSessionFor(stripe, input.orderId);
+  const existing = await openSessionFor(
+    stripe,
+    input.orderId,
+    input.customerEmail,
+  );
+  let supersedes = "";
   if (existing) {
     if (existing.amount_total === input.amount && existing.url) {
       return existing.url;
     }
-    await stripe.checkout.sessions.expire(existing.id);
+    await expireQuietly(stripe, existing.id);
+    supersedes = `-${existing.id}`;
   }
 
   const copy = copyFor(input.locale);
@@ -48,32 +69,42 @@ export async function createPaymentSession(
     : copy.order;
   const separator = input.confirmationUrl.includes("?") ? "&" : "?";
 
-  const session = await stripe.checkout.sessions.create(
-    {
-      mode: "payment",
-      client_reference_id: input.orderId,
-      customer_email: input.customerEmail,
-      metadata: { cmssyOrderId: input.orderId },
-      payment_intent_data: { metadata: { cmssyOrderId: input.orderId } },
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: input.currency.toLowerCase(),
-            unit_amount: input.amount,
-            product_data: { name },
-          },
-        },
-      ],
-      success_url: `${input.confirmationUrl}${separator}paid=1`,
-      cancel_url: input.confirmationUrl,
-    },
-    {
-      idempotencyKey: `cmssy-order-${input.orderId}-${input.amount}-${input.locale}`,
-    },
-  );
+  const idempotencyKey = `cmssy-order-${input.orderId}-${input.amount}${supersedes}`;
 
-  return session.url;
+  try {
+    const session = await stripe.checkout.sessions.create(
+      {
+        mode: "payment",
+        client_reference_id: input.orderId,
+        customer_email: input.customerEmail,
+        metadata: { cmssyOrderId: input.orderId },
+        payment_intent_data: { metadata: { cmssyOrderId: input.orderId } },
+        line_items: [
+          {
+            quantity: 1,
+            price_data: {
+              currency: input.currency.toLowerCase(),
+              unit_amount: input.amount,
+              product_data: { name },
+            },
+          },
+        ],
+        success_url: `${input.confirmationUrl}${separator}paid=1`,
+        cancel_url: input.confirmationUrl,
+      },
+      { idempotencyKey },
+    );
+    return session.url;
+  } catch (error) {
+    if (!(error instanceof Stripe.errors.StripeIdempotencyError)) throw error;
+    const raced = await openSessionFor(
+      stripe,
+      input.orderId,
+      input.customerEmail,
+    );
+    if (raced?.url) return raced.url;
+    throw error;
+  }
 }
 
 const RECORD_ORDER_PAYMENT = `

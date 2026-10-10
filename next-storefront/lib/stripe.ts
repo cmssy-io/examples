@@ -14,5 +14,9 @@ export function stripeWebhookSecret(): string | null {
 }
 
 export function payOnline(): boolean {
-  return Boolean(process.env.STRIPE_SECRET_KEY);
+  return Boolean(
+    process.env.STRIPE_SECRET_KEY &&
+      process.env.STRIPE_WEBHOOK_SECRET &&
+      process.env.CMSSY_API_TOKEN,
+  );
 }
