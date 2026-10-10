@@ -124,13 +124,17 @@ export default function CmssyPage({ loaderData }: Route.ComponentProps) {
   // No separate route: a React Router page always sees its query string.
   if (isEdit) {
     return (
-      <CmssyEditor
-        page={page}
-        locale={locale}
-        defaultLocale={defaultLocale}
-        enabledLocales={enabledLocales}
-        edit={{ editorOrigin, blockDataToken }}
-      />
+      <div className="shop-scope">
+        <main className="shop-main">
+          <CmssyEditor
+            page={page}
+            locale={locale}
+            defaultLocale={defaultLocale}
+            enabledLocales={enabledLocales}
+            edit={{ editorOrigin, blockDataToken }}
+          />
+        </main>
+      </div>
     );
   }
 
@@ -149,9 +153,9 @@ export default function CmssyPage({ loaderData }: Route.ComponentProps) {
   );
 
   return (
-    <>
+    <div className="shop-scope">
       {region("header")}
-      <main>
+      <main className="shop-main">
         {page ? (
           (page.blocks ?? []).map((block) => (
             <CmssyBlock
@@ -170,6 +174,6 @@ export default function CmssyPage({ loaderData }: Route.ComponentProps) {
         )}
       </main>
       {region("footer")}
-    </>
+    </div>
   );
 }

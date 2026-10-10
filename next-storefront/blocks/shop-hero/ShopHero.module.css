@@ -1,3 +1,20 @@
+.hero :global(.shop-btn) {
+  background: transparent;
+  border-color: color-mix(in oklab, var(--primary-foreground) 45%, transparent);
+  color: var(--primary-foreground);
+}
+
+.hero :global(.shop-btn):hover {
+  border-color: var(--primary-foreground);
+}
+
+.hero :global(.shop-btn-primary),
+.hero :global(.shop-btn-primary):hover {
+  background: var(--primary-foreground);
+  border-color: var(--primary-foreground);
+  color: var(--foreground);
+}
+
 .hero {
   display: grid;
   grid-template-columns: 1.4fr 1fr;

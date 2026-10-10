@@ -3,6 +3,7 @@ import { loadCmssyPage } from "@cmssy/astro";
 import { resolveEditorOrigin } from "@cmssy/core";
 import { cmssy } from "../../cmssy.config";
 import CmssyEditor from "../../cmssy/editor";
+import "../../styles/shop.css";
 
 // The editor iframe lands here (the middleware rewrites verified requests). It
 // must be dynamic: a prerendered page never sees the query string.
@@ -21,16 +22,27 @@ const editorOrigin = resolveEditorOrigin(cmssy.editorOrigin);
 <html lang={locale}>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    />
     <title>cmssy editor</title>
   </head>
   <body>
-    <CmssyEditor
-      client:load
-      page={page}
-      locale={locale}
-      defaultLocale={defaultLocale}
-      enabledLocales={enabledLocales}
-      edit={{ editorOrigin, blockDataToken }}
-    />
+    <div class="shop-scope">
+      <main class="shop-main">
+        <CmssyEditor
+          client:load
+          page={page}
+          locale={locale}
+          defaultLocale={defaultLocale}
+          enabledLocales={enabledLocales}
+          edit={{ editorOrigin, blockDataToken }}
+        />
+      </main>
+    </div>
   </body>
 </html>

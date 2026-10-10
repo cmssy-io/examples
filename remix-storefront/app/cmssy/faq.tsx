@@ -1,4 +1,5 @@
 import { fields, type BlockProps } from "@cmssy/react";
+import styles from "./faq.module.css";
 
 export const faqProps = {
   heading: fields.text({ label: "Heading", defaultValue: "Questions" }),
@@ -15,20 +16,22 @@ export const faqProps = {
 };
 
 export function Faq({ content }: BlockProps<typeof faqProps>) {
-  const items = content.items ?? [];
+  const items = (content.items ?? []).filter((item) => item.question);
   if (items.length === 0) return null;
 
   return (
-    <section>
-      {content.heading ? <h2>{content.heading}</h2> : null}
-      <dl>
-        {items.map((item, index) => (
-          <div key={index}>
-            <dt>{item.question}</dt>
-            {item.answer ? <dd>{item.answer}</dd> : null}
-          </div>
+    <section className={styles.section}>
+      {content.heading ? (
+        <h2 className={styles.heading}>{content.heading}</h2>
+      ) : null}
+      <div className={styles.list}>
+        {items.map((item) => (
+          <details key={item.question} className={`shop-card ${styles.item}`}>
+            <summary className={styles.question}>{item.question}</summary>
+            {item.answer ? <p className={styles.answer}>{item.answer}</p> : null}
+          </details>
         ))}
-      </dl>
+      </div>
     </section>
   );
 }

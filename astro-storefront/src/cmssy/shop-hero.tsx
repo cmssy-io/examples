@@ -1,4 +1,5 @@
 import { fields, type BlockProps } from "@cmssy/react";
+import styles from "./shop-hero.module.css";
 
 export const shopHeroProps = {
   heading: fields.text({ label: "Heading", required: true }),
@@ -20,24 +21,47 @@ export const shopHeroProps = {
 };
 
 export function ShopHero({ content }: BlockProps<typeof shopHeroProps>) {
-  const valueProps = content.props ?? [];
+  const {
+    heading,
+    text,
+    primaryButtonText,
+    primaryButtonUrl,
+    secondaryButtonText,
+    secondaryButtonUrl,
+  } = content;
+
+  if (!heading) return null;
+
+  const valueProps = (content.props ?? []).filter((prop) => prop.title);
 
   return (
-    <section>
-      <h1>{content.heading}</h1>
-      {content.text ? <p>{content.text}</p> : null}
-      {content.primaryButtonText && content.primaryButtonUrl ? (
-        <a href={content.primaryButtonUrl}>{content.primaryButtonText}</a>
-      ) : null}
-      {content.secondaryButtonText && content.secondaryButtonUrl ? (
-        <a href={content.secondaryButtonUrl}>{content.secondaryButtonText}</a>
-      ) : null}
+    <section className={styles.hero}>
+      <div>
+        <h1 className={styles.title}>{heading}</h1>
+        {text ? <p className={styles.text}>{text}</p> : null}
+        {(primaryButtonText && primaryButtonUrl) ||
+        (secondaryButtonText && secondaryButtonUrl) ? (
+          <div className={styles.actions}>
+            {primaryButtonText && primaryButtonUrl ? (
+              <a href={primaryButtonUrl} className="shop-btn shop-btn-primary">
+                {primaryButtonText}
+              </a>
+            ) : null}
+            {secondaryButtonText && secondaryButtonUrl ? (
+              <a href={secondaryButtonUrl} className="shop-btn">
+                {secondaryButtonText}
+              </a>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+
       {valueProps.length > 0 ? (
-        <ul>
-          {valueProps.map((item, index) => (
-            <li key={index}>
-              <strong>{item.title}</strong>
-              {item.text ? <span>{item.text}</span> : null}
+        <ul className={styles.props}>
+          {valueProps.map((prop) => (
+            <li key={prop.title}>
+              <strong>{prop.title}</strong>
+              {prop.text ? <span>{prop.text}</span> : null}
             </li>
           ))}
         </ul>

@@ -11,6 +11,7 @@ import { Blocks } from "../components/Blocks";
 import { Region } from "../components/Region";
 import { pickLocalized } from "../lib/locale-path";
 import { fetchPageMeta } from "../services/seo";
+import "../styles/shop.css";
 
 export const prerender = false;
 
@@ -77,10 +78,18 @@ const description = pickLocalized(meta?.seoDescription, locale, defaultLocale);
 <html lang={locale}>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    />
     <title>{title}</title>
     {description ? <meta name="description" content={description} /> : null}
   </head>
   <body>
+    <div class="shop-scope">
     <Region
       groups={regionGroups}
       region="header"
@@ -90,20 +99,22 @@ const description = pickLocalized(meta?.seoDescription, locale, defaultLocale);
       blockData={header.data}
       blockContent={header.content}
     />
-    {
-      page ? (
-        <Blocks
-          page={page}
-          locale={locale}
-          defaultLocale={defaultLocale}
-          enabledLocales={enabledLocales}
-          blockData={blockData}
-          blockContent={blockContent}
-        />
-      ) : (
-        <main><h1>Not found</h1></main>
-      )
-    }
+    <main class="shop-main">
+      {
+        page ? (
+          <Blocks
+            page={page}
+            locale={locale}
+            defaultLocale={defaultLocale}
+            enabledLocales={enabledLocales}
+            blockData={blockData}
+            blockContent={blockContent}
+          />
+        ) : (
+          <h1>Not found</h1>
+        )
+      }
+    </main>
     <Region
       groups={regionGroups}
       region="footer"
@@ -113,5 +124,6 @@ const description = pickLocalized(meta?.seoDescription, locale, defaultLocale);
       blockData={footer.data}
       blockContent={footer.content}
     />
+    </div>
   </body>
 </html>

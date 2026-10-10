@@ -1,4 +1,5 @@
 import { fields, mediaUrl, type BlockProps } from "@cmssy/react";
+import styles from "./feature-media.module.css";
 
 export const featureMediaProps = {
   heading: fields.text({ label: "Heading", required: true }),
@@ -23,25 +24,39 @@ export const featureMediaProps = {
 };
 
 export function FeatureMedia({ content }: BlockProps<typeof featureMediaProps>) {
-  const bullets = content.bullets ?? [];
-
+  const { heading, text, buttonText, buttonUrl } = content;
   const mediaSrc = mediaUrl(content.media);
+  if (!heading) return null;
+
+  const bullets = (content.bullets ?? []).filter((bullet) => bullet.text);
+  const mediaFirst = content.mediaSide === "left";
 
   return (
-    <section>
-      <h2>{content.heading}</h2>
-      {content.text ? <p>{content.text}</p> : null}
-      {bullets.length > 0 ? (
-        <ul>
-          {bullets.map((bullet, index) => (
-            <li key={index}>{bullet.text}</li>
-          ))}
-        </ul>
+    <section
+      className={`${styles.section} ${mediaFirst ? styles.mediaFirst : ""}`}
+    >
+      <div className={styles.body}>
+        <h2 className={styles.heading}>{heading}</h2>
+        {text ? <p className={styles.text}>{text}</p> : null}
+        {bullets.length > 0 ? (
+          <ul className={styles.bullets}>
+            {bullets.map((bullet) => (
+              <li key={bullet.text}>{bullet.text}</li>
+            ))}
+          </ul>
+        ) : null}
+        {buttonText && buttonUrl ? (
+          <a href={buttonUrl} className="shop-btn shop-btn-primary">
+            {buttonText}
+          </a>
+        ) : null}
+      </div>
+
+      {mediaSrc ? (
+        <div className={styles.media}>
+          <img src={mediaSrc} alt={heading} className={styles.image} />
+        </div>
       ) : null}
-      {content.buttonText && content.buttonUrl ? (
-        <a href={content.buttonUrl}>{content.buttonText}</a>
-      ) : null}
-      {mediaSrc ? <img src={mediaSrc} alt="" /> : null}
     </section>
   );
 }

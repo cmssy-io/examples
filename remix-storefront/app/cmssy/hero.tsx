@@ -1,4 +1,5 @@
 import { fields, mediaUrl, type BlockProps } from "@cmssy/react";
+import styles from "./hero.module.css";
 
 export const heroProps = {
   badgeText: fields.text({ label: "Badge" }),
@@ -12,24 +13,79 @@ export const heroProps = {
   media: fields.media({ label: "Media (image or video)" }),
 };
 
+const isVideo = (src: string) => /\.(mp4|webm|ogg)$/i.test(src);
+
 export function Hero({ content }: BlockProps<typeof heroProps>) {
+  const {
+    badgeText,
+    heading,
+    headingHighlight,
+    subheading,
+    primaryButtonText,
+    primaryButtonUrl,
+    secondaryButtonText,
+    secondaryButtonUrl,
+  } = content;
   const mediaSrc = mediaUrl(content.media);
 
+  if (!heading && !headingHighlight) return null;
+
   return (
-    <section>
-      {content.badgeText ? <p>{content.badgeText}</p> : null}
-      <h1>
-        {content.heading}
-        {content.headingHighlight ? <em>{content.headingHighlight}</em> : null}
-      </h1>
-      {content.subheading ? <p>{content.subheading}</p> : null}
-      {content.primaryButtonText && content.primaryButtonUrl ? (
-        <a href={content.primaryButtonUrl}>{content.primaryButtonText}</a>
-      ) : null}
-      {content.secondaryButtonText && content.secondaryButtonUrl ? (
-        <a href={content.secondaryButtonUrl}>{content.secondaryButtonText}</a>
-      ) : null}
-      {mediaSrc ? <img src={mediaSrc} alt="" /> : null}
+    <section className={styles.hero}>
+      <div className={styles.inner}>
+        {badgeText ? <span className={styles.badge}>{badgeText}</span> : null}
+
+        <h1 className={styles.title}>
+          {heading}
+          {headingHighlight ? (
+            <>
+              {heading ? " " : ""}
+              <span className={styles.highlight}>{headingHighlight}</span>
+            </>
+          ) : null}
+        </h1>
+
+        {subheading ? <p className={styles.subheading}>{subheading}</p> : null}
+
+        {(primaryButtonText && primaryButtonUrl) ||
+        (secondaryButtonText && secondaryButtonUrl) ? (
+          <div className={styles.actions}>
+            {primaryButtonText && primaryButtonUrl ? (
+              <a href={primaryButtonUrl} className="shop-btn shop-btn-primary">
+                {primaryButtonText}
+              </a>
+            ) : null}
+            {secondaryButtonText && secondaryButtonUrl ? (
+              <a href={secondaryButtonUrl} className="shop-btn">
+                {secondaryButtonText}
+              </a>
+            ) : null}
+          </div>
+        ) : null}
+
+        {mediaSrc ? (
+          <div className={styles.media}>
+            <div className={styles.mediaFrame}>
+              {isVideo(mediaSrc) ? (
+                <video
+                  src={mediaSrc}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className={styles.video}
+                />
+              ) : (
+                <img
+                  src={mediaSrc}
+                  alt={heading ?? ""}
+                  className={styles.image}
+                />
+              )}
+            </div>
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }

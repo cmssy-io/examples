@@ -1,4 +1,5 @@
 import { fields, type BlockProps } from "@cmssy/react";
+import styles from "./site-footer.module.css";
 
 export const siteFooterProps = {
   brandName: fields.text({ label: "Brand name", defaultValue: "MACHTEC" }),
@@ -35,29 +36,43 @@ export function SiteFooter({ content }: BlockProps<typeof siteFooterProps>) {
   );
 
   return (
-    <footer>
-      <div>
-        {content.brandName ? <strong>{content.brandName}</strong> : null}
-        {content.brandText ? <p>{content.brandText}</p> : null}
+    <footer className={styles.footer}>
+      <div className={styles.inner}>
+        <div className={styles.columns}>
+          <div className={styles.brand}>
+            {content.brandName ? (
+              <span className={styles.brandName}>{content.brandName}</span>
+            ) : null}
+            {content.brandText ? (
+              <span className={styles.brandText}>{content.brandText}</span>
+            ) : null}
+          </div>
+
+          {columns.map((column, index) => (
+            <nav key={column.title ?? index} className={styles.col}>
+              {column.title ? (
+                <p className={styles.columnTitle}>{column.title}</p>
+              ) : null}
+              <ul className={styles.links}>
+                {(column.links ?? [])
+                  .filter((link) => link.label && link.url)
+                  .map((link) => (
+                    <li key={`${link.url}${link.label}`}>
+                      <a href={link.url} className={styles.link}>
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+              </ul>
+            </nav>
+          ))}
+        </div>
+
+        <div className={styles.bottom}>
+          {content.note ? <span>{content.note}</span> : null}
+          {content.credit ? <span>{content.credit}</span> : null}
+        </div>
       </div>
-
-      {columns.map((column, index) => (
-        <nav key={column.title ?? index}>
-          {column.title ? <p>{column.title}</p> : null}
-          <ul>
-            {(column.links ?? [])
-              .filter((link) => link.label && link.url)
-              .map((link) => (
-                <li key={`${link.url}${link.label}`}>
-                  <a href={link.url}>{link.label}</a>
-                </li>
-              ))}
-          </ul>
-        </nav>
-      ))}
-
-      {content.note ? <p>{content.note}</p> : null}
-      {content.credit ? <p>{content.credit}</p> : null}
     </footer>
   );
 }
