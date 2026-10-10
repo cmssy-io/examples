@@ -56,7 +56,7 @@ importers:
     devDependencies:
       '@cmssy/cli':
         specifier: ^19.1.0
-        version: 19.4.0
+        version: 19.1.0
       '@graphql-codegen/cli':
         specifier: ^7.2.0
         version: 7.4.6(@types/node@26.2.0)(graphql@17.0.2)(typescript@5.9.3)
@@ -227,15 +227,12 @@ packages:
     resolution: {integrity: sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA==}
     engines: {node: '>=6.9.0'}
 
-  '@cmssy/cli@19.4.0':
-    resolution: {integrity: sha512-orLOlkPPZGzT8Yr0jQ5FXEEhqu8noTVLzTxM7LARQAYc8iJws9OEPzlvnjzgaJ03aT18jUhSxS2FT9Wzevf40g==}
+  '@cmssy/cli@19.1.0':
+    resolution: {integrity: sha512-1Iz+mQ+YSfdc1DIEKXtNaH/soHw/Jk40Y88oC1KxuuyZACeBkyBA56Nz6OZqBpVuUjqwLi68Yxyv+tP+irY2hA==}
     hasBin: true
 
   '@cmssy/core@19.1.0':
     resolution: {integrity: sha512-5ZGkh6C9/VdCMU3BsuDrxdQKqoHTdaGU2mzYFsDqCQR5OJc5Kk8Jya+8UPuJOnT3u5e85pEkjn7IbN134/3U3Q==}
-
-  '@cmssy/core@19.4.0':
-    resolution: {integrity: sha512-w0WDdXi/nystXx8RRNkR6+arwt3qIp9RKF/zw1Wcy1efFLIA4g3naYiqGOhCq74rjuuiI78h3YuaUcEAna8dJQ==}
 
   '@cmssy/react@19.1.0':
     resolution: {integrity: sha512-KEPXTWu8XiAgOplbQml82tu+bw32STGOuyWHv6Vqt2WuHm8y98iaNSjhUPUA+Ob/Eqpu1p4HQ5IZgwAzVecdww==}
@@ -2581,17 +2578,12 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@cmssy/cli@19.4.0':
+  '@cmssy/cli@19.1.0':
     dependencies:
-      '@cmssy/core': 19.4.0
+      '@cmssy/core': 19.1.0
       esbuild: 0.27.7
 
   '@cmssy/core@19.1.0':
-    dependencies:
-      '@cmssy/types': 0.59.0
-      jose: 6.2.8
-
-  '@cmssy/core@19.4.0':
     dependencies:
       '@cmssy/types': 0.59.0
       jose: 6.2.8
