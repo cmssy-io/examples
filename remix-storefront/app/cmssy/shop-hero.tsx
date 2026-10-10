@@ -1,4 +1,5 @@
 import { fields, type BlockProps } from "@cmssy/react";
+import { CmssyLink } from "../components/cmssy-link";
 import styles from "./shop-hero.module.css";
 
 export const shopHeroProps = {
@@ -43,14 +44,14 @@ export function ShopHero({ content }: BlockProps<typeof shopHeroProps>) {
         (secondaryButtonText && secondaryButtonUrl) ? (
           <div className={styles.actions}>
             {primaryButtonText && primaryButtonUrl ? (
-              <a href={primaryButtonUrl} className="shop-btn shop-btn-primary">
+              <CmssyLink href={primaryButtonUrl} className="shop-btn shop-btn-primary">
                 {primaryButtonText}
-              </a>
+              </CmssyLink>
             ) : null}
             {secondaryButtonText && secondaryButtonUrl ? (
-              <a href={secondaryButtonUrl} className="shop-btn">
+              <CmssyLink href={secondaryButtonUrl} className="shop-btn">
                 {secondaryButtonText}
-              </a>
+              </CmssyLink>
             ) : null}
           </div>
         ) : null}

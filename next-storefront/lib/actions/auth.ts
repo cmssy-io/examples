@@ -2,6 +2,7 @@
 
 import * as authService from "@/services/auth";
 import { toSessionPayload } from "@/lib/cmssy/access-claims";
+import { clearCartToken } from "@/lib/cmssy/cart-cookie";
 import {
   clearSession,
   readSession,
@@ -43,8 +44,10 @@ export async function registerAction(
 
 export async function signOutAction(): Promise<{ ok: true }> {
   const session = await readSession();
-
+  if (session) {
+    await authService.signOut(session.refreshToken).catch(() => undefined);
+  }
   await clearSession();
-  if (session) await authService.signOut(session.refreshToken);
+  await clearCartToken();
   return { ok: true };
 }

@@ -1,0 +1,38 @@
+query PublicOrder($workspaceId: ID!, $orderId: ID!, $accessToken: String!) {
+  public {
+    order {
+      byToken(workspaceId: $workspaceId, orderId: $orderId, accessToken: $accessToken) {
+        id
+        orderNumber
+        status
+        paymentStatus
+        fulfillmentStatus
+        subtotal
+        discount
+        appliedDiscount { code type value amount }
+        tax
+        total
+        pricesIncludeTax
+        taxSummary { rateId name rate base amount }
+        currency
+        customerEmail
+        poNumber
+        customerNote
+        shippingTotal
+        shippingMethod { id label price }
+        shippingAddress { name company line1 line2 postalCode city region country phone vatId }
+        amountPaid
+        balanceDue
+        refundedAmount
+        trackingNumber
+        trackingCarrier
+        invoiceNumber
+        invoiceUrl
+        paidAt
+        fulfilledAt
+        createdAt
+        items { name price listPrice tierMinQty currency quantity sku taxRate taxAmount }
+      }
+    }
+  }
+}

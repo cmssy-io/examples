@@ -1,0 +1,14 @@
+query SiteTaxRates($workspaceSlug: String!) {
+  public {
+    siteConfig(workspaceSlug: $workspaceSlug) {
+      id
+      publicCart {
+        defaultTaxRateId
+        taxRates {
+          id
+          rate
+        }
+      }
+    }
+  }
+}

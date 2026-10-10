@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { localePath } from "@/lib/locale-path";
 import { useShopLocale, useShopPathname } from "./locale-ui";
 import styles from "./language-switcher.module.css";
@@ -12,6 +13,8 @@ const LABELS: Record<string, string> = {
 export function LanguageSwitcher() {
   const { locale, defaultLocale, locales } = useShopLocale();
   const pathname = useShopPathname();
+  const query = useSearchParams().toString();
+  const search = query ? `?${query}` : "";
 
   if (locales.length < 2) return null;
 
@@ -20,7 +23,7 @@ export function LanguageSwitcher() {
       {locales.map((option) => (
         <a
           key={option}
-          href={localePath(pathname, option, defaultLocale)}
+          href={`${localePath(pathname, option, defaultLocale)}${search}`}
           aria-current={option === locale ? "true" : undefined}
           className={option === locale ? styles.active : styles.option}
         >

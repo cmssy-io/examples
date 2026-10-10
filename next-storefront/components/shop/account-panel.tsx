@@ -13,7 +13,7 @@ export function AccountPanel() {
   const copy = useShopCopy();
   const router = useRouter();
   const { user, signIn, register, signOut, loading } = useCmssyUser();
-  const { merge } = useCart();
+  const { merge, refresh } = useCart();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [error, setError] = useState<string | null>(null);
 
@@ -69,6 +69,7 @@ export function AccountPanel() {
           variant="outline"
           onClick={async () => {
             await signOut();
+            await refresh();
             router.refresh();
           }}
         >

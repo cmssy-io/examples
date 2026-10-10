@@ -83,13 +83,17 @@ function toCategory(row: RecordRow): Category {
 }
 
 export async function loadCategories(locale?: string): Promise<Category[]> {
-  const data = await client.queryScoped(PublicModelRecordsDocument, {
-    modelSlug: CATEGORY_MODEL,
-    locale: locale ?? null,
-    limit: 50,
-    offset: 0,
-    sort: "sortOrder",
-  });
+  const data = await client.queryScoped(
+    PublicModelRecordsDocument,
+    {
+      modelSlug: CATEGORY_MODEL,
+      locale: locale ?? null,
+      limit: 50,
+      offset: 0,
+      sort: "sortOrder",
+    },
+    { retry: "interactive" },
+  );
 
   const items = data?.public?.model?.records?.items ?? [];
   return items.map(toCategory).sort((a, b) => {
@@ -186,15 +190,19 @@ async function queryProducts(vars: {
   offset?: number;
   sort?: string;
 }): Promise<{ items: ProductRecord[]; total: number; hasMore: boolean }> {
-  const data = await client.queryScoped(PublicModelProductsDocument, {
-    modelSlug: PRODUCT_MODEL,
-    filter: vars.filter ?? {},
-    stockState: vars.stockState ?? null,
-    locale: vars.locale ?? null,
-    limit: vars.limit ?? 50,
-    offset: vars.offset ?? 0,
-    sort: vars.sort ?? null,
-  });
+  const data = await client.queryScoped(
+    PublicModelProductsDocument,
+    {
+      modelSlug: PRODUCT_MODEL,
+      filter: vars.filter ?? {},
+      stockState: vars.stockState ?? null,
+      locale: vars.locale ?? null,
+      limit: vars.limit ?? 50,
+      offset: vars.offset ?? 0,
+      sort: vars.sort ?? null,
+    },
+    { retry: "interactive" },
+  );
   const records = data?.public?.model?.records;
   return {
     items: records?.items ?? [],
@@ -233,10 +241,17 @@ export async function loadProducts(query: ProductQuery): Promise<ProductPage> {
   if (query.categoryId) filter.category = query.categoryId;
   if (query.brand) filter.brand = query.brand;
 
-  const sorted = sortProducts(
-    await fetchAllProducts(filter, query.stockState, query.locale),
-    query.sort,
-  );
+  const all = await fetchAllProducts(filter, query.stockState, query.locale);
+  const needle = query.search?.trim().toLowerCase();
+  const matched = needle
+    ? all.filter((product) =>
+        [product.title, product.sku, product.brand ?? ""]
+          .join(" ")
+          .toLowerCase()
+          .includes(needle),
+      )
+    : all;
+  const sorted = sortProducts(matched, query.sort);
   const total = sorted.length;
   const start = (page - 1) * limit;
   const items = sorted.slice(start, start + limit);
@@ -246,6 +261,11 @@ export async function loadProducts(query: ProductQuery): Promise<ProductPage> {
     total,
     hasMore: start + items.length < total,
   };
+}
+
+export async function loadProductSlugs(locale?: string): Promise<string[]> {
+  const products = await fetchAllProducts({}, undefined, locale);
+  return products.map((product) => product.slug);
 }
 
 export async function loadProductBySlug(

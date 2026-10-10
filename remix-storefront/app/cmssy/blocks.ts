@@ -77,13 +77,7 @@ export const categoryGridBlock = defineBlock({
   props: categoryGridProps,
   loader: async ({ context }) => {
     const { loadCategories } = await import("../services/catalog");
-    if (!context) return { items: [] };
-    return {
-      items: await loadCategories({
-        current: context.locale.current,
-        default: context.locale.default,
-      }),
-    };
+    return { items: await loadCategories(context?.locale.current) };
   },
 });
 
@@ -94,17 +88,13 @@ export const productGridBlock = defineBlock({
   props: productGridProps,
   loader: async ({ content, context }) => {
     const { loadProducts } = await import("../services/catalog");
-    if (!context) return { items: [] };
-    return {
-      items: await loadProducts(
-        { current: context.locale.current, default: context.locale.default },
-        {
-          categoryId: content.category?.id,
-          sort: content.sort,
-          limit: content.limit,
-        },
-      ),
-    };
+    const page = await loadProducts({
+      categoryId: content.category?.id,
+      sort: typeof content.sort === "string" ? content.sort : "title",
+      limit: Number(content.limit) || 8,
+      locale: context?.locale.current,
+    });
+    return { items: page.items };
   },
 });
 
@@ -113,9 +103,6 @@ export const proseBlock = defineBlock({
   label: "Prose",
   component: Prose,
   props: proseProps,
-  // Sanitized in the loader, which runs only on the server: the allow-list and
-  // sanitize-html itself stay out of the client bundle, and the browser is
-  // never the thing deciding which tags were safe.
   loader: async ({ content }) => {
     const html = content.body ?? "";
     if (!html) return { html: "" };
@@ -147,25 +134,20 @@ export const blogIndexBlock = defineBlock({
   component: BlogIndex,
   props: blogIndexProps,
   loader: async ({ content, context }) => {
-    // `parentPage`, never `parentSlug`: the field was renamed when it became a
-    // page selector, and content still holding the old key is what made this
-    // block render an empty list in simple-blog for weeks (CMS-1088). The SDK
-    // collapses a single-select selector to one PageRef before it gets here.
     const parentSlug = content.parentPage?.slug;
-    if (!parentSlug || !context) return { items: [] };
+    if (!parentSlug) return { items: [] };
     const { loadPosts } = await import("../services/posts");
     return {
-      items: await loadPosts(
-        { current: context.locale.current, default: context.locale.default },
-        { parentSlug, limit: content.postsPerPage ?? 9 },
-      ),
+      items: await loadPosts({
+        parentSlug,
+        limit: Number(content.postsPerPage) || 9,
+        locale: context?.locale.current,
+        defaultLocale: context?.locale.default,
+      }),
     };
   },
 });
 
-// Layout blocks, not page blocks: the workspace puts these in the header and
-// footer regions of the homepage and every page inherits them. `category` is
-// what tells the editor to file them under Layout rather than the block picker.
 export const siteHeaderBlock = defineBlock({
   type: "site-header",
   label: "Site header",
@@ -173,14 +155,8 @@ export const siteHeaderBlock = defineBlock({
   component: SiteHeader,
   props: siteHeaderProps,
   loader: async ({ context }) => {
-    if (!context) return { categories: [] };
-    const { loadCategories } = await import("../services/catalog");
-    return {
-      categories: await loadCategories({
-        current: context.locale.current,
-        default: context.locale.default,
-      }),
-    };
+    const { loadMegaMenu } = await import("./load-mega");
+    return { categories: await loadMegaMenu(context?.locale.current) };
   },
 });
 

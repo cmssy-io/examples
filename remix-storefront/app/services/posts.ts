@@ -1,6 +1,6 @@
-import { pickLocalized } from "../lib/localized";
-import type { Locales } from "./catalog";
-import { client, PAGES_BY_TYPE_QUERY } from "./gateway";
+import { PublicPagesByTypeDocument } from "../graphql/generated/graphql";
+import { localizedText } from "../lib/localized";
+import { client } from "./gateway";
 
 export interface Post {
   id: string;
@@ -11,46 +11,29 @@ export interface Post {
   publishedAt: string | null;
 }
 
-// The delivery API returns translatable fields language-keyed
-// (e.g. `{ en: "Title" }`), so every one of them goes through `text` below.
-type Localized = string | Record<string, string> | null | undefined;
-
-interface PostRow {
-  id: string;
-  slug: string;
-  fullSlug: string;
-  publishedAt: string | null;
-  displayName: Localized;
-  seoTitle: Localized;
-  seoDescription: Localized;
+export interface LoadPostsOptions {
+  parentSlug: string;
+  limit: number;
+  locale?: string;
+  defaultLocale?: string;
 }
 
-function text(value: Localized, locales: Locales): string {
-  if (typeof value === "string") return value;
-  if (value && typeof value === "object") {
-    return pickLocalized(value as never, locales.current, locales.default);
-  }
-  return "";
-}
-
-export async function loadPosts(
-  locales: Locales,
-  options: { parentSlug: string; limit: number },
-): Promise<Post[]> {
-  const data = await client.queryScoped<{
-    public?: { page?: { byType?: { items?: PostRow[] } | null } | null } | null;
-  }>(PAGES_BY_TYPE_QUERY, {
+export async function loadPosts(options: LoadPostsOptions): Promise<Post[]> {
+  const data = await client.queryScoped(PublicPagesByTypeDocument, {
     parentSlug: options.parentSlug,
     limit: options.limit,
     offset: 0,
   });
+  const locale = { locale: options.locale, defaultLocale: options.defaultLocale };
   const items = data?.public?.page?.byType?.items ?? [];
   return items.map((item) => ({
     id: item.id,
     slug: item.slug,
     fullSlug: item.fullSlug,
-    title: text(item.seoTitle, locales) || text(item.displayName, locales),
-    summary: text(item.seoDescription, locales),
+    title:
+      localizedText(item.seoTitle, locale) ||
+      localizedText(item.displayName, locale),
+    summary: localizedText(item.seoDescription, locale),
     publishedAt: item.publishedAt,
   }));
 }

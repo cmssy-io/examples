@@ -3,11 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/components/shop/cart-provider";
+import type { ProductData } from "@/graphql/models";
 import { addItemAction, findProductAction } from "@/lib/actions/cart";
+import { localizedText } from "@/lib/localized";
 import { PRODUCT_MODEL } from "@/lib/catalog-models";
 import { Badge } from "./ui/badge";
 import { Button, buttonClass } from "./ui/button";
-import { useLocalePath, useShopCopy } from "./locale-ui";
+import { useLocalePath, useShopCopy, useShopLocale } from "./locale-ui";
 import { fill } from "@/lib/shop-copy";
 import styles from "./order.module.css";
 
@@ -35,6 +37,7 @@ function parseLines(input: string): Line[] {
 export function QuickOrder() {
   const localePath = useLocalePath();
   const copy = useShopCopy();
+  const { locale, defaultLocale } = useShopLocale();
   const { refresh } = useCart();
   const [input, setInput] = useState("");
   const [results, setResults] = useState<Result[] | null>(null);
@@ -48,31 +51,39 @@ export function QuickOrder() {
     const lines = parseLines(input);
     const outcome: Result[] = [];
 
-    for (const line of lines) {
-      const product = await findProductAction(PRODUCT_MODEL, { sku: line.sku });
-      if (!product) {
-        outcome.push({ ...line, ok: false, reason: copy.skuNotFound });
-        continue;
-      }
-      const result = await addItemAction({
-        recordId: product.id,
-        quantity: line.quantity,
-      });
-      if ("error" in result) {
-        outcome.push({ ...line, ok: false, reason: result.error });
-      } else {
-        outcome.push({
-          ...line,
-          ok: true,
-          name:
-            (product as { name?: string; title?: string }).name ??
-            (product as { title?: string }).title,
+    try {
+      for (const line of lines) {
+        const lookup = await findProductAction(PRODUCT_MODEL, { sku: line.sku });
+        if ("error" in lookup) {
+          outcome.push({ ...line, ok: false, reason: lookup.error });
+          continue;
+        }
+        const product = lookup.product;
+        if (!product) {
+          outcome.push({ ...line, ok: false, reason: copy.skuNotFound });
+          continue;
+        }
+        const result = await addItemAction({
+          recordId: product.id,
+          quantity: line.quantity,
         });
+        if ("error" in result) {
+          outcome.push({ ...line, ok: false, reason: result.error });
+        } else {
+          outcome.push({
+            ...line,
+            ok: true,
+            name: localizedText((product.data as ProductData).title, {
+            locale,
+            defaultLocale,
+          }),
+          });
+        }
       }
+      setResults(outcome);
+    } finally {
+      setBusy(false);
     }
-
-    setResults(outcome);
-    setBusy(false);
 
     if (outcome.some((line) => line.ok)) await refresh();
   }

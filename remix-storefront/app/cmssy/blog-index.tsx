@@ -1,4 +1,5 @@
 import { fields, type BlockProps } from "@cmssy/react";
+import { CmssyLink } from "../components/cmssy-link";
 import type { Post } from "../services/posts";
 import styles from "./blog-index.module.css";
 
@@ -22,7 +23,7 @@ export function BlogIndex({
   return (
     <section className={styles.grid}>
       {items.map((post) => (
-        <a
+        <CmssyLink
           key={post.id}
           href={post.fullSlug}
           className={`shop-card ${styles.card}`}
@@ -37,7 +38,7 @@ export function BlogIndex({
           ) : null}
           <h3 className={styles.title}>{post.title}</h3>
           {post.summary ? <p className={styles.excerpt}>{post.summary}</p> : null}
-        </a>
+        </CmssyLink>
       ))}
     </section>
   );

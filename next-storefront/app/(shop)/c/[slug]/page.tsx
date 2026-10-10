@@ -63,10 +63,12 @@ export default async function CategoryPage({
   const page = Math.max(1, Number(query.page ?? "1") || 1);
 
   const stockState = toStockState(query.stock);
+  const term = query.q?.trim() || undefined;
   const [result, brands, stockFacets] = await Promise.all([
     loadProducts({
       categoryId: category?.id,
       brand: query.brand,
+      search: term,
       sort: query.sort,
       stockState,
       page,
@@ -76,16 +78,7 @@ export default async function CategoryPage({
     loadStockFacets(category?.id, query.brand, locale),
   ]);
 
-  const term = query.q?.trim() || undefined;
-  const search = term?.toLowerCase();
-  const items = search
-    ? result.items.filter((product) =>
-        [product.title, product.sku, product.brand ?? ""]
-          .join(" ")
-          .toLowerCase()
-          .includes(search),
-      )
-    : result.items;
+  const items = result.items;
 
   const copy = copyFor(locale);
   const stockLabels: Record<StockState, string> = {
@@ -296,7 +289,7 @@ export default async function CategoryPage({
 
           {items.length === 0 ? (
             <div className={`shop-card ${styles.empty}`}>
-              {search ? (
+              {term ? (
                 <>
                   <h2>{copy.noProductsFound}</h2>
                   <p className="shop-muted">
@@ -328,7 +321,7 @@ export default async function CategoryPage({
             </div>
           )}
 
-          {lastPage > 1 && !search ? (
+          {lastPage > 1 ? (
             <nav className={styles.pager} aria-label={copy.paginationAria}>
               {page > 1 ? (
                 <Link

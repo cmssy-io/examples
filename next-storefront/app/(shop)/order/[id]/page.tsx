@@ -13,7 +13,10 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const { locale } = await shopLocale();
-  return { title: `${copyFor(locale).orderConfirmation} - MACHTEC` };
+  return {
+    title: `${copyFor(locale).orderConfirmation} - MACHTEC`,
+    robots: { index: false },
+  };
 }
 
 export default async function OrderPage({

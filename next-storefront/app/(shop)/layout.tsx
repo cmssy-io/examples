@@ -28,7 +28,7 @@ export default async function ShopLayout({
   children: ReactNode;
 }) {
   const [initialCart, initialUser, { locale }, editMode] = await Promise.all([
-    getCart(),
+    getCart().catch(() => null),
     currentUser(),
     shopLocale(),
     isCmssyEditMode(),
