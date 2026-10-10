@@ -17,8 +17,9 @@ export function readShopCookie(
 export function serializeShopCookie(
   name: ShopCookieName,
   value: string,
+  secure: boolean,
 ): string {
-  const options = sessionCookieOptions();
+  const options = sessionCookieOptions(secure);
   return serialize(name, value, {
     ...options,
     maxAge: value ? options.maxAge : 0,

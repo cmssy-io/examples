@@ -1,6 +1,9 @@
 import { cmssyMiddleware } from "@cmssy/astro";
+import { sequence } from "astro:middleware";
 import { cmssy } from "./cmssy.config";
+import { shopMiddleware } from "./shop/middleware";
 
-// The whole adapter. It resolves the language, routes a verified editor request
-// to /cmssy-edit, and applies the CSP that lets the admin frame this site.
-export const onRequest = cmssyMiddleware(cmssy);
+export const onRequest = sequence(
+  shopMiddleware,
+  cmssyMiddleware(cmssy, { stripLocalePrefix: true }),
+);

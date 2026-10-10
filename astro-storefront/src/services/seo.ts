@@ -1,20 +1,16 @@
-import type { CmssyLocalizedValue } from "@cmssy/core";
 import { cmssy } from "../cmssy.config";
-import { PAGE_META_QUERY, publicQuery } from "./gateway";
+import {
+  PublicPageMetaDocument,
+  type PublicPageMetaQuery,
+} from "../graphql/generated/graphql";
+import { publicRequest } from "./gateway";
 
-export interface PageMeta {
-  seoTitle: CmssyLocalizedValue;
-  seoDescription: CmssyLocalizedValue;
-  displayName: CmssyLocalizedValue;
-}
+export type PageMeta = NonNullable<PublicPageMetaQuery["public"]["page"]["get"]>;
 
 export async function fetchPageMeta(slug: string): Promise<PageMeta | null> {
-  try {
-    const data = await publicQuery<{
-      public: { page: { get: PageMeta | null } };
-    }>(PAGE_META_QUERY, { workspaceSlug: cmssy.workspaceSlug, slug });
-    return data.public.page.get;
-  } catch {
-    return null;
-  }
+  const data = await publicRequest(PublicPageMetaDocument, {
+    workspaceSlug: cmssy.workspaceSlug,
+    slug,
+  });
+  return data.public?.page?.get ?? null;
 }

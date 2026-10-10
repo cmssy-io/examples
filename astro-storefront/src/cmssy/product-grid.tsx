@@ -1,7 +1,8 @@
 import { fields, type BlockProps } from "@cmssy/react";
-import { CATEGORY_MODEL } from "../services/catalog-models";
+import catalog from "../components/shop/catalog.module.css";
+import { ProductCard } from "../components/shop/product-card";
 import type { Product } from "../services/catalog";
-import { ProductCard } from "./product-card";
+import { CATEGORY_MODEL } from "../services/catalog-models";
 import styles from "./product-grid.module.css";
 
 export const productGridProps = {
@@ -31,7 +32,7 @@ export function ProductGrid({
       {content.heading ? (
         <h2 className={styles.heading}>{content.heading}</h2>
       ) : null}
-      <div className={styles.grid}>
+      <div className={catalog.grid}>
         {items.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

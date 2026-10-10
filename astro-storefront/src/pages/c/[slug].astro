@@ -1,0 +1,256 @@
+---
+import styles from "../../components/shop/catalog.module.css";
+import NotFound from "../../components/shop/not-found.astro";
+import ShopLayout from "../../layouts/shop-layout.astro";
+import { CatalogGridIsland } from "../../islands/catalog-grid";
+import { localePath } from "../../lib/locale-path";
+import { copyFor, fill } from "../../lib/shop-copy";
+import {
+  PAGE_SIZE,
+  loadBrandFacets,
+  loadCategories,
+  loadProducts,
+  loadStockFacets,
+  type StockState,
+} from "../../services/catalog";
+import { shopPageState } from "../../shop/page-state";
+
+export const prerender = false;
+
+const SORT_VALUES = ["title", "price", "-price"] as const;
+
+function toStockState(value: string | null): StockState | undefined {
+  return value === "in" || value === "low" || value === "out"
+    ? value
+    : undefined;
+}
+
+function buildHref(
+  base: string,
+  current: Record<string, string | undefined>,
+  patch: Record<string, string | undefined>,
+): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries({ ...current, ...patch })) {
+    if (value) params.set(key, value);
+  }
+  const query = params.toString();
+  return query ? `${base}?${query}` : base;
+}
+
+const state = await shopPageState(Astro);
+const { locale, defaultLocale } = state.location;
+const copy = copyFor(locale);
+const slug = Astro.params.slug ?? "all";
+const search = Astro.url.searchParams;
+
+const categories = await loadCategories(locale);
+const category =
+  slug === "all" ? null : categories.find((item) => item.slug === slug);
+const notFound = slug !== "all" && !category;
+if (notFound) Astro.response.status = 404;
+
+const brand = search.get("brand") || undefined;
+const sort = search.get("sort") || undefined;
+const term = search.get("q")?.trim() || undefined;
+const stockState = toStockState(search.get("stock"));
+const page = Math.max(1, Number(search.get("page") ?? "1") || 1);
+
+const [result, brands, stockFacets] = notFound
+  ? [{ items: [], total: 0, hasMore: false }, [], []]
+  : await Promise.all([
+      loadProducts({
+        categoryId: category?.id,
+        brand,
+        search: term,
+        sort,
+        stockState,
+        page,
+        locale,
+      }),
+      loadBrandFacets(category?.id, locale),
+      loadStockFacets(category?.id, brand, locale),
+    ]);
+
+const lastPage = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
+const href = (path: string) => localePath(path, locale, defaultLocale);
+const base = href(`/c/${slug}`);
+const current = { brand, sort, q: term, stock: stockState };
+const stockLabels: Record<StockState, string> = {
+  in: copy.inStock,
+  low: copy.lowStock,
+  out: copy.backorder,
+};
+const sortLabels: Record<(typeof SORT_VALUES)[number], string> = {
+  title: copy.sortName,
+  price: copy.sortPriceAsc,
+  "-price": copy.sortPriceDesc,
+};
+const activeFilters = [
+  brand
+    ? {
+        label: brand,
+        clearHref: buildHref(base, current, { brand: undefined, page: undefined }),
+      }
+    : null,
+  term
+    ? {
+        label: `"${term}"`,
+        clearHref: buildHref(base, current, { q: undefined, page: undefined }),
+      }
+    : null,
+  stockState
+    ? {
+        label: stockLabels[stockState],
+        clearHref: buildHref(base, current, { stock: undefined, page: undefined }),
+      }
+    : null,
+].filter((filter) => filter !== null);
+const facetClass = (active: boolean) =>
+  `${styles.facetLink} ${active ? styles.facetLinkActive : ""}`;
+const title = `${category?.name ?? copy.allProducts} - MACHTEC`;
+---
+
+<ShopLayout state={state} title={title}>
+  {notFound ? <NotFound location={state.location} /> : (
+    <>
+      <h1 style="margin-top: 0">{category ? category.name : copy.allProducts}</h1>
+      {category?.description ? <p class="shop-muted">{category.description}</p> : null}
+
+      <div class={styles.layout}>
+        <aside class={`shop-card ${styles.facets}`}>
+          <div class={styles.facetGroup}>
+            <span class={styles.facetTitle}>{copy.category}</span>
+            <a href={href("/c/all")} class={facetClass(slug === "all")}>
+              {copy.allProducts}
+            </a>
+            {categories.map((item) => (
+              <a href={href(`/c/${item.slug}`)} class={facetClass(item.slug === slug)}>
+                {item.name}
+              </a>
+            ))}
+          </div>
+
+          {stockFacets.length > 0 ? (
+            <div class={styles.facetGroup}>
+              <span class={styles.facetTitle}>{copy.availability}</span>
+              <a
+                href={buildHref(base, current, { stock: undefined, page: undefined })}
+                class={facetClass(!stockState)}
+              >
+                {copy.anyAvailability}
+              </a>
+              {stockFacets.map((facet) => (
+                <a
+                  href={buildHref(base, current, { stock: facet.state, page: undefined })}
+                  class={facetClass(stockState === facet.state)}
+                >
+                  <span>{stockLabels[facet.state]}</span>
+                  <span class={styles.facetCount}>{facet.count}</span>
+                </a>
+              ))}
+            </div>
+          ) : null}
+
+          {brands.length > 0 ? (
+            <div class={styles.facetGroup}>
+              <span class={styles.facetTitle}>{copy.brand}</span>
+              <a
+                href={buildHref(base, current, { brand: undefined, page: undefined })}
+                class={facetClass(!brand)}
+              >
+                {copy.anyBrand}
+              </a>
+              {brands.map((facet) => (
+                <a
+                  href={buildHref(base, current, { brand: facet.brand, page: undefined })}
+                  class={facetClass(brand === facet.brand)}
+                >
+                  <span>{facet.brand}</span>
+                  <span class={styles.facetCount}>{facet.count}</span>
+                </a>
+              ))}
+            </div>
+          ) : null}
+        </aside>
+
+        <div>
+          <div class={styles.toolbar}>
+            <span class={styles.count}>
+              {fill(
+                result.total === 1 ? copy.productsCountOne : copy.productsCountMany,
+                { count: result.total },
+              )}
+              {brand ? ` ${fill(copy.fromBrand, { brand })}` : ""}
+            </span>
+            <div class={styles.sort}>
+              <span class="shop-label" style="margin: 0">{copy.sort}</span>
+              {SORT_VALUES.map((value) => (
+                <a
+                  href={buildHref(base, current, { sort: value, page: undefined })}
+                  class={facetClass((sort ?? "title") === value)}
+                >
+                  {sortLabels[value]}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {activeFilters.length > 0 ? (
+            <div class={styles.chips}>
+              <span class={styles.chipsLabel}>{copy.activeFilters}</span>
+              {activeFilters.map((filter) => (
+                <a href={filter.clearHref} class={styles.chip}>
+                  {filter.label}
+                  <span aria-hidden>x</span>
+                  <span class="shop-sr">{copy.removeFilter}</span>
+                </a>
+              ))}
+              <a href={base} class={styles.chipsReset}>{copy.reset}</a>
+            </div>
+          ) : null}
+
+          {result.items.length === 0 ? (
+            <div class={`shop-card ${styles.empty}`}>
+              {term ? (
+                <>
+                  <h2>{copy.noProductsFound}</h2>
+                  <p class="shop-muted">{fill(copy.searchEmptyHint, { term })}</p>
+                  <a class="shop-btn" href={base}>
+                    {fill(copy.browseX, {
+                      what: category ? category.name.toLowerCase() : copy.theCatalog,
+                    })}
+                  </a>
+                </>
+              ) : (
+                <>
+                  <h2>{copy.noProductsMatch}</h2>
+                  <p class="shop-muted">{copy.noProductsHint}</p>
+                  <a class="shop-btn" href={base}>{copy.clearAllFilters}</a>
+                </>
+              )}
+            </div>
+          ) : (
+            <CatalogGridIsland client:load shop={state} products={result.items} />
+          )}
+
+          {lastPage > 1 ? (
+            <nav class={styles.pager} aria-label={copy.paginationAria}>
+              {page > 1 ? (
+                <a class="shop-btn" href={buildHref(base, current, { page: String(page - 1) })}>
+                  {copy.previous}
+                </a>
+              ) : null}
+              <span class={styles.count}>{fill(copy.pageOf, { page, last: lastPage })}</span>
+              {result.hasMore ? (
+                <a class="shop-btn" href={buildHref(base, current, { page: String(page + 1) })}>
+                  {copy.next}
+                </a>
+              ) : null}
+            </nav>
+          ) : null}
+        </div>
+      </div>
+    </>
+  )}
+</ShopLayout>

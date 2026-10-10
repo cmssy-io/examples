@@ -1,4 +1,5 @@
 import { fields, type BlockProps } from "@cmssy/react";
+import { CmssyLink } from "../components/cmssy-link";
 import styles from "./site-footer.module.css";
 
 export const siteFooterProps = {
@@ -58,9 +59,9 @@ export function SiteFooter({ content }: BlockProps<typeof siteFooterProps>) {
                   .filter((link) => link.label && link.url)
                   .map((link, linkIndex) => (
                     <li key={linkIndex}>
-                      <a href={link.url} className={styles.link}>
+                      <CmssyLink href={link.url} className={styles.link}>
                         {link.label}
-                      </a>
+                      </CmssyLink>
                     </li>
                   ))}
               </ul>

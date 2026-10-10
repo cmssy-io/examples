@@ -1,4 +1,5 @@
 import { fields, mediaUrl, type BlockProps } from "@cmssy/react";
+import { CmssyLink } from "../components/cmssy-link";
 import styles from "./feature-media.module.css";
 
 export const featureMediaProps = {
@@ -46,9 +47,9 @@ export function FeatureMedia({ content }: BlockProps<typeof featureMediaProps>) 
           </ul>
         ) : null}
         {buttonText && buttonUrl ? (
-          <a href={buttonUrl} className="shop-btn shop-btn-primary">
+          <CmssyLink href={buttonUrl} className="shop-btn shop-btn-primary">
             {buttonText}
-          </a>
+          </CmssyLink>
         ) : null}
       </div>
 

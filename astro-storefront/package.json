@@ -12,7 +12,9 @@
     "build:local": "LOCAL_SERVE=1 astro build",
     "start": "node --env-file-if-exists=.env.local ./dist/server/entry.mjs",
     "smoke:edit": "node --env-file-if-exists=.env.local smoke-edit.mjs",
-    "typecheck": "astro check"
+    "typecheck": "astro check",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "types": "cmssy types --out src/graphql/models.ts"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.2",
@@ -20,18 +22,27 @@
     "@cmssy/astro": "^19.1.0",
     "@cmssy/core": "^19.1.0",
     "@cmssy/react": "^19.1.0",
+    "@graphql-typed-document-node/core": "3.2.0",
+    "@nanostores/react": "^2.0.1",
     "astro": "^7.2.2",
+    "jose": "^6.2.12",
+    "nanostores": "^1.5.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "sanitize-html": "^2.17.7"
+    "sanitize-html": "^2.17.7",
+    "stripe": "^23.0.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@astrojs/node": "^11.1.2",
+    "@cmssy/cli": "19.1.0",
+    "@graphql-codegen/cli": "^7.4.6",
+    "@graphql-codegen/client-preset": "^6.2.3",
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@types/sanitize-html": "^2.16.1",
+    "graphql": "^17.0.2",
     "typescript": "^5.9.3"
   },
   "description": "A cmssy site on Astro: the catch-all route, block registry and verified edit mode with the Astro adapter.",

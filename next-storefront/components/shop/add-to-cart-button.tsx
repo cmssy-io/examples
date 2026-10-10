@@ -29,9 +29,7 @@ export function AddToCartButton({
       onClick={async () => {
         setAdding(true);
         try {
-          await addToCart(recordId, 1);
-
-          announceAdded(name);
+          if (await addToCart(recordId, 1)) announceAdded(name);
         } finally {
           setAdding(false);
         }

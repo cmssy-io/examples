@@ -1,0 +1,8 @@
+mutation SiteMemberRegister($input: SiteMemberRegisterInput!) {
+  siteMember {
+    register(input: $input) {
+      success
+      message
+    }
+  }
+}

@@ -1,31 +1,25 @@
 import { CmssyBlock, buildBlockMap, buildBlockContext } from "@cmssy/react";
 import type { CmssyPageData } from "@cmssy/core";
 import { blocks } from "../cmssy/blocks";
+import { LocaleProvider, type ShopLocation } from "./shop/locale-ui";
 
-/**
- * The public page: React blocks rendered on the server by Astro, with no client
- * JS at all. The visitor gets HTML; the framework stays out of the render path.
- */
 export function Blocks({
   page,
-  locale,
-  defaultLocale,
-  enabledLocales,
+  location,
   blockData,
   blockContent,
 }: {
   page: CmssyPageData;
-  locale: string;
-  defaultLocale: string;
-  enabledLocales: string[];
+  location: ShopLocation;
   blockData: Record<string, unknown>;
   blockContent: Record<string, Record<string, unknown>>;
 }) {
+  const { locale, defaultLocale, locales } = location;
   const blockMap = buildBlockMap(blocks);
-  const context = buildBlockContext(locale, defaultLocale, enabledLocales);
+  const context = buildBlockContext(locale, defaultLocale, locales);
 
   return (
-    <>
+    <LocaleProvider value={location}>
       {(page.blocks ?? []).map((block) => (
         <CmssyBlock
           key={block.id}
@@ -38,6 +32,6 @@ export function Blocks({
           data={blockData[block.id]}
         />
       ))}
-    </>
+    </LocaleProvider>
   );
 }

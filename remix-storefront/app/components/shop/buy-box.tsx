@@ -43,8 +43,7 @@ export function BuyBox({
   async function handleAdd() {
     setAdding(true);
     try {
-      await addToCart(product.id, quantity);
-      announceAdded(product.title);
+      if (await addToCart(product.id, quantity)) announceAdded(product.title);
     } finally {
       setAdding(false);
     }

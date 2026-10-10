@@ -1,0 +1,17 @@
+---
+import ShopLayout from "../layouts/shop-layout.astro";
+import { QuickOrderIsland } from "../islands/quick-order";
+import { copyFor } from "../lib/shop-copy";
+import { shopPageState } from "../shop/page-state";
+
+export const prerender = false;
+
+const state = await shopPageState(Astro);
+const copy = copyFor(state.location.locale);
+---
+
+<ShopLayout state={state} title={`${copy.quickOrder} - MACHTEC`}>
+  <h1 style="margin-top: 0">{copy.quickOrder}</h1>
+  <p class="shop-muted">{copy.quickOrderIntro}</p>
+  <QuickOrderIsland client:load shop={state} />
+</ShopLayout>

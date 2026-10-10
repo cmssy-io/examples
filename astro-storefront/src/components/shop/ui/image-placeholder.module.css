@@ -1,0 +1,27 @@
+/* The design's product-image placeholder (sf-imgph): a soft diagonal tile
+   with the product/category code set in mono. No real imagery in the catalog,
+   so this is the faithful stand-in used on cards, PDP, cart lines, megamenu. */
+
+.ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--muted) 0%, var(--secondary) 100%);
+  overflow: hidden;
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--muted-foreground);
+  opacity: 0.6;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* A real product image fills the same box as the placeholder tile. */
+.img {
+  display: block;
+  object-fit: cover;
+  background: var(--card);
+}

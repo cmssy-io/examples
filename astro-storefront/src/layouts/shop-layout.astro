@@ -1,0 +1,61 @@
+---
+import { layoutBlocks } from "../cmssy/layout-blocks";
+import { Region } from "../components/Region";
+import type { ShopState } from "../components/shop/island";
+import { CartDrawerIsland } from "../islands/cart-drawer";
+import { HeaderRegionIsland } from "../islands/header-region";
+import { loadShopChrome, type ShopChrome } from "../shop/chrome";
+import "../styles/shop.css";
+
+interface Props {
+  state: ShopState;
+  chrome?: ShopChrome;
+  title: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const { state, title, description, noindex = false } = Astro.props;
+const { location } = state;
+const chrome = Astro.props.chrome ?? (await loadShopChrome(location.locale));
+const headerGroups = chrome.layouts.filter((group) => group.region === "header");
+---
+
+<html lang={location.locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    />
+    <title>{title}</title>
+    {description ? <meta name="description" content={description} /> : null}
+    {noindex ? <meta name="robots" content="noindex" /> : null}
+  </head>
+  <body>
+    <div class="shop-scope">
+      <HeaderRegionIsland
+        client:load
+        shop={state}
+        groups={headerGroups}
+        blockData={chrome.header.data}
+        blockContent={chrome.header.content}
+      />
+      <main class="shop-main">
+        <slot />
+      </main>
+      <Region
+        blocks={layoutBlocks}
+        groups={chrome.layouts}
+        region="footer"
+        location={location}
+        blockData={chrome.footer.data}
+        blockContent={chrome.footer.content}
+      />
+      <CartDrawerIsland client:load shop={state} />
+    </div>
+  </body>
+</html>

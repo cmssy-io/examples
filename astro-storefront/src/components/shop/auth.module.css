@@ -1,0 +1,191 @@
+/* Two-column trade auth (sign in / request account), adapted from the design's
+   full-bleed split into a bordered card that lives inside the shop chrome. */
+
+.auth {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background: var(--card);
+}
+
+@media (max-width: 800px) {
+  .auth {
+    grid-template-columns: 1fr;
+  }
+  .brandPane {
+    display: none;
+  }
+}
+
+.brandPane {
+  background: var(--foreground);
+  color: var(--primary-foreground);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brandMark {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  background: var(--primary-foreground);
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-bold);
+}
+
+.brandName {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+}
+
+.pitchTitle {
+  font-size: 30px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-weight: var(--font-bold);
+  margin: 0 0 16px;
+  max-width: 16ch;
+}
+
+.pitchText {
+  opacity: 0.75;
+  max-width: 42ch;
+  margin: 0 0 28px;
+}
+
+.stats {
+  display: flex;
+  gap: 28px;
+}
+
+.statValue {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-semibold);
+}
+
+.statLabel {
+  font-size: var(--text-xs);
+  opacity: 0.7;
+}
+
+.legal {
+  font-size: var(--text-xs);
+  opacity: 0.6;
+}
+
+.formPane {
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.formInner {
+  width: 100%;
+  max-width: 400px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--secondary);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  margin-bottom: 24px;
+}
+
+.tab {
+  flex: 1;
+  height: 34px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+.tabActive {
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: var(--shadow-xs);
+}
+
+.formTitle {
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  margin: 0 0 4px;
+}
+
+.formLead {
+  color: var(--muted-foreground);
+  margin: 0 0 20px;
+  font-size: var(--text-sm);
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.gridTwo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.errorBox {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: 1px solid var(--destructive);
+  background: var(--destructive-subtle);
+  color: var(--destructive-strong);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: var(--text-sm);
+}
+
+.errorBox svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.switch {
+  text-align: center;
+  margin-top: 20px;
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+
+.switchLink {
+  color: var(--foreground);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+  padding: 0;
+}

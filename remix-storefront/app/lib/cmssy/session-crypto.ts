@@ -95,10 +95,10 @@ export function isAccessExpired(
   return payload.accessExpiresAt <= now + ACCESS_EXPIRY_SKEW_MS;
 }
 
-export function sessionCookieOptions() {
+export function sessionCookieOptions(secure: boolean) {
   return {
     httpOnly: true as const,
-    secure: process.env.NODE_ENV !== "development",
+    secure,
     sameSite: "lax" as const,
     path: "/" as const,
     maxAge: SESSION_MAX_AGE_SECONDS,

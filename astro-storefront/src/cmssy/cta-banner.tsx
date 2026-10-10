@@ -1,4 +1,5 @@
 import { fields, type BlockProps } from "@cmssy/react";
+import { CmssyLink } from "../components/cmssy-link";
 import styles from "./cta-banner.module.css";
 
 export const ctaBannerProps = {
@@ -32,14 +33,14 @@ export function CtaBanner({ content }: BlockProps<typeof ctaBannerProps>) {
       (secondaryButtonText && secondaryButtonUrl) ? (
         <div className={styles.actions}>
           {primaryButtonText && primaryButtonUrl ? (
-            <a href={primaryButtonUrl} className="shop-btn shop-btn-primary">
+            <CmssyLink href={primaryButtonUrl} className="shop-btn shop-btn-primary">
               {primaryButtonText}
-            </a>
+            </CmssyLink>
           ) : null}
           {secondaryButtonText && secondaryButtonUrl ? (
-            <a href={secondaryButtonUrl} className="shop-btn">
+            <CmssyLink href={secondaryButtonUrl} className="shop-btn">
               {secondaryButtonText}
-            </a>
+            </CmssyLink>
           ) : null}
         </div>
       ) : null}

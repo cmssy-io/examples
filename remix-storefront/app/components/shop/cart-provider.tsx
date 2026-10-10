@@ -81,14 +81,14 @@ export interface CartContextValue {
     recordId: string,
     quantity?: number,
     options?: AddToCartOptions,
-  ): Promise<void>;
-  updateItem(itemId: string, quantity: number): Promise<void>;
-  removeItem(itemId: string): Promise<void>;
-  clearCart(): Promise<void>;
-  applyDiscount(code: string): Promise<void>;
-  removeDiscount(): Promise<void>;
-  setShippingMethod(shippingMethodId: string | null): Promise<void>;
-  merge(): Promise<void>;
+  ): Promise<boolean>;
+  updateItem(itemId: string, quantity: number): Promise<boolean>;
+  removeItem(itemId: string): Promise<boolean>;
+  clearCart(): Promise<boolean>;
+  applyDiscount(code: string): Promise<boolean>;
+  removeDiscount(): Promise<boolean>;
+  setShippingMethod(shippingMethodId: string | null): Promise<boolean>;
+  merge(): Promise<boolean>;
   checkout(input: CheckoutInput): Promise<CheckoutOutcome>;
   refresh(): Promise<void>;
 }
@@ -124,24 +124,26 @@ export function CartProvider({
     const run = (
       optimistic: CartAction | null,
       action: () => Promise<CartResult>,
-    ): Promise<void> => {
-      let settle: () => void = () => {};
-      const done = new Promise<void>((resolve) => {
+    ): Promise<boolean> => {
+      let settle: (accepted: boolean) => void = () => {};
+      const done = new Promise<boolean>((resolve) => {
         settle = resolve;
       });
       startTransition(async () => {
         if (optimistic) applyOptimistic(optimistic);
         try {
           const result = await action();
-          if ("error" in result) setError(result.error);
-          else {
+          if ("error" in result) {
+            setError(result.error);
+            settle(false);
+          } else {
             setCart(result.cart);
             setError(null);
+            settle(true);
           }
         } catch (err) {
           setError(actionErrorMessage(err, "Commerce request failed"));
-        } finally {
-          settle();
+          settle(false);
         }
       });
       return done;
