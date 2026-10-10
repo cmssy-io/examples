@@ -113,14 +113,19 @@ reports back:
 3. The confirmation page the buyer returns to reads `paymentStatus` from cmssy, so it shows "Paid"
    once the webhook has landed, and a "Pay now" button while the balance is still due - on the
    guest confirmation page and on a signed-in member's order page alike. "Pay now" reuses the
-   order's open Checkout Session when one exists, and expires it when the balance changed, so an
-   order never has two payable links at once.
+   order's open Checkout Session when one exists, expires it when the balance changed, and creates
+   the new one under an idempotency key for that order and amount, so a double click mints one
+   session, not two. Before the browser leaves for Stripe, the confirmation URL is pushed onto the
+   history, so Back from Stripe lands on the order, not on an empty cart.
 
-What cmssy refuses, the webhook does not retry: a canceled order, an amount above the balance, an
-unknown order come back from `recordPayment` as a GraphQL error, which the route answers with 200
-and `handled: false`, logged. Only a transport failure gets a 500, which is what makes Stripe try
-again. `recordPayment` lives in the admin schema, outside the delivery codegen this app types its
-other operations against, so `services/payments.ts` carries that one mutation by hand.
+What cmssy refuses, the webhook does not retry: a canceled order, an amount above the balance or an
+unknown order come back from `recordPayment` as a GraphQL error with `BAD_USER_INPUT` or
+`NOT_FOUND`, which the route answers with 200 and `handled: false`, logged. Anything else - a
+revoked token, a role without `orders:manage`, a write conflict, a transport failure - is a 500,
+which is what makes Stripe try again. The amount recorded is the one in the order's currency:
+`currency_conversion.amount_total` when Stripe presented the buyer another currency, `amount_total`
+otherwise. `recordPayment` lives in the admin schema, outside the delivery codegen this app types
+its other operations against, so `services/payments.ts` carries that one mutation by hand.
 
 Locally, `stripe listen --forward-to localhost:3000/api/stripe/webhook` prints the webhook secret to
 use. Test cards: `4242 4242 4242 4242`, any future date, any CVC.

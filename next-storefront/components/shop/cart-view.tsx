@@ -73,19 +73,20 @@ export function CartView({ payOnline }: { payOnline: boolean }) {
         },
       });
 
+      const token = order.accessToken;
+      const confirmation = localePath(
+        token
+          ? `/order/${order.id}?token=${encodeURIComponent(token)}`
+          : `/order/${order.id}`,
+      );
+
       if (paymentUrl) {
+        window.history.pushState(null, "", confirmation);
         window.location.assign(paymentUrl);
         return;
       }
 
-      const token = order.accessToken;
-      router.push(
-        localePath(
-          token
-            ? `/order/${order.id}?token=${encodeURIComponent(token)}`
-            : `/order/${order.id}`,
-        ),
-      );
+      router.push(confirmation);
     } catch (cause) {
       setCheckoutError(
         cause instanceof Error ? cause.message : copy.checkoutFailed,

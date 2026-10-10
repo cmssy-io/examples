@@ -1,7 +1,7 @@
 import type Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { stripeClient, stripeWebhookSecret } from "@/lib/stripe";
-import { OrderPaymentRefused, recordOrderPayment } from "@/services/payments";
+import { recordOrderPayment } from "@/services/payments";
 
 const PAID_EVENTS = new Set<Stripe.Event.Type>([
   "checkout.session.completed",
@@ -38,11 +38,9 @@ export async function POST(request: Request) {
 
   const session = event.data.object as Stripe.Checkout.Session;
   const orderId = session.metadata?.cmssyOrderId;
-  if (
-    session.payment_status !== "paid" ||
-    !orderId ||
-    session.amount_total === null
-  ) {
+  const amount =
+    session.currency_conversion?.amount_total ?? session.amount_total;
+  if (session.payment_status !== "paid" || !orderId || amount === null) {
     return NextResponse.json({ received: true, handled: false });
   }
 
@@ -52,25 +50,21 @@ export async function POST(request: Request) {
       : (session.payment_intent?.id ?? session.id);
 
   try {
-    const order = await recordOrderPayment({
-      orderId,
-      amount: session.amount_total,
-      reference,
-    });
-    return NextResponse.json({
-      received: true,
-      handled: true,
-      paymentStatus: order.paymentStatus,
-    });
-  } catch (error) {
-    if (error instanceof OrderPaymentRefused) {
-      console.warn("stripe webhook: cmssy refused the payment", error.message);
+    const outcome = await recordOrderPayment({ orderId, amount, reference });
+    if ("refused" in outcome) {
+      console.warn("stripe webhook: cmssy refused the payment", outcome.refused);
       return NextResponse.json({
         received: true,
         handled: false,
-        refused: error.message,
+        refused: outcome.refused,
       });
     }
+    return NextResponse.json({
+      received: true,
+      handled: true,
+      paymentStatus: outcome.recorded.paymentStatus,
+    });
+  } catch (error) {
     console.error("stripe webhook: payment not recorded on cmssy", error);
     return new Response("Payment not recorded", { status: 500 });
   }
