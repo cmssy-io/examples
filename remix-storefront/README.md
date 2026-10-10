@@ -160,4 +160,6 @@ so `pnpm build` produces exactly what Vercel deploys. The preset splits the
 server build into per-runtime bundles (`build/server/nodejs_<hash>/index.js`)
 that Vercel's builder knows how to find and `react-router-serve` does not - which
 is why serving it yourself is `pnpm build:local && pnpm start`, not
-`pnpm build && pnpm start`.
+`pnpm build && pnpm start`. `pnpm start` runs with `NODE_ENV=production`, so the
+shop's cookies carry `Secure`; to use the cart or sign in over plain http, run
+`NODE_ENV=development pnpm start` instead.

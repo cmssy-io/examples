@@ -75,9 +75,8 @@ export async function sealSession(payload: SessionPayload): Promise<string> {
 export async function openSession(
   token: string,
 ): Promise<SessionPayload | null> {
-  const key = await sessionKey();
-
   try {
+    const key = await sessionKey();
     const { payload } = await jwtDecrypt(token, key, {
       keyManagementAlgorithms: ["dir"],
       contentEncryptionAlgorithms: ["A256GCM"],

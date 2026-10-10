@@ -48,7 +48,7 @@ export function AccountPanel() {
     if (mode === "signup") {
       const signedIn = await signIn(email, password);
       if (!signedIn.ok) {
-        setError(signedIn.message ?? copy.couldNotSignIn);
+        setError(result.message ?? signedIn.message ?? copy.couldNotSignIn);
         return;
       }
     }

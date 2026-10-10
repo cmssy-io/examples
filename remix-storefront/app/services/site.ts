@@ -5,6 +5,7 @@ import {
 } from "../graphql/generated/graphql";
 import type { SiteLocales } from "../lib/locale-path";
 import type { LocalizedValue } from "../lib/localized";
+import { ttlCache } from "../lib/ttl-cache";
 import { publicRequest } from "./gateway";
 
 export interface SiteConfig {
@@ -15,14 +16,10 @@ export interface SiteConfig {
   branding: { ogImageUrl: string | null } | null;
 }
 
-let cached: Promise<SiteConfig | null> | undefined;
+const siteConfigCache = ttlCache<SiteConfig | null>(60_000);
 
 export function fetchSiteConfig(): Promise<SiteConfig | null> {
-  cached ??= loadSiteConfig().catch((error: unknown) => {
-    cached = undefined;
-    throw error;
-  });
-  return cached;
+  return siteConfigCache("site-config", loadSiteConfig);
 }
 
 async function loadSiteConfig(): Promise<SiteConfig | null> {
