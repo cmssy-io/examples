@@ -1,0 +1,32 @@
+import { useLocation } from "react-router";
+import { localePath } from "../../lib/locale-path";
+import styles from "./language-switcher.module.css";
+import { useShopLocale, useShopPathname } from "./locale-ui";
+
+const LABELS: Record<string, string> = {
+  en: "EN",
+  no: "NO",
+};
+
+export function LanguageSwitcher() {
+  const { locale, defaultLocale, locales } = useShopLocale();
+  const pathname = useShopPathname();
+  const { search } = useLocation();
+
+  if (locales.length < 2) return null;
+
+  return (
+    <div className={styles.switcher}>
+      {locales.map((option) => (
+        <a
+          key={option}
+          href={`${localePath(pathname, option, defaultLocale)}${search}`}
+          aria-current={option === locale ? "true" : undefined}
+          className={option === locale ? styles.active : styles.option}
+        >
+          {LABELS[option] ?? option.toUpperCase()}
+        </a>
+      ))}
+    </div>
+  );
+}

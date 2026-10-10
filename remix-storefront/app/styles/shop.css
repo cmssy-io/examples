@@ -76,13 +76,17 @@ body {
   font-weight: var(--font-medium);
   box-shadow: var(--shadow-xs);
   cursor: pointer;
-  transition:
-    background var(--duration-fast) var(--ease-out),
+  transition: background var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out);
 }
 
 .shop-btn:hover:not(:disabled) {
   border-color: var(--muted-foreground);
+}
+
+.shop-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .shop-btn-primary {
@@ -96,9 +100,35 @@ body {
   border-color: var(--primary);
 }
 
+.shop-input,
+.shop-select {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--text-sm);
+  box-shadow: var(--shadow-xs);
+}
+
+.shop-input:focus-visible,
+.shop-select:focus-visible,
 .shop-btn:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+
+.shop-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin-bottom: 5px;
 }
 
 .shop-card {
@@ -106,8 +136,7 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xs);
-  transition:
-    box-shadow var(--duration-fast) var(--ease-out),
+  transition: box-shadow var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out);
 }
 
@@ -121,8 +150,7 @@ a.shop-card:hover {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  transition:
-    box-shadow var(--duration-fast) var(--ease-out),
+  transition: box-shadow var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out);
 }
 
@@ -133,4 +161,53 @@ a.shop-card:hover {
 
 .shop-muted {
   color: var(--muted-foreground);
+}
+
+.shop-error {
+  color: var(--destructive);
+  font-size: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .shop-scope {
+    --shop-bg: #0f1216;
+    --shop-surface: #171c22;
+    --shop-border: #2a323c;
+    --shop-ink: #e9edf2;
+    --shop-muted: #97a2b0;
+    --shop-ink-inverse: #e9edf2;
+    --shop-dark: #0b0e12;
+    --shop-ok: #4ade80;
+    --shop-warn: #fbbf24;
+    --shop-danger: #f87171;
+  }
+}
+
+@keyframes sf-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.sf-skel {
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  animation: sf-pulse 1.2s ease-in-out infinite;
+}
+
+.shop-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }

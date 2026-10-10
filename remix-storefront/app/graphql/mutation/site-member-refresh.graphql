@@ -1,0 +1,11 @@
+mutation SiteMemberRefresh($refreshToken: String!) {
+  siteMember {
+    refresh(refreshToken: $refreshToken) {
+      success
+      message
+      accessToken
+      refreshToken
+      accessTokenExpiresIn
+    }
+  }
+}

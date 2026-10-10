@@ -1,30 +1,14 @@
 import type { MetadataRoute } from "next";
-import { loadCategories, loadProducts } from "@/lib/catalog";
+import { loadCategories, loadProductSlugs } from "@/lib/catalog";
 import { localePath } from "@/lib/locale";
 import { fetchSiteConfig, resolveSiteLocales } from "@/services/site";
 import { listPublicPages } from "@/services/pages";
 import { siteUrl } from "@/lib/site-url";
 
-const PAGE_SIZE = 50;
-const MAX_PAGES = 40;
-
 interface SitemapContext {
   baseUrl: string;
   defaultLocale: string;
   locales: string[];
-}
-
-async function allProductSlugs(): Promise<string[]> {
-  const slugs: string[] = [];
-  for (let page = 1; page <= MAX_PAGES; page++) {
-    const { items, hasMore } = await loadProducts({ page, limit: PAGE_SIZE });
-    slugs.push(...items.map((product) => product.slug));
-    if (!hasMore) return slugs;
-  }
-  console.warn(
-    `sitemap: stopped after ${MAX_PAGES} pages - the catalog has more products than that`,
-  );
-  return slugs;
 }
 
 function languagesFor(path: string, { baseUrl, defaultLocale, locales }: SitemapContext) {
@@ -47,7 +31,7 @@ async function shopEntries(
   const { baseUrl, defaultLocale, locales } = context;
   const [categories, productSlugs] = await Promise.all([
     loadCategories(),
-    allProductSlugs(),
+    loadProductSlugs(),
   ]);
 
   const paths = [

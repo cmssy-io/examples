@@ -1,13 +1,18 @@
 import { fields, type BlockProps } from "@cmssy/react";
-import type { Category } from "../services/catalog";
+import { useState } from "react";
+import { Link } from "react-router";
+import { useCart } from "../components/shop/cart-provider";
+import { useCartUi } from "../components/shop/cart-ui";
+import { LanguageSwitcher } from "../components/shop/language-switcher";
+import { useLocalePath, useShopCopy } from "../components/shop/locale-ui";
+import { useCmssyUser } from "../components/shop/user-provider";
 import { CATEGORY_MODEL } from "../services/catalog-models";
+import { HeaderNav } from "./header-nav";
+import { HeaderSearch } from "./header-search";
+import { AccountIcon, CartIcon, QuickOrderIcon } from "./icons";
+import type { MegaCategory } from "./load-mega";
 import styles from "./site-header.module.css";
 
-// Field for field the same declaration as next-storefront's, and that is not a
-// stylistic preference: the block manifest is per-workspace, all four examples
-// point at cmssy/cmssy-demo, and whichever handshake ran last decides what the
-// editor offers everyone. A narrower schema here would quietly take fields away
-// from the Next example's editor.
 export const siteHeaderProps = {
   utilityNote: fields.text({ label: "Utility bar note" }),
   hoursNote: fields.text({ label: "Opening hours" }),
@@ -36,52 +41,54 @@ export const siteHeaderProps = {
 };
 
 export interface SiteHeaderData {
-  categories: Category[];
+  categories: MegaCategory[];
 }
 
-function SearchIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  );
+type NavSelection = NonNullable<
+  BlockProps<typeof siteHeaderProps>["content"]["navCategories"]
+>;
+
+function selectCategories(
+  all: MegaCategory[],
+  selection: NavSelection,
+): MegaCategory[] {
+  const ids = selection
+    .map((item) => item.category?.id)
+    .filter((id): id is string => Boolean(id));
+  if (ids.length === 0) return all;
+  return ids.flatMap((id) => {
+    const category = all.find((candidate) => candidate.id === id);
+    return category ? [category] : [];
+  });
 }
 
 export function SiteHeader({
   content,
   data,
 }: BlockProps<typeof siteHeaderProps, SiteHeaderData>) {
-  const all = data?.categories ?? [];
-  const picked = (content.navCategories ?? [])
-    .map((item) => item.category?.id)
-    .filter((id): id is string => Boolean(id));
-  // Empty means every category, which is what the field's own helper text
-  // promises the editor.
-  const categories = picked.length
-    ? picked
-        .map((id) => all.find((category) => category.id === id))
-        .filter((category): category is Category => Boolean(category))
-    : all;
+  const { cart } = useCart();
+  const { openDrawer } = useCartUi();
+  const { user } = useCmssyUser();
+  const localePath = useLocalePath();
+  const copy = useShopCopy();
+
+  const [megaOpen, setMegaOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const categories = selectCategories(
+    data?.categories ?? [],
+    content.navCategories ?? [],
+  );
+  const itemCount = cart?.itemCount ?? 0;
   const brandName = content.brandName ?? "";
+  const signInLabel = content.signInLabel ?? copy.tradeSignIn;
+  const closeMega = () => setMegaOpen(false);
 
   return (
     <>
       <div className={styles.utility}>
         <div className={styles.utilityInner}>
-          {content.utilityNote ? (
-            <span className={styles.utilityNote}>{content.utilityNote}</span>
-          ) : null}
+          <span className={styles.utilityNote}>{content.utilityNote}</span>
           <div className={styles.utilityList}>
             {content.hoursNote ? (
               <span className={styles.hoursNote}>{content.hoursNote}</span>
@@ -91,16 +98,17 @@ export function SiteHeader({
                 {content.dispatchNote}
               </span>
             ) : null}
-            {content.signInLabel ? (
-              <a href="/account">{content.signInLabel}</a>
-            ) : null}
+            <Link to={localePath("/account")}>
+              {user ? user.email : signInLabel}
+            </Link>
+            <LanguageSwitcher />
           </div>
         </div>
       </div>
 
-      <header className={styles.header}>
+      <header className={styles.header} onMouseLeave={closeMega}>
         <div className={styles.headerInner}>
-          <a href="/" className={styles.brand}>
+          <Link to={localePath("/")} className={styles.brand}>
             <span className={styles.brandMark} aria-hidden>
               {brandName.slice(0, 1)}
             </span>
@@ -112,43 +120,52 @@ export function SiteHeader({
                 </span>
               ) : null}
             </span>
-          </a>
+          </Link>
 
-          {content.searchPlaceholder ? (
-            <form action="/c/all" method="get" className={styles.search}>
-              <input
-                className={styles.searchInput}
-                type="search"
-                name="q"
-                placeholder={content.searchPlaceholder}
-                aria-label={content.searchPlaceholder}
-              />
-              <button
-                type="submit"
-                className={styles.searchButton}
-                aria-label={content.searchPlaceholder}
-              >
-                <SearchIcon />
-              </button>
-            </form>
-          ) : null}
+          <HeaderSearch placeholder={content.searchPlaceholder} />
+
+          <div className={styles.actions}>
+            <Link to={localePath("/quick-order")} className={styles.action}>
+              <QuickOrderIcon />
+              <span>{copy.quickOrder}</span>
+            </Link>
+            <Link to={localePath("/account")} className={styles.action}>
+              <AccountIcon />
+              <span>{copy.account}</span>
+            </Link>
+            <Link
+              to={localePath("/cart")}
+              className={`${styles.action} ${styles.actionStrong}`}
+              onClick={(event) => {
+                if (
+                  event.metaKey ||
+                  event.ctrlKey ||
+                  event.shiftKey ||
+                  event.altKey
+                ) {
+                  return;
+                }
+                event.preventDefault();
+                openDrawer();
+              }}
+            >
+              <CartIcon />
+              <span>{copy.cart}</span>
+              {itemCount > 0 ? (
+                <span className={styles.badge}>{itemCount}</span>
+              ) : null}
+            </Link>
+          </div>
         </div>
 
-        {categories.length > 0 ? (
-          <nav className={styles.nav}>
-            <div className={styles.navInner}>
-              {categories.map((category) => (
-                <a
-                  key={category.id}
-                  href={`/c/${category.slug}`}
-                  className={styles.navLink}
-                >
-                  {category.name}
-                </a>
-              ))}
-            </div>
-          </nav>
-        ) : null}
+        <HeaderNav
+          categories={categories}
+          megaOpen={megaOpen}
+          activeIndex={activeIndex}
+          onOpenChange={setMegaOpen}
+          onActivate={setActiveIndex}
+          onClose={closeMega}
+        />
       </header>
     </>
   );

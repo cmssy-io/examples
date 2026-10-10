@@ -1,7 +1,9 @@
 import { localizeHref } from "@cmssy/remix";
 import { cmssy } from "../../cmssy.config";
 import { siteUrlFor } from "../lib/site-url";
+import { loadCategories, loadProductSlugs } from "../services/catalog";
 import { listPublicPages } from "../services/pages";
+import type { SiteLocales } from "../lib/locale-path";
 import { fetchSiteConfig, resolveSiteLocales } from "../services/site";
 import type { Route } from "./+types/sitemap";
 
@@ -14,6 +16,10 @@ interface SitemapEntry {
   loc: string;
   lastModified: string | null;
   alternates: SitemapAlternate[];
+}
+
+interface SitemapContext extends SiteLocales {
+  siteUrl: string;
 }
 
 function xmlEscape(value: string): string {
@@ -42,51 +48,78 @@ function renderEntry(entry: SitemapEntry): string {
 }
 
 function pathFor(slug: string): string {
-  const normalized = slug.startsWith("/") ? slug : `/${slug}`;
-  return normalized === "/" ? "/" : normalized;
+  return slug.startsWith("/") ? slug : `/${slug}`;
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const siteUrl = siteUrlFor(cmssy, request);
-  const [locales, pages, siteConfig] = await Promise.all([
-    resolveSiteLocales(),
+function entriesFor(
+  path: string,
+  lastModified: string | null,
+  { siteUrl, defaultLocale, locales }: SitemapContext,
+): SitemapEntry[] {
+  const hrefFor = (locale: string) =>
+    `${siteUrl}${localizeHref(path, { default: defaultLocale, enabled: locales, current: locale })}`;
+  const alternates =
+    locales.length > 1
+      ? [
+          ...locales.map((locale) => ({
+            hreflang: locale,
+            href: hrefFor(locale),
+          })),
+          { hreflang: "x-default", href: hrefFor(defaultLocale) },
+        ]
+      : [];
+  return locales.map((locale) => ({
+    loc: hrefFor(locale),
+    lastModified,
+    alternates,
+  }));
+}
+
+async function pageEntries(context: SitemapContext): Promise<SitemapEntry[]> {
+  const [pages, siteConfig] = await Promise.all([
     listPublicPages(),
     fetchSiteConfig(),
   ]);
   const notFoundPageId = siteConfig?.notFoundPageId ?? null;
-
-  const entries = pages
+  return pages
     .filter((page) => page.publishedAt && page.id !== notFoundPageId)
-    .flatMap<SitemapEntry>((page) => {
-      // The SDK owns the prefix rule - the default language has none, every
-      // other enabled one is a first segment. A sitemap that spells that out
-      // itself is a second implementation of it, and the two drift.
-      const hrefFor = (locale: string) =>
-        `${siteUrl}${localizeHref(pathFor(page.slug), { ...locales, current: locale })}`;
-      // One language means no alternates worth listing, and an `x-default`
-      // pointing at the only URL on the entry tells a crawler nothing.
-      const alternates =
-        locales.enabled.length > 1
-          ? [
-              ...locales.enabled.map((locale) => ({
-                hreflang: locale,
-                href: hrefFor(locale),
-              })),
-              { hreflang: "x-default", href: hrefFor(locales.default) },
-            ]
-          : [];
+    .flatMap((page) =>
+      entriesFor(
+        pathFor(page.slug),
+        page.updatedAt ?? page.publishedAt ?? null,
+        context,
+      ),
+    );
+}
 
-      return locales.enabled.map((locale) => ({
-        loc: hrefFor(locale),
-        lastModified: page.updatedAt ?? page.publishedAt,
-        alternates,
-      }));
-    });
+async function shopEntries(context: SitemapContext): Promise<SitemapEntry[]> {
+  const [categories, productSlugs] = await Promise.all([
+    loadCategories(),
+    loadProductSlugs(),
+  ]);
+  const paths = [
+    "/c/all",
+    ...categories.map((category) => `/c/${category.slug}`),
+    ...productSlugs.map((slug) => `/p/${slug}`),
+  ];
+  return paths.flatMap((path) => entriesFor(path, null, context));
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const locales = await resolveSiteLocales();
+  const context: SitemapContext = {
+    ...locales,
+    siteUrl: siteUrlFor(cmssy, request),
+  };
+  const [pages, shop] = await Promise.all([
+    pageEntries(context),
+    shopEntries(context),
+  ]);
 
   const body = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
-    ...entries.map(renderEntry),
+    ...[...pages, ...shop].map(renderEntry),
     "</urlset>",
   ].join("\n");
 

@@ -2,7 +2,6 @@ import {
   CmssyBlock,
   buildBlockContext,
   buildBlockMap,
-  resolveCmssyLayoutSlot,
   resolveEditorBlockData,
   resolveEditorLayoutBlockData,
   type EditorBlockData,
@@ -13,8 +12,11 @@ import { cmssy } from "../../cmssy.config";
 import { blocks } from "../cmssy/blocks";
 import { CmssyEditor } from "../cmssy/editor";
 import { Region } from "../cmssy/region";
-import { pickLocalized } from "../lib/localized";
+import { CartDrawer } from "../components/shop/cart-drawer";
+import { ShopNotFound } from "../components/shop/shop-error";
+import { localizedText } from "../lib/localized";
 import { fetchPageMeta } from "../services/seo";
+import { loadShopChrome } from "../shop/chrome";
 import type { Route } from "./+types/page";
 
 const cmssyLoader = createCmssyLoader(cmssy);
@@ -32,39 +34,27 @@ export async function loader(args: Route.LoaderArgs) {
         config: cmssy,
       });
 
-  // The header and the footer live in the workspace, on the homepage, and every
-  // page inherits them - so they are content, resolved the way the page's own
-  // blocks are, not chrome hard-coded into this route.
-  //
-  // A URL with no page behind it inherits nothing, which would leave the 404 the
-  // only page on the site with no way off it. The regions of "/" are the site's
-  // own, so that is what it gets.
-  const layouts = data.page
-    ? data.layouts
-    : (
-        await resolveCmssyLayoutSlot(cmssy, {
-          region: "header",
-          blocks,
-          editMode: false,
-          path: [],
-          locale: data.locale,
-        })
-      ).groups;
+  const chrome = data.page
+    ? null
+    : await loadShopChrome(data.locale);
+  const layouts = chrome ? chrome.layouts : data.layouts;
 
-  const [header, footer] = await Promise.all(
-    (["header", "footer"] as const).map((region) =>
-      resolveEditorLayoutBlockData({
-        groups: layouts,
-        blocks,
-        region,
-        page: data.pageContext,
-        locale: data.locale,
-        defaultLocale: data.defaultLocale,
-        enabledLocales: data.enabledLocales,
-        config: cmssy,
-      }),
-    ),
-  );
+  const [header, footer] = chrome
+    ? [chrome.header, chrome.footer]
+    : await Promise.all(
+        (["header", "footer"] as const).map((region) =>
+          resolveEditorLayoutBlockData({
+            groups: layouts,
+            blocks,
+            region,
+            page: data.pageContext,
+            locale: data.locale,
+            defaultLocale: data.defaultLocale,
+            enabledLocales: data.enabledLocales,
+            config: cmssy,
+          }),
+        ),
+      );
 
   const payload = {
     ...data,
@@ -86,13 +76,9 @@ export async function loader(args: Route.LoaderArgs) {
 export function meta({ loaderData: data }: Route.MetaArgs) {
   if (!data) return [];
   const title =
-    pickLocalized(data.meta?.seoTitle, data.locale, data.defaultLocale) ||
-    pickLocalized(data.meta?.displayName, data.locale, data.defaultLocale);
-  const description = pickLocalized(
-    data.meta?.seoDescription,
-    data.locale,
-    data.defaultLocale,
-  );
+    localizedText(data.meta?.seoTitle, data) ||
+    localizedText(data.meta?.displayName, data);
+  const description = localizedText(data.meta?.seoDescription, data);
 
   return [
     ...(title ? [{ title }] : []),
@@ -170,10 +156,11 @@ export default function CmssyPage({ loaderData }: Route.ComponentProps) {
             />
           ))
         ) : (
-          <h1>Not found</h1>
+          <ShopNotFound />
         )}
       </main>
       {region("footer")}
+      <CartDrawer />
     </div>
   );
 }

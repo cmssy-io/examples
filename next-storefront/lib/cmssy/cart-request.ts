@@ -18,6 +18,7 @@ export async function cartRequest<R, V>(
     buildVariables(workspaceId),
     {
       public: true,
+      retry: "interactive",
       headers: {
         "x-workspace-id": workspaceId,
         "x-cart-session": cartToken,

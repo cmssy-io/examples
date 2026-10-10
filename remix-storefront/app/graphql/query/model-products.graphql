@@ -1,0 +1,36 @@
+query PublicModelProducts(
+  $workspaceId: String!
+  $modelSlug: String!
+  $filter: JSON
+  $stockState: String
+  $locale: String
+  $limit: Int
+  $offset: Int
+  $sort: String
+) {
+  public {
+    model {
+      records(
+        workspaceId: $workspaceId
+        modelSlug: $modelSlug
+        filter: $filter
+        stockState: $stockState
+        locale: $locale
+        limit: $limit
+        offset: $offset
+        sort: $sort
+      ) {
+        items {
+          id
+          data
+          priceTiers {
+            minQty
+            price
+          }
+        }
+        total
+        hasMore
+      }
+    }
+  }
+}

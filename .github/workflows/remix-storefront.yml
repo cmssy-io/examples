@@ -64,6 +64,38 @@ jobs:
       # them.
       - run: pnpm typecheck
 
+      - name: The CLI and the runtime SDK are the same version
+        run: |
+          set -euo pipefail
+          version() {
+            node -p "JSON.parse(require('fs').readFileSync('node_modules/@cmssy/$1/package.json','utf8')).version"
+          }
+          cli=$(version cli)
+          core=$(version core)
+          if [ "$cli" != "$core" ]; then
+            echo "::error::@cmssy/cli $cli writes the operations, the app runs @cmssy/core $core - bump both"
+            exit 1
+          fi
+          echo "both on $cli"
+
+      - name: Generated types match the workspace and the SDK
+        env:
+          CMSSY_ORG_SLUG: cmssy
+          CMSSY_WORKSPACE_SLUG: cmssy-demo
+        run: pnpm types --check
+
+      - name: Generated documents are up to date
+        env:
+          CMSSY_ORG_SLUG: cmssy
+          CMSSY_WORKSPACE_SLUG: cmssy-demo
+        run: |
+          pnpm codegen
+          if [ -n "$(git status --porcelain -- app/graphql/generated)" ]; then
+            git status --short -- app/graphql/generated
+            echo "::error::run pnpm codegen and commit app/graphql/generated"
+            exit 1
+          fi
+
       # This example reads the workspace at request time, not at build time, so
       # the build needs no CMS credentials and can run on every PR. Kept beside
       # the assertion below, which builds with `build:local`: this line is the

@@ -1,0 +1,30 @@
+mutation RemoveCartItem($workspaceId: ID!, $itemId: ID!) {
+  cart {
+    removeItem(workspaceId: $workspaceId, itemId: $itemId) {
+      id
+      status
+      itemCount
+      subtotal
+      currency
+      discountedTotal
+      tax
+      totalGross
+      pricesIncludeTax
+      shippingTotal
+      taxSummary { rateId name rate base amount }
+      shippingMethod { id label price etaLabel }
+      availableShippingMethods { id label price etaLabel }
+      appliedDiscount { code type value computedAmount }
+      items {
+        id
+        recordId
+        quantity
+        variantSelections
+        unitPrice
+        currentPrice
+        priceMismatch
+        snapshot { name price currency imageUrl sku tiers { minQty price } }
+      }
+    }
+  }
+}

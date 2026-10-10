@@ -1,4 +1,5 @@
 import { fields, type BlockProps } from "@cmssy/react";
+import { CmssyLink } from "../components/cmssy-link";
 import type { Category } from "../services/catalog";
 import styles from "./category-grid.module.css";
 
@@ -20,7 +21,7 @@ export function CategoryGrid({
       ) : null}
       <div className={styles.grid}>
         {items.map((category) => (
-          <a
+          <CmssyLink
             key={category.id}
             href={`/c/${category.slug}`}
             className={`shop-card ${styles.card}`}
@@ -32,7 +33,7 @@ export function CategoryGrid({
             {category.description ? (
               <span className="shop-muted">{category.description}</span>
             ) : null}
-          </a>
+          </CmssyLink>
         ))}
       </div>
     </section>

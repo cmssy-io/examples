@@ -70,11 +70,19 @@ export async function mergeCartAction(): Promise<CartResult> {
   return settle(cart.mergeCart());
 }
 
+export type FindProductResult =
+  | { product: Product | null }
+  | { error: string };
+
 export async function findProductAction(
   modelSlug: string,
   filter: Record<string, unknown>,
-): Promise<Product | null> {
-  return cart.findProduct(modelSlug, filter);
+): Promise<FindProductResult> {
+  try {
+    return { product: await cart.findProduct(modelSlug, filter) };
+  } catch (err) {
+    return { error: errorMessage(err) };
+  }
 }
 
 export type CheckoutResult =

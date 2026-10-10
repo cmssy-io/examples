@@ -1,0 +1,14 @@
+query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON) {
+  public {
+    model {
+      records(workspaceId: $workspaceId, modelSlug: $modelSlug, filter: $filter, limit: 1) {
+        items {
+          id
+          data
+          priceTiers { minQty price }
+          variants { id sku price inventory tiers { minQty price } selectedOptions { name value } }
+        }
+      }
+    }
+  }
+}

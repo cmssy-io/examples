@@ -1,4 +1,5 @@
 import { fields, type BlockProps } from "@cmssy/react";
+import { CmssyLink } from "../components/cmssy-link";
 import styles from "./promo-strip.module.css";
 
 export const promoStripProps = {
@@ -15,9 +16,9 @@ export function PromoStrip({ content }: BlockProps<typeof promoStripProps>) {
     <aside className={styles.strip}>
       <span>{text}</span>
       {linkText && linkUrl ? (
-        <a href={linkUrl} className={styles.link}>
+        <CmssyLink href={linkUrl} className={styles.link}>
           {linkText}
-        </a>
+        </CmssyLink>
       ) : null}
     </aside>
   );

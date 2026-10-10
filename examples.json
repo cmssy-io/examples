@@ -178,6 +178,50 @@
           "lang": "no"
         },
         {
+          "path": "/c/all",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/no/cart",
+          "lang": "no",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/cart",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/account",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/quick-order",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/xx/cart",
+          "status": 404,
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
           "path": "/no-page-lives-here",
           "status": 404,
           "elements": [
@@ -198,10 +242,54 @@
             "blocks": []
           },
           "status": 403
+        },
+        {
+          "path": "/api/cart",
+          "status": 405
+        },
+        {
+          "path": "/api/cart",
+          "method": "POST",
+          "headers": {
+            "content-type": "application/json"
+          },
+          "body": {
+            "intent": "nope"
+          },
+          "status": 400
+        },
+        {
+          "path": "/api/auth",
+          "status": 405
+        },
+        {
+          "path": "/api/auth",
+          "method": "POST",
+          "headers": {
+            "content-type": "application/json"
+          },
+          "body": {
+            "intent": "nope"
+          },
+          "status": 400
+        },
+        {
+          "path": "/api/stripe/webhook",
+          "status": 405
+        },
+        {
+          "path": "/api/stripe/webhook",
+          "method": "POST",
+          "headers": {
+            "content-type": "application/json"
+          },
+          "body": {},
+          "status": 503
         }
       ],
       "$blockDataComment": "No GET row here, unlike the Next examples: Astro answers 404 for a GET on a POST-only endpoint and React Router answers 400, so 405 is a Next-ism. The forged POST covers both claims anyway - an unmounted route 404s on the POST too, so 403 proves mounted AND refusing.",
-      "assertSitemap": true
+      "$shopComment": "The storefront routes are plain app routes on the same header and footer as the cmssy pages, mounted once bare and once under a locale prefix: `/no/cart` is the Norwegian cart and `/xx/cart` is a 404 with the chrome still around it, because only a language the workspace enables is a prefix. `/no/cart` rather than `/no/c/all`: the catalogue page is the most expensive render against the demo workspace's delivery budget (its facets re-read the whole product list), and the locale mechanics are the same loader either way. `/api/cart` and `/api/auth` are POST-only resource routes behind the cart and sign-in actions, so a GET is 405. The two `/api/stripe/webhook` targets prove the route is mounted the way the Next entry does: GET is 405, and a POST with no Stripe keys in the environment is 503, not 404.",
+      "$sitemapComment": "No `assertSitemap` any more, for the reason next-storefront has none: the sitemap now lists the catalogue too (148 URLs on cmssy-demo), and the assertion fetches its first 60 in parallel, which is 60 page renders at once against the demo workspace's delivery rate limit. Nothing in CI fetches `/sitemap.xml` now; the locale prefix it emits is the one `/no/cart` and `/no/blog` above route, and the sitemap itself is checked by hand (148 URLs on cmssy-demo, one per enabled language with hreflang alternates)."
     },
     {
       "dir": "vite-spa",
