@@ -1,18 +1,14 @@
 ---
-import { localePath } from "../lib/locale-path";
+import { CMSSY_LOCALE_HEADER } from "@cmssy/astro";
 import { copyFor } from "../lib/shop-copy";
-import { shopLocale } from "../shop/locale";
 import "../styles/shop.css";
 
-const locale = await shopLocale(Astro.request).catch(() => null);
-const code = locale?.locale ?? "en";
-const copy = copyFor(code);
-const retryHref = locale
-  ? localePath(Astro.originPathname, locale.locale, locale.defaultLocale)
-  : "/";
+const locale = Astro.request.headers.get(CMSSY_LOCALE_HEADER) ?? "en";
+const copy = copyFor(locale);
+const retryHref = Astro.originPathname;
 ---
 
-<html lang={code}>
+<html lang={locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
