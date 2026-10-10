@@ -3,8 +3,13 @@
 import type { ShippingAddressInput } from "@/graphql/generated/graphql";
 import type { Cart, CheckoutOrder, Product } from "@/graphql/types";
 import * as cart from "@/services/cart";
+import { fetchOrderByToken, getMyOrder } from "@/services/orders";
+import { createPaymentSession } from "@/services/payments";
 import { clearCartToken } from "@/lib/cmssy/cart-cookie";
 import { parseShippingAddress } from "@/lib/cmssy/shipping-address";
+import { localePath, shopLocale } from "@/lib/locale";
+import { siteUrl } from "@/lib/site-url";
+import { copyFor } from "@/lib/shop-copy";
 
 export type CartResult = { cart: Cart } | { error: string };
 
@@ -72,7 +77,40 @@ export async function findProductAction(
   return cart.findProduct(modelSlug, filter);
 }
 
-export type CheckoutResult = { order: CheckoutOrder } | { error: string };
+export type CheckoutResult =
+  | { order: CheckoutOrder; paymentUrl: string | null }
+  | { error: string };
+
+async function confirmationUrl(
+  orderId: string,
+  accessToken: string | null,
+): Promise<string> {
+  const { locale, defaultLocale } = await shopLocale();
+  const path = accessToken
+    ? `/order/${orderId}?token=${encodeURIComponent(accessToken)}`
+    : `/order/${orderId}`;
+  return `${siteUrl()}${localePath(path, locale, defaultLocale)}`;
+}
+
+async function paymentUrlFor(order: {
+  id: string;
+  orderNumber: number | null;
+  currency: string;
+  customerEmail: string;
+  accessToken: string | null;
+  amount: number;
+}): Promise<string | null> {
+  const { locale } = await shopLocale();
+  return createPaymentSession({
+    orderId: order.id,
+    orderNumber: order.orderNumber,
+    currency: order.currency,
+    amount: order.amount,
+    customerEmail: order.customerEmail,
+    confirmationUrl: await confirmationUrl(order.id, order.accessToken),
+    locale,
+  });
+}
 
 export async function checkoutAction(input: {
   customerEmail: string;
@@ -88,7 +126,72 @@ export async function checkoutAction(input: {
       shippingAddress: parseShippingAddress(input.shippingAddress),
     });
     await clearCartToken();
-    return { order };
+    let paymentUrl: string | null = null;
+    try {
+      paymentUrl = await paymentUrlFor({
+        id: order.id,
+        orderNumber: order.orderNumber ?? null,
+        currency: order.currency,
+        customerEmail: order.customerEmail,
+        accessToken: order.accessToken ?? null,
+        amount: order.total,
+      });
+    } catch (err) {
+      console.error("checkout: order placed, payment session not created", err);
+    }
+    return { order, paymentUrl };
+  } catch (err) {
+    return { error: errorMessage(err) };
+  }
+}
+
+export type PayOrderResult = { url: string } | { error: string };
+
+async function payExistingOrder(
+  order: {
+    id: string;
+    orderNumber?: number | null;
+    status: string;
+    currency: string;
+    customerEmail: string;
+    balanceDue: number;
+  } | null,
+  accessToken: string | null,
+): Promise<PayOrderResult> {
+  const { locale } = await shopLocale();
+  const copy = copyFor(locale);
+  if (!order) return { error: copy.orderNotFound };
+  if (order.status === "canceled") return { error: copy.orderCanceled };
+  if (order.balanceDue <= 0) return { error: copy.orderAlreadyPaid };
+  const url = await paymentUrlFor({
+    id: order.id,
+    orderNumber: order.orderNumber ?? null,
+    currency: order.currency,
+    customerEmail: order.customerEmail,
+    accessToken,
+    amount: order.balanceDue,
+  });
+  return url ? { url } : { error: copy.onlinePaymentUnavailable };
+}
+
+export async function payOrderAction(
+  orderId: string,
+  accessToken: string,
+): Promise<PayOrderResult> {
+  try {
+    const order = await fetchOrderByToken(orderId, accessToken);
+    return await payExistingOrder(order, accessToken);
+  } catch (err) {
+    return { error: errorMessage(err) };
+  }
+}
+
+export async function payMyOrderAction(
+  orderId: string,
+): Promise<PayOrderResult> {
+  try {
+    const order = await getMyOrder(orderId);
+    return await payExistingOrder(order, null);
   } catch (err) {
     return { error: errorMessage(err) };
   }

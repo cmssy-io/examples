@@ -50,7 +50,7 @@ Measured 2026-10-10: four of the five examples register the whole block set -
 `next-storefront`, `astro-storefront` and `remix-storefront` 14 `defineBlock` calls each, and
 `vite-spa` 13. `simple-blog` registers 2, which is its entire surface: a `/blog` listing and
 a post. Every example carries `assertRender` targets in `examples.json` and none is marked
-`buildOnly`, so all five are asserted in CI - 4, 6, 7, 7 and 1 target respectively, with the Astro
+`buildOnly`, so all five are asserted in CI - 6, 6, 7, 7 and 1 target respectively, with the Astro
 and React Router storefronts also asserting their sitemap.
 
 ## Why this repo exists

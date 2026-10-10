@@ -35,9 +35,22 @@
             "blocks": []
           },
           "status": 403
+        },
+        {
+          "path": "/api/stripe/webhook",
+          "status": 405
+        },
+        {
+          "path": "/api/stripe/webhook",
+          "method": "POST",
+          "headers": {
+            "content-type": "application/json"
+          },
+          "body": {},
+          "status": 503
         }
       ],
-      "$assertComment": "No `elements` on the 404: this example answers 404 correctly but streams the body client-side, so the served HTML carries neither region. astro and remix render theirs server-side and are asserted for it."
+      "$assertComment": "No `elements` on the 404: this example answers 404 correctly but streams the body client-side, so the served HTML carries neither region. astro and remix render theirs server-side and are asserted for it. The two `/api/stripe/webhook` targets prove the route is mounted: GET is 405, and a POST with no Stripe keys in the environment is 503, not 404 - CI runs without keys, so 503 is what a mounted route answers there."
     },
     {
       "dir": "simple-blog",

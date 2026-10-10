@@ -89,6 +89,52 @@ Four values (cmssy cloud handles the rest):
 | `CMSSY_DRAFT_SECRET`   | cmssy dashboard -> Settings -> Headless (generated per workspace - copy the exact value) |
 | `CMSSY_SESSION_SECRET` | Generate one: `openssl rand -base64 32`. Seals the member session cookie.                |
 
+Three more turn on card payment with Stripe Checkout, and only all three together do: with one or
+two of them set the shop stays on the invoice flow, so a buyer can never pay on Stripe while the
+webhook has no secret or no token to record the payment with. Without them checkout places the
+order and the confirmation page reads "awaiting payment", which is the net-30 flow:
+
+| Variable                | Where to find it                                                                                   |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
+| `STRIPE_SECRET_KEY`     | `sk_test_...` from the Stripe dashboard, Developers -> API keys, test mode                         |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` of a webhook endpoint at `<origin>/api/stripe/webhook` subscribed to `checkout.session.completed` and `checkout.session.async_payment_succeeded` |
+| `CMSSY_API_TOKEN`       | `cs_...` from cmssy dashboard -> Settings -> API tokens, created by a member whose role can manage orders; the token acts as that member. Server-only. |
+
+### Paying an order with Stripe
+
+cmssy is the order record and never holds a payment key. The storefront does the paying and
+reports back:
+
+1. `checkoutAction` places the order through `cart.checkout` - the order exists, unpaid, before any
+   money moves. With `STRIPE_SECRET_KEY` set it then opens a Stripe Checkout Session for the order's
+   total, with the cmssy order id in the session metadata, and the browser is sent to Stripe.
+2. Stripe calls `POST /api/stripe/webhook`. The route verifies the signature with
+   `STRIPE_WEBHOOK_SECRET`, reads the order id back out of the session, and records the payment on
+   the order with the admin mutation `order.recordPayment`, authenticated with `CMSSY_API_TOKEN`.
+   The mutation is idempotent on the payment reference, so a retried webhook records nothing twice.
+3. The confirmation page the buyer returns to reads `paymentStatus` from cmssy, so it shows "Paid"
+   once the webhook has landed, and a "Pay now" button while the balance is still due - on the
+   guest confirmation page and on a signed-in member's order page alike. "Pay now" reuses the
+   order's open Checkout Session when one exists (looked up among the buyer's open sessions, by
+   `customer_details.email`), expires it when the balance changed, and creates the new one under an
+   idempotency key for that order, amount and the session it supersedes, so a double click mints
+   one session, not two; a concurrent create in another locale trips Stripe's idempotency check and
+   falls back to the session the first request made. Before the browser leaves for Stripe, the
+   confirmation URL is pushed onto the history, so Back from Stripe lands on the order, not on an
+   empty cart.
+
+What cmssy refuses, the webhook does not retry: a canceled order, an amount above the balance or an
+unknown order come back from `recordPayment` as a GraphQL error with `BAD_USER_INPUT` or
+`NOT_FOUND`, which the route answers with 200 and `handled: false`, logged. Anything else - a
+revoked token, a role without `orders:manage`, a write conflict, a transport failure - is a 500,
+which is what makes Stripe try again. The amount recorded is the one in the order's currency:
+`currency_conversion.amount_total` when Stripe presented the buyer another currency, `amount_total`
+otherwise. `recordPayment` lives in the admin schema, outside the delivery codegen this app types
+its other operations against, so `services/payments.ts` carries that one mutation by hand.
+
+Locally, `stripe listen --forward-to localhost:3000/api/stripe/webhook` prints the webhook secret to
+use. Test cards: `4242 4242 4242 4242`, any future date, any CVC.
+
 ## Project structure
 
 ```
@@ -100,6 +146,7 @@ app/(shop)/
   c/[slug]/ p/[slug]/    category and product pages (model records, not CMS pages)
   cart/ account/ order/  cart, sign-in, order history and receipts
 app/api/draft/route.ts   draft/preview mode entry (createDraftRoute)
+app/api/stripe/webhook/  verifies Stripe's signature, records the payment on the order
 app/sitemap.ts robots.ts SEO built from the workspace's pages plus the catalogue
 blocks/                  14 blocks; each is block.ts + Component.tsx + CSS Module
 cmssy/
@@ -107,9 +154,10 @@ cmssy/
   editor.tsx             lazy-loads blocks for the visual editor
   editable-layout.tsx    mounts header/footer through the edit bridge
 graphql/                 one .graphql file per operation + codegen output (committed)
-services/                pages, site, layout, seo, cart, auth, orders
+services/                pages, site, layout, seo, cart, auth, orders, payments
 lib/cmssy/               session sealing, cart + member tokens, request helpers
-lib/actions/             Server Actions for cart and auth
+lib/actions/             Server Actions for cart, checkout + payment and auth
+lib/stripe.ts            the Stripe client, present only when STRIPE_SECRET_KEY is set
 cmssy.config.ts          org + workspaceSlug + draftSecret + resolveLocale
 codegen.ts               types the .graphql files against the live delivery schema
 proxy.ts                 locale header, session refresh, verified edit rewrite, CSP

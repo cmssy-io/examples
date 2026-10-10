@@ -96,7 +96,7 @@ export interface CartContextValue {
   removeDiscount(): Promise<void>;
   setShippingMethod(shippingMethodId: string | null): Promise<void>;
   merge(): Promise<void>;
-  checkout(input: CheckoutInput): Promise<CheckoutOrder>;
+  checkout(input: CheckoutInput): Promise<CheckoutOutcome>;
   refresh(): Promise<void>;
 }
 
@@ -105,6 +105,11 @@ export interface CheckoutInput {
   poNumber: string | null;
   customerNote: string | null;
   shippingAddress: ShippingAddressInput | null;
+}
+
+export interface CheckoutOutcome {
+  order: CheckoutOrder;
+  paymentUrl: string | null;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -183,7 +188,7 @@ export function CartProvider({
         }
         if ("error" in result) throw new Error(result.error);
         setCart(null);
-        return result.order;
+        return result;
       },
       refresh: async () => {
         try {

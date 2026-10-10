@@ -4,6 +4,7 @@ import { currentUser } from "@/lib/cmssy/session";
 import { listMyOrders } from "@/services/orders";
 import { shopLocale } from "@/lib/locale";
 import { copyFor } from "@/lib/shop-copy";
+import { payOnline } from "@/lib/stripe";
 
 export async function generateMetadata() {
   const { locale } = await shopLocale();
@@ -21,7 +22,7 @@ export default async function AccountPage() {
     <>
       <h1 style={{ marginTop: 0 }}>{copy.tradeAccount}</h1>
       <AccountPanel />
-      {user ? <OrderHistory orders={orders} /> : null}
+      {user ? <OrderHistory orders={orders} payOnline={payOnline()} /> : null}
     </>
   );
 }

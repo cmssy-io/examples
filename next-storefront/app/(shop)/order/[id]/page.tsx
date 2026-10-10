@@ -3,6 +3,8 @@ import { fetchOrderByToken, getMyOrder } from "@/services/orders";
 import { currentUser } from "@/lib/cmssy/session";
 import { AccountOrder } from "@/components/shop/account-order";
 import { OrderReceipt, paymentLabel } from "@/components/shop/order-receipt";
+import { PayOrderButton } from "@/components/shop/pay-order-button";
+import { payOnline } from "@/lib/stripe";
 import { localePath, shopLocale } from "@/lib/locale";
 import { copyFor } from "@/lib/shop-copy";
 import styles from "@/components/shop/order.module.css";
@@ -19,10 +21,10 @@ export default async function OrderPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string; paid?: string }>;
 }) {
   const { id } = await params;
-  const { token } = await searchParams;
+  const { token, paid } = await searchParams;
   const { locale, defaultLocale } = await shopLocale();
   const href = (path: string) => localePath(path, locale, defaultLocale);
   const copy = copyFor(locale);
@@ -41,7 +43,13 @@ export default async function OrderPage({
         </div>
       );
     }
-    return <AccountOrder order={order} />;
+    return (
+      <AccountOrder
+        order={order}
+        payOnline={payOnline()}
+        paid={Boolean(paid)}
+      />
+    );
   }
 
   const order = await fetchOrderByToken(id, token);
@@ -93,7 +101,20 @@ export default async function OrderPage({
           {copy.confirmationSentTo}{" "}
           <span className={styles.strong}>{order.customerEmail}</span>
         </p>
-        <span className={styles.badge}>{paymentLabel(order, copy)}</span>
+        <span className={styles.badge}>
+          {paymentLabel(order, copy, payOnline())}
+        </span>
+        {paid && order.balanceDue > 0 ? (
+          <p className={styles.subtitle}>
+            {copy.paymentConfirming}{" "}
+            <Link
+              className={styles.strong}
+              href={href(`/order/${order.id}?token=${encodeURIComponent(token)}`)}
+            >
+              {copy.checkOrderStatus}
+            </Link>
+          </p>
+        ) : null}
       </div>
 
       <OrderReceipt order={order} copy={copy} />
@@ -108,6 +129,12 @@ export default async function OrderPage({
       ) : null}
 
       <div className={styles.actions}>
+        {payOnline() &&
+        order.balanceDue > 0 &&
+        order.status !== "canceled" &&
+        !paid ? (
+          <PayOrderButton orderId={order.id} token={token} />
+        ) : null}
         <Link className="shop-btn shop-btn-primary" href={href("/c/all")}>
           {copy.continueShopping}
         </Link>

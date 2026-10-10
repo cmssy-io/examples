@@ -5,9 +5,13 @@ import styles from "./order.module.css";
 
 type ReceiptOrder = Order | PublicOrder;
 
-export function paymentLabel(order: ReceiptOrder, copy: ShopCopy) {
+export function paymentLabel(
+  order: ReceiptOrder,
+  copy: ShopCopy,
+  payOnline = false,
+) {
   const labels: Record<string, string> = {
-    unpaid: copy.awaitingPayment,
+    unpaid: payOnline ? copy.awaitingPaymentOnline : copy.awaitingPayment,
     partially_paid: copy.partiallyPaid,
     paid: copy.paid,
     refunded: copy.refunded,
