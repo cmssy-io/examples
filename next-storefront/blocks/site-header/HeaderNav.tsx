@@ -7,13 +7,12 @@ import {
   useShopPathname,
 } from "@/components/shop/locale-ui";
 import { MegaMenu } from "./MegaMenu";
-import { ChevronIcon, MenuIcon, TruckIcon } from "./icons";
+import { ChevronIcon, MenuIcon } from "./icons";
 import type { MegaCategory } from "./load-mega";
 import styles from "./SiteHeader.module.css";
 
 export function HeaderNav({
   categories,
-  dispatchNote,
   megaOpen,
   activeIndex,
   onOpenChange,
@@ -21,7 +20,6 @@ export function HeaderNav({
   onClose,
 }: {
   categories: MegaCategory[];
-  dispatchNote?: string;
   megaOpen: boolean;
   activeIndex: number;
   onOpenChange: (open: boolean) => void;
@@ -69,13 +67,6 @@ export function HeaderNav({
               {category.name}
             </Link>
           ))}
-
-          {dispatchNote ? (
-            <span className={styles.dispatch}>
-              <TruckIcon />
-              {dispatchNote}
-            </span>
-          ) : null}
         </div>
       </nav>
 

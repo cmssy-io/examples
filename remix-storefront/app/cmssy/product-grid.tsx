@@ -1,6 +1,8 @@
 import { fields, type BlockProps } from "@cmssy/react";
 import { CATEGORY_MODEL } from "../services/catalog-models";
 import type { Product } from "../services/catalog";
+import { ProductCard } from "./product-card";
+import styles from "./product-grid.module.css";
 
 export const productGridProps = {
   heading: fields.text({ label: "Heading", defaultValue: "Popular lines" }),
@@ -25,18 +27,15 @@ export function ProductGrid({
   if (items.length === 0) return null;
 
   return (
-    <section>
-      {content.heading ? <h2>{content.heading}</h2> : null}
-      <ul>
+    <section className={styles.section}>
+      {content.heading ? (
+        <h2 className={styles.heading}>{content.heading}</h2>
+      ) : null}
+      <div className={styles.grid}>
         {items.map((product) => (
-          <li key={product.id}>
-            <a href={`/p/${product.slug}`}>
-              <strong>{product.title}</strong>
-              {product.sku ? <span>{product.sku}</span> : null}
-            </a>
-          </li>
+          <ProductCard key={product.id} product={product} />
         ))}
-      </ul>
+      </div>
     </section>
   );
 }

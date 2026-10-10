@@ -12,6 +12,7 @@ import { ShopHero, shopHeroProps } from "./shop-hero";
 import { SiteFooter, siteFooterProps } from "./site-footer";
 import { SiteHeader, siteHeaderProps } from "./site-header";
 import { StatsBand, statsBandProps } from "./stats-band";
+import { ValueProps, valuePropsProps } from "./value-props";
 
 export const heroBlock = defineBlock({
   type: "hero",
@@ -32,6 +33,13 @@ export const promoStripBlock = defineBlock({
   label: "Promo strip",
   component: PromoStrip,
   props: promoStripProps,
+});
+
+export const valuePropsBlock = defineBlock({
+  type: "value-props",
+  label: "Value props",
+  component: ValueProps,
+  props: valuePropsProps,
 });
 
 export const statsBandBlock = defineBlock({
@@ -188,6 +196,7 @@ export const blocks = [
   heroBlock,
   shopHeroBlock,
   promoStripBlock,
+  valuePropsBlock,
   statsBandBlock,
   faqBlock,
   ctaBannerBlock,

@@ -1,4 +1,5 @@
 import { fields, type BlockProps } from "@cmssy/react";
+import styles from "./stats-band.module.css";
 
 export const statsBandProps = {
   items: fields.repeater({
@@ -14,19 +15,17 @@ export const statsBandProps = {
 };
 
 export function StatsBand({ content }: BlockProps<typeof statsBandProps>) {
-  const items = content.items ?? [];
+  const items = (content.items ?? []).filter((item) => item.value);
   if (items.length === 0) return null;
 
   return (
-    <section>
-      <dl>
-        {items.map((item, index) => (
-          <div key={index}>
-            <dt>{item.value}</dt>
-            {item.label ? <dd>{item.label}</dd> : null}
-          </div>
-        ))}
-      </dl>
+    <section className={styles.band}>
+      {items.map((item, index) => (
+        <div key={index} className={styles.stat}>
+          <strong className={styles.value}>{item.value}</strong>
+          {item.label ? <span className={styles.label}>{item.label}</span> : null}
+        </div>
+      ))}
     </section>
   );
 }
