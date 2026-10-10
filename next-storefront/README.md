@@ -96,7 +96,7 @@ the confirmation page reads "awaiting payment", which is the net-30 flow:
 | ----------------------- | -------------------------------------------------------------------------------------------------- |
 | `STRIPE_SECRET_KEY`     | `sk_test_...` from the Stripe dashboard, Developers -> API keys, test mode                         |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_...` of a webhook endpoint at `<origin>/api/stripe/webhook` for `checkout.session.completed` |
-| `CMSSY_API_TOKEN`       | `cs_...` with the orders scope, cmssy dashboard -> Settings -> API tokens. Server-only.           |
+| `CMSSY_API_TOKEN`       | `cs_...` from cmssy dashboard -> Settings -> API tokens, created by a member whose role can manage orders; the token acts as that member. Server-only. |
 
 ### Paying an order with Stripe
 
@@ -111,7 +111,16 @@ reports back:
    the order with the admin mutation `order.recordPayment`, authenticated with `CMSSY_API_TOKEN`.
    The mutation is idempotent on the payment reference, so a retried webhook records nothing twice.
 3. The confirmation page the buyer returns to reads `paymentStatus` from cmssy, so it shows "Paid"
-   once the webhook has landed, and a "Pay now" button while the balance is still due.
+   once the webhook has landed, and a "Pay now" button while the balance is still due - on the
+   guest confirmation page and on a signed-in member's order page alike. "Pay now" reuses the
+   order's open Checkout Session when one exists, and expires it when the balance changed, so an
+   order never has two payable links at once.
+
+What cmssy refuses, the webhook does not retry: a canceled order, an amount above the balance, an
+unknown order come back from `recordPayment` as a GraphQL error, which the route answers with 200
+and `handled: false`, logged. Only a transport failure gets a 500, which is what makes Stripe try
+again. `recordPayment` lives in the admin schema, outside the delivery codegen this app types its
+other operations against, so `services/payments.ts` carries that one mutation by hand.
 
 Locally, `stripe listen --forward-to localhost:3000/api/stripe/webhook` prints the webhook secret to
 use. Test cards: `4242 4242 4242 4242`, any future date, any CVC.
@@ -127,6 +136,7 @@ app/(shop)/
   c/[slug]/ p/[slug]/    category and product pages (model records, not CMS pages)
   cart/ account/ order/  cart, sign-in, order history and receipts
 app/api/draft/route.ts   draft/preview mode entry (createDraftRoute)
+app/api/stripe/webhook/  verifies Stripe's signature, records the payment on the order
 app/sitemap.ts robots.ts SEO built from the workspace's pages plus the catalogue
 blocks/                  14 blocks; each is block.ts + Component.tsx + CSS Module
 cmssy/
@@ -134,9 +144,10 @@ cmssy/
   editor.tsx             lazy-loads blocks for the visual editor
   editable-layout.tsx    mounts header/footer through the edit bridge
 graphql/                 one .graphql file per operation + codegen output (committed)
-services/                pages, site, layout, seo, cart, auth, orders
+services/                pages, site, layout, seo, cart, auth, orders, payments
 lib/cmssy/               session sealing, cart + member tokens, request helpers
-lib/actions/             Server Actions for cart and auth
+lib/actions/             Server Actions for cart, checkout + payment and auth
+lib/stripe.ts            the Stripe client, present only when STRIPE_SECRET_KEY is set
 cmssy.config.ts          org + workspaceSlug + draftSecret + resolveLocale
 codegen.ts               types the .graphql files against the live delivery schema
 proxy.ts                 locale header, session refresh, verified edit rewrite, CSP

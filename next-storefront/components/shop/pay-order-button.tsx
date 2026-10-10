@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { payOrderAction } from "@/lib/actions/cart";
+import { payMyOrderAction, payOrderAction } from "@/lib/actions/cart";
 import { actionErrorMessage } from "@/lib/action-errors";
 import { useShopCopy } from "./locale-ui";
 
@@ -10,7 +10,7 @@ export function PayOrderButton({
   token,
 }: {
   orderId: string;
-  token: string;
+  token?: string;
 }) {
   const copy = useShopCopy();
   const [pending, setPending] = useState(false);
@@ -20,7 +20,9 @@ export function PayOrderButton({
     setPending(true);
     setError(null);
     try {
-      const result = await payOrderAction(orderId, token);
+      const result = token
+        ? await payOrderAction(orderId, token)
+        : await payMyOrderAction(orderId);
       if ("error" in result) throw new Error(result.error);
       window.location.assign(result.url);
     } catch (cause) {

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Order } from "@/graphql/types";
 import { OrderReceipt, paymentLabel } from "./order-receipt";
+import { PayOrderButton } from "./pay-order-button";
 import type { BadgeVariant } from "./ui/badge";
 import { Badge } from "./ui/badge";
 import { buttonClass } from "./ui/button";
@@ -96,9 +97,19 @@ function OrderTimeline({ order, copy }: { order: Order; copy: ShopCopy }) {
   );
 }
 
-export function AccountOrder({ order }: { order: Order }) {
+export function AccountOrder({
+  order,
+  payOnline,
+  paid,
+}: {
+  order: Order;
+  payOnline: boolean;
+  paid: boolean;
+}) {
   const localePath = useLocalePath();
   const copy = useShopCopy();
+  const canPay =
+    payOnline && order.balanceDue > 0 && order.status !== "canceled";
 
   const tracking = order.trackingNumber
     ? [order.trackingCarrier, order.trackingNumber].filter(Boolean).join(" ")
@@ -121,8 +132,16 @@ export function AccountOrder({ order }: { order: Order }) {
         <div className={`shop-card ${styles.statusCard}`}>
           <div className={styles.statusLabel}>{copy.statusPayment}</div>
           <Badge variant={paymentVariant(order.paymentStatus)}>
-            {paymentLabel(order, copy)}
+            {paymentLabel(order, copy, payOnline)}
           </Badge>
+          {paid && order.balanceDue > 0 ? (
+            <p className="shop-muted">
+              {copy.paymentConfirming}{" "}
+              <Link href={localePath(`/order/${order.id}`)}>
+                {copy.checkOrderStatus}
+              </Link>
+            </p>
+          ) : null}
         </div>
         <div className={`shop-card ${styles.statusCard}`}>
           <div className={styles.statusLabel}>{copy.statusFulfilment}</div>
@@ -146,6 +165,7 @@ export function AccountOrder({ order }: { order: Order }) {
       </div>
 
       <div className={styles.actions}>
+        {canPay && !paid ? <PayOrderButton orderId={order.id} /> : null}
         {order.invoiceUrl ? (
           <a className={buttonClass("outline")} href={order.invoiceUrl}>
             {copy.downloadInvoice}

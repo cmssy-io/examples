@@ -1,7 +1,7 @@
 import type Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { stripeClient, stripeWebhookSecret } from "@/lib/stripe";
-import { recordOrderPayment } from "@/services/payments";
+import { OrderPaymentRefused, recordOrderPayment } from "@/services/payments";
 
 const PAID_EVENTS = new Set<Stripe.Event.Type>([
   "checkout.session.completed",
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   }
 
   const session = event.data.object as Stripe.Checkout.Session;
-  const orderId = session.metadata?.cmssyOrderId ?? session.client_reference_id;
+  const orderId = session.metadata?.cmssyOrderId;
   if (
     session.payment_status !== "paid" ||
     !orderId ||
@@ -63,6 +63,14 @@ export async function POST(request: Request) {
       paymentStatus: order.paymentStatus,
     });
   } catch (error) {
+    if (error instanceof OrderPaymentRefused) {
+      console.warn("stripe webhook: cmssy refused the payment", error.message);
+      return NextResponse.json({
+        received: true,
+        handled: false,
+        refused: error.message,
+      });
+    }
     console.error("stripe webhook: payment not recorded on cmssy", error);
     return new Response("Payment not recorded", { status: 500 });
   }

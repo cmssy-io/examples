@@ -1,5 +1,6 @@
-import { createCmssyClient, graphqlRequest } from "@cmssy/core";
+import { CmssyRequestError, createCmssyClient, graphqlRequest } from "@cmssy/core";
 import { cmssy } from "@/cmssy.config";
+import type Stripe from "stripe";
 import { stripeClient } from "@/lib/stripe";
 import { copyFor } from "@/lib/shop-copy";
 
@@ -17,11 +18,29 @@ export interface PaymentSessionInput {
   locale: string;
 }
 
+async function openSessionFor(stripe: Stripe, orderId: string) {
+  const open = await stripe.checkout.sessions.list({
+    status: "open",
+    limit: 100,
+  });
+  return open.data.find(
+    (session) => session.metadata?.cmssyOrderId === orderId,
+  );
+}
+
 export async function createPaymentSession(
   input: PaymentSessionInput,
 ): Promise<string | null> {
   const stripe = stripeClient();
   if (!stripe || input.amount <= 0) return null;
+
+  const existing = await openSessionFor(stripe, input.orderId);
+  if (existing) {
+    if (existing.amount_total === input.amount && existing.url) {
+      return existing.url;
+    }
+    await stripe.checkout.sessions.expire(existing.id);
+  }
 
   const copy = copyFor(input.locale);
   const name = input.orderNumber
@@ -72,6 +91,15 @@ export interface RecordedPayment {
   balanceDue: number;
 }
 
+const RECORD_PAYMENT_LABEL = "record order payment";
+
+export class OrderPaymentRefused extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "OrderPaymentRefused";
+  }
+}
+
 export async function recordOrderPayment(input: {
   orderId: string;
   amount: number;
@@ -85,19 +113,30 @@ export async function recordOrderPayment(input: {
   }
   const workspaceId = await client.resolveWorkspaceId();
 
-  const data = await graphqlRequest<{
-    order: { recordPayment: RecordedPayment };
-  }>(
-    cmssy,
-    RECORD_ORDER_PAYMENT,
-    { input: { ...input, provider: PAYMENT_PROVIDER } },
-    {
-      headers: {
-        authorization: `Bearer ${token}`,
-        "x-workspace-id": workspaceId,
+  try {
+    const data = await graphqlRequest<{
+      order: { recordPayment: RecordedPayment };
+    }>(
+      cmssy,
+      RECORD_ORDER_PAYMENT,
+      { input: { ...input, provider: PAYMENT_PROVIDER } },
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+          "x-workspace-id": workspaceId,
+        },
       },
-    },
-    "record order payment",
-  );
-  return data.order.recordPayment;
+      RECORD_PAYMENT_LABEL,
+    );
+    return data.order.recordPayment;
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      !(error instanceof CmssyRequestError) &&
+      error.message.startsWith(`cmssy: ${RECORD_PAYMENT_LABEL} error`)
+    ) {
+      throw new OrderPaymentRefused(error.message);
+    }
+    throw error;
+  }
 }

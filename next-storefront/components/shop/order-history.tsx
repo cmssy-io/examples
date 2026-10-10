@@ -3,10 +3,17 @@
 import Link from "next/link";
 import type { Order } from "@/graphql/types";
 import { formatMoney } from "@/lib/money";
+import { paymentLabel } from "./order-receipt";
 import { useLocalePath, useShopCopy } from "./locale-ui";
 import styles from "./order.module.css";
 
-export function OrderHistory({ orders }: { orders: Order[] }) {
+export function OrderHistory({
+  orders,
+  payOnline,
+}: {
+  orders: Order[];
+  payOnline: boolean;
+}) {
   const localePath = useLocalePath();
   const copy = useShopCopy();
 
@@ -30,7 +37,9 @@ export function OrderHistory({ orders }: { orders: Order[] }) {
                 {order.poNumber ? (
                   <span className="shop-muted"> - PO {order.poNumber}</span>
                 ) : null}
-                <div className={styles.status}>{order.status}</div>
+                <div className={styles.status}>
+                  {order.status} · {paymentLabel(order, copy, payOnline)}
+                </div>
               </div>
               <span>{formatMoney(order.total, order.currency)}</span>
             </Link>

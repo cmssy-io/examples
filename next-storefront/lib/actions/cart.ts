@@ -3,12 +3,13 @@
 import type { ShippingAddressInput } from "@/graphql/generated/graphql";
 import type { Cart, CheckoutOrder, Product } from "@/graphql/types";
 import * as cart from "@/services/cart";
-import { fetchOrderByToken } from "@/services/orders";
+import { fetchOrderByToken, getMyOrder } from "@/services/orders";
 import { createPaymentSession } from "@/services/payments";
 import { clearCartToken } from "@/lib/cmssy/cart-cookie";
 import { parseShippingAddress } from "@/lib/cmssy/shipping-address";
 import { localePath, shopLocale } from "@/lib/locale";
 import { siteUrl } from "@/lib/site-url";
+import { copyFor } from "@/lib/shop-copy";
 
 export type CartResult = { cart: Cart } | { error: string };
 
@@ -146,23 +147,51 @@ export async function checkoutAction(input: {
 
 export type PayOrderResult = { url: string } | { error: string };
 
+async function payExistingOrder(
+  order: {
+    id: string;
+    orderNumber?: number | null;
+    status: string;
+    currency: string;
+    customerEmail: string;
+    balanceDue: number;
+  } | null,
+  accessToken: string | null,
+): Promise<PayOrderResult> {
+  const { locale } = await shopLocale();
+  const copy = copyFor(locale);
+  if (!order) return { error: copy.orderNotFound };
+  if (order.status === "canceled") return { error: copy.orderCanceled };
+  if (order.balanceDue <= 0) return { error: copy.orderAlreadyPaid };
+  const url = await paymentUrlFor({
+    id: order.id,
+    orderNumber: order.orderNumber ?? null,
+    currency: order.currency,
+    customerEmail: order.customerEmail,
+    accessToken,
+    amount: order.balanceDue,
+  });
+  return url ? { url } : { error: copy.onlinePaymentUnavailable };
+}
+
 export async function payOrderAction(
   orderId: string,
   accessToken: string,
 ): Promise<PayOrderResult> {
   try {
     const order = await fetchOrderByToken(orderId, accessToken);
-    if (!order) return { error: "Order not found" };
-    if (order.balanceDue <= 0) return { error: "Order is already paid" };
-    const url = await paymentUrlFor({
-      id: order.id,
-      orderNumber: order.orderNumber ?? null,
-      currency: order.currency,
-      customerEmail: order.customerEmail,
-      accessToken,
-      amount: order.balanceDue,
-    });
-    return url ? { url } : { error: "Online payment is not available" };
+    return await payExistingOrder(order, accessToken);
+  } catch (err) {
+    return { error: errorMessage(err) };
+  }
+}
+
+export async function payMyOrderAction(
+  orderId: string,
+): Promise<PayOrderResult> {
+  try {
+    const order = await getMyOrder(orderId);
+    return await payExistingOrder(order, null);
   } catch (err) {
     return { error: errorMessage(err) };
   }
