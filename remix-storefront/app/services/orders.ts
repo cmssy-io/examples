@@ -1,4 +1,4 @@
-import { createCmssyClient } from "@cmssy/core";
+import { CmssyGraphqlError, createCmssyClient } from "@cmssy/core";
 import { cmssy } from "../../cmssy.config";
 import type { Order, MyOrders, PublicOrder } from "../graphql/types";
 import { memberRequest } from "../lib/cmssy/member-request";
@@ -41,14 +41,21 @@ export async function fetchOrderByToken(
   accessToken: string,
 ): Promise<PublicOrder | null> {
   const workspaceId = await client.resolveWorkspaceId({ retry: retryMode() });
-  const data = await client.query(
-    PublicOrderDocument,
-    { workspaceId, orderId, accessToken },
-    {
-      public: true,
-      retry: retryMode(),
-      headers: { "x-workspace-id": workspaceId },
-    },
-  );
-  return data.public.order.byToken;
+  try {
+    const data = await client.query(
+      PublicOrderDocument,
+      { workspaceId, orderId, accessToken },
+      {
+        public: true,
+        retry: retryMode(),
+        headers: { "x-workspace-id": workspaceId },
+      },
+    );
+    return data.public.order.byToken;
+  } catch (error) {
+    if (error instanceof CmssyGraphqlError && error.code === "NOT_FOUND") {
+      return null;
+    }
+    throw error;
+  }
 }

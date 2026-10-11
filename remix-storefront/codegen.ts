@@ -1,4 +1,5 @@
 import type { CodegenConfig } from "@graphql-codegen/cli";
+import { createRetryingFetch } from "@cmssy/core";
 import { loadEnvFiles } from "./app/lib/load-env-files.mjs";
 
 loadEnvFiles();
@@ -25,7 +26,9 @@ function deliverySchemaUrl(): string {
 }
 
 const config: CodegenConfig = {
-  schema: process.env.CODEGEN_SCHEMA || deliverySchemaUrl(),
+  schema: process.env.CODEGEN_SCHEMA || {
+    [deliverySchemaUrl()]: { customFetch: createRetryingFetch("build", fetch) },
+  },
   // `cmssy/` holds the delivery reads the SDK itself performs, vendored by
   // `pnpm types`. They are typed here like any other document, so this app does
   // not keep a second copy of a query the SDK already sends.

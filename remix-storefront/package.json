@@ -17,9 +17,9 @@
     "types": "cmssy types --out app/graphql/models.ts"
   },
   "dependencies": {
-    "@cmssy/core": "^19.1.0",
-    "@cmssy/react": "^19.1.0",
-    "@cmssy/remix": "^19.1.0",
+    "@cmssy/core": "^19.5.0",
+    "@cmssy/react": "^19.5.0",
+    "@cmssy/remix": "^19.5.0",
     "@graphql-typed-document-node/core": "3.2.0",
     "@react-router/node": "^8.3.0",
     "@react-router/serve": "^8.3.0",
@@ -34,7 +34,7 @@
     "stripe": "^23.0.0"
   },
   "devDependencies": {
-    "@cmssy/cli": "^19.1.0",
+    "@cmssy/cli": "^19.5.0",
     "@graphql-codegen/cli": "^7.2.0",
     "@graphql-codegen/client-preset": "^6.1.0",
     "@react-router/dev": "^8.3.0",
