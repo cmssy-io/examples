@@ -56,7 +56,9 @@ export function ProductCard({ product }: { product: Product }) {
         </h3>
         <span className={styles.cardSku}>{product.sku}</span>
 
-        <StockBadge inventory={product.inventory} />
+        {product.hasVariants ? null : (
+          <StockBadge inventory={product.inventory} />
+        )}
 
         {bestTier ? (
           <span className={styles.tierHint}>
