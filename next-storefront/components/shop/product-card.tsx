@@ -18,9 +18,15 @@ const STOCK_VARIANT: Record<ReturnType<typeof stockState>, BadgeVariant> = {
   out: "destructive",
 };
 
-export function StockBadge({ inventory }: { inventory: number }) {
+export function StockBadge({
+  inventory,
+  threshold,
+}: {
+  inventory: number;
+  threshold: number | null;
+}) {
   const copy = useShopCopy();
-  const state = stockState(inventory);
+  const state = stockState(inventory, threshold);
   const label = { in: copy.inStock, low: copy.lowStock, out: copy.backorder };
   return (
     <Badge variant={STOCK_VARIANT[state]}>
@@ -56,22 +62,30 @@ export function ProductCard({ product }: { product: Product }) {
         </h3>
         <span className={styles.cardSku}>{product.sku}</span>
 
-        {product.hasVariants ? null : (
-          <StockBadge inventory={product.inventory} />
+        {product.available === null ? null : (
+          <StockBadge
+            inventory={product.available}
+            threshold={product.lowStockThreshold}
+          />
         )}
 
         {bestTier ? (
           <span className={styles.tierHint}>
             {formatMoney(bestTier.price)} {copy.from} {bestTier.minQty}+ (
-            {copy.save} {savingsPercent(product.price, bestTier.price)}%)
+            {copy.save} {savingsPercent(product.fromPrice, bestTier.price)}%)
           </span>
         ) : null}
 
         <div className={styles.cardBottom}>
           <div>
-            <div className={styles.price}>
+            <div
+              className={styles.price}
+              data-from-price={
+                product.hasVariants ? product.fromPrice : undefined
+              }
+            >
               {product.hasVariants ? `${copy.from} ` : ""}
-              {formatMoney(product.price)}
+              {formatMoney(product.fromPrice)}
             </div>
             <div className={styles.cardPer}>
               {copy.netPer} {product.unit ?? "pcs"}

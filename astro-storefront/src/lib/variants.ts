@@ -3,7 +3,6 @@ import type {
   ProductVariant,
   VariantOption,
 } from "../services/catalog";
-import { stockState } from "./money";
 import type { ShopCopy } from "./shop-copy";
 
 const AXIS_ORDER = ["size", "pack"];
@@ -151,10 +150,10 @@ export function variantInStock(
 }
 
 export function productOutOfStock(
-  product: Pick<Product, "inventory" | "variants">,
+  product: Pick<Product, "available" | "variants">,
 ): boolean {
   if (product.variants.length === 0) {
-    return stockState(product.inventory) === "out";
+    return product.available !== null && product.available <= 0;
   }
   return !product.variants.some(variantInStock);
 }

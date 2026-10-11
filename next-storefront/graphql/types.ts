@@ -5,7 +5,7 @@ import type {
   CheckoutMutation,
   MyOrderQuery,
   MyOrdersQuery,
-  ProductQuery,
+  ProductBySkuQuery,
   PublicOrderQuery,
 } from "@/graphql/generated/graphql";
 
@@ -22,4 +22,5 @@ export type PublicOrder = NonNullable<
 
 export type CheckoutOrder = NonNullable<CheckoutMutation["cart"]["checkout"]>;
 
-export type Product = ProductQuery["public"]["model"]["records"]["items"][number];
+export type SkuMatch =
+  ProductBySkuQuery["public"]["model"]["records"]["items"][number];

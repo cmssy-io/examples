@@ -45,16 +45,14 @@ export function BuyBox({
 
   const basePrice = variant
     ? variant.price
-    : hasVariants
-      ? Math.min(...product.variants.map((candidate) => candidate.price))
-      : product.price;
+    : product.fromPrice;
   const tiers =
     variant && variant.tiers.length > 0 ? variant.tiers : product.tiers;
   const inventory = variant
     ? variant.inventory
     : hasVariants
       ? null
-      : product.inventory;
+      : product.available;
   const outOfStock = variant
     ? !variantInStock(variant)
     : productOutOfStock(product);
@@ -162,7 +160,10 @@ export function BuyBox({
       ) : null}
 
       {needsVariant || inventory === null ? null : (
-        <StockBadge inventory={inventory} />
+        <StockBadge
+          inventory={inventory}
+          threshold={product.lowStockThreshold}
+        />
       )}
 
       {outOfStock && !hasVariants ? (

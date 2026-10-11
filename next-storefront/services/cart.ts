@@ -1,5 +1,5 @@
 import type { ShippingAddressInput } from "@/graphql/generated/graphql";
-import type { Cart, CheckoutOrder, Product } from "@/graphql/types";
+import type { Cart, CheckoutOrder, SkuMatch } from "@/graphql/types";
 import { cartRequest } from "@/lib/cmssy/cart-request";
 import {
   AddToCartDocument,
@@ -8,7 +8,7 @@ import {
   CheckoutDocument,
   ClearCartDocument,
   MergeCartDocument,
-  ProductDocument,
+  ProductBySkuDocument,
   RemoveCartItemDocument,
   RemoveDiscountDocument,
   SetShippingMethodDocument,
@@ -105,12 +105,13 @@ export function checkout(input: CheckoutInput): Promise<CheckoutOrder> {
   ).then((data) => data.cart.checkout);
 }
 
-export function findProduct(
+export function findBySku(
   modelSlug: string,
-  filter: Record<string, unknown>,
-): Promise<Product | null> {
+  sku: string,
+  locale: string,
+): Promise<SkuMatch[]> {
   return cartRequest(
-    ProductDocument,
-    (workspaceId) => ({ workspaceId, modelSlug, filter }),
-  ).then((data) => data.public.model.records.items[0] ?? null);
+    ProductBySkuDocument,
+    (workspaceId) => ({ workspaceId, modelSlug, sku, locale }),
+  ).then((data) => data.public.model.records.items);
 }

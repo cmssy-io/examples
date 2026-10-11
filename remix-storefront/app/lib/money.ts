@@ -31,8 +31,11 @@ export function savingsPercent(basePrice: number, tierPrice: number): number {
 
 export type StockState = "in" | "low" | "out";
 
-export function stockState(inventory: number, lowThreshold = 20): StockState {
+export function stockState(
+  inventory: number,
+  lowThreshold: number | null,
+): StockState {
   if (inventory <= 0) return "out";
-  if (inventory <= lowThreshold) return "low";
+  if (lowThreshold !== null && inventory <= lowThreshold) return "low";
   return "in";
 }

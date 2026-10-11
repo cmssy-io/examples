@@ -286,7 +286,7 @@ export type PublicModelProductsQueryVariables = Exact<{
 }>;
 
 
-export type PublicModelProductsQuery = { public: { model: { records: { total: number, hasMore: boolean, items: Array<{ id: string, data: unknown, priceTiers: Array<{ minQty: number, price: number }>, variants: Array<{ id: string }> }> } } } };
+export type PublicModelProductsQuery = { public: { model: { records: { total: number, hasMore: boolean, items: Array<{ id: string, data: unknown, variantCount: number, available: number | null, priceTiers: Array<{ minQty: number, price: number }>, variantPriceRange: { min: number } | null }> } } } };
 
 export type PublicOrderQueryVariables = Exact<{
   workspaceId: string | number;
@@ -324,6 +324,16 @@ export type PublicPagesByTypeQueryVariables = Exact<{
 
 export type PublicPagesByTypeQuery = { public: { page: { byType: { hasMore: boolean, items: Array<{ id: string, slug: string, fullSlug: string, publishedAt: string | null, displayName: unknown, seoTitle: unknown, seoDescription: unknown }> } } } };
 
+export type ProductBySkuQueryVariables = Exact<{
+  workspaceId: string;
+  modelSlug: string;
+  sku: string;
+  locale?: string | null | undefined;
+}>;
+
+
+export type ProductBySkuQuery = { public: { model: { records: { items: Array<{ id: string, data: unknown, variantCount: number, variants: Array<{ selectedOptions: Array<{ name: string, value: string }> }> }> } } } };
+
 export type ProductRolesQueryVariables = Exact<{
   workspaceId: string;
 }>;
@@ -336,17 +346,18 @@ export type ProductQueryVariables = Exact<{
   modelSlug: string;
   filter?: unknown;
   locale?: string | null | undefined;
+  variantOffset?: number | null | undefined;
 }>;
 
 
-export type ProductQuery = { public: { model: { records: { items: Array<{ id: string, data: unknown, priceTiers: Array<{ minQty: number, price: number }>, variants: Array<{ id: string, sku: string | null, price: number, inventory: number | null, tiers: Array<{ minQty: number, price: number }>, selectedOptions: Array<{ name: string, value: string }> }> }> } } } };
+export type ProductQuery = { public: { model: { records: { items: Array<{ id: string, data: unknown, variantCount: number, available: number | null, priceTiers: Array<{ minQty: number, price: number }>, variantPriceRange: { min: number } | null, variants: Array<{ id: string, sku: string | null, price: number, inventory: number | null, tiers: Array<{ minQty: number, price: number }>, selectedOptions: Array<{ name: string, value: string }> }> }> } } } };
 
-export type SiteTaxRatesQueryVariables = Exact<{
+export type ShopSettingsQueryVariables = Exact<{
   workspaceSlug: string;
 }>;
 
 
-export type SiteTaxRatesQuery = { public: { siteConfig: { id: string, publicCart: { defaultTaxRateId: string | null, taxRates: Array<{ id: string, rate: number }> } | null } | null } };
+export type ShopSettingsQuery = { public: { siteConfig: { id: string, lowStockThreshold: number, publicCart: { defaultTaxRateId: string | null, taxRates: Array<{ id: string, rate: number }> } | null } | null } };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -1299,9 +1310,11 @@ export const PublicModelProductsDocument = new TypedDocumentString(`
             minQty
             price
           }
-          variants {
-            id
+          variantCount
+          variantPriceRange {
+            min
           }
+          available
         }
         total
         hasMore
@@ -1559,6 +1572,33 @@ export const PublicPagesByTypeDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PublicPagesByTypeQuery, PublicPagesByTypeQueryVariables>;
+export const ProductBySkuDocument = new TypedDocumentString(`
+    query ProductBySku($workspaceId: String!, $modelSlug: String!, $sku: String!, $locale: String) {
+  public {
+    model {
+      records(
+        workspaceId: $workspaceId
+        modelSlug: $modelSlug
+        sku: $sku
+        locale: $locale
+        limit: 2
+      ) {
+        items {
+          id
+          data
+          variantCount
+          variants(sku: $sku, limit: 1) {
+            selectedOptions {
+              name
+              value
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ProductBySkuQuery, ProductBySkuQueryVariables>;
 export const ProductRolesDocument = new TypedDocumentString(`
     query ProductRoles($workspaceId: String!) {
   public {
@@ -1574,7 +1614,7 @@ export const ProductRolesDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<ProductRolesQuery, ProductRolesQueryVariables>;
 export const ProductDocument = new TypedDocumentString(`
-    query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String) {
+    query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String, $variantOffset: Int) {
   public {
     model {
       records(
@@ -1591,7 +1631,12 @@ export const ProductDocument = new TypedDocumentString(`
             minQty
             price
           }
-          variants {
+          variantCount
+          variantPriceRange {
+            min
+          }
+          available
+          variants(offset: $variantOffset) {
             id
             sku
             price
@@ -1611,11 +1656,12 @@ export const ProductDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ProductQuery, ProductQueryVariables>;
-export const SiteTaxRatesDocument = new TypedDocumentString(`
-    query SiteTaxRates($workspaceSlug: String!) {
+export const ShopSettingsDocument = new TypedDocumentString(`
+    query ShopSettings($workspaceSlug: String!) {
   public {
     siteConfig(workspaceSlug: $workspaceSlug) {
       id
+      lowStockThreshold
       publicCart {
         defaultTaxRateId
         taxRates {
@@ -1626,4 +1672,4 @@ export const SiteTaxRatesDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<SiteTaxRatesQuery, SiteTaxRatesQueryVariables>;
+    `) as unknown as TypedDocumentString<ShopSettingsQuery, ShopSettingsQueryVariables>;

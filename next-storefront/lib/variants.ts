@@ -1,5 +1,4 @@
 import type { Product, ProductVariant, VariantOption } from "@/lib/catalog";
-import { stockState } from "@/lib/money";
 import type { ShopCopy } from "@/lib/shop-copy";
 
 const AXIS_ORDER = ["size", "pack"];
@@ -101,7 +100,9 @@ export function findVariant(
   );
 }
 
-export function selectionsOf(variant: ProductVariant): VariantSelection {
+export function selectionsOf(
+  variant: Pick<ProductVariant, "selectedOptions">,
+): VariantSelection {
   return Object.fromEntries(
     variant.selectedOptions.map(({ name, value }) => [name, value]),
   );
@@ -147,10 +148,10 @@ export function variantInStock(
 }
 
 export function productOutOfStock(
-  product: Pick<Product, "inventory" | "variants">,
+  product: Pick<Product, "available" | "variants">,
 ): boolean {
   if (product.variants.length === 0) {
-    return stockState(product.inventory) === "out";
+    return product.available !== null && product.available <= 0;
   }
   return !product.variants.some(variantInStock);
 }

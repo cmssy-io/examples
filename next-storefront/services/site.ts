@@ -2,9 +2,10 @@ import { cmssy } from "@/cmssy.config";
 import {
   ProductRolesDocument,
   PublicSiteConfigDocument,
-  SiteTaxRatesDocument,
+  ShopSettingsDocument,
 } from "@/graphql/generated/graphql";
 import { publicRequest, scopedRequest } from "@/services/gateway";
+import { ttlCache } from "@/lib/ttl-cache";
 import type { SiteLocales } from "@/lib/locale-path";
 import type { LocalizedValue } from "@/lib/localized";
 
@@ -66,25 +67,32 @@ export interface SiteTaxRates {
   rates: Map<string, number>;
 }
 
-let cachedTax: Promise<SiteTaxRates | null> | undefined;
-
-export function fetchTaxRates(): Promise<SiteTaxRates | null> {
-  cachedTax ??= loadTaxRates().catch((error: unknown) => {
-    cachedTax = undefined;
-    throw error;
-  });
-  return cachedTax;
+export interface ShopSettings {
+  tax: SiteTaxRates | null;
+  lowStockThreshold: number | null;
 }
 
-async function loadTaxRates(): Promise<SiteTaxRates | null> {
-  const data = await publicRequest(SiteTaxRatesDocument, {
+const shopSettingsCache = ttlCache<ShopSettings>(60_000);
+
+export function fetchShopSettings(): Promise<ShopSettings> {
+  return shopSettingsCache("shop-settings", loadShopSettings);
+}
+
+async function loadShopSettings(): Promise<ShopSettings> {
+  const data = await publicRequest(ShopSettingsDocument, {
     workspaceSlug: cmssy.workspaceSlug,
   });
-  const cart = data.public?.siteConfig?.publicCart ?? null;
-  if (!cart) return null;
+  const config = data.public?.siteConfig;
+  if (!config) return { tax: null, lowStockThreshold: null };
+  const cart = config.publicCart ?? null;
   return {
-    defaultTaxRateId: cart.defaultTaxRateId ?? null,
-    rates: new Map(cart.taxRates.map((rate) => [rate.id, rate.rate])),
+    tax: cart
+      ? {
+          defaultTaxRateId: cart.defaultTaxRateId ?? null,
+          rates: new Map(cart.taxRates.map((rate) => [rate.id, rate.rate])),
+        }
+      : null,
+    lowStockThreshold: config.lowStockThreshold,
   };
 }
 
