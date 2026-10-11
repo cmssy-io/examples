@@ -59,17 +59,13 @@ export interface SiteTaxRates {
 
 export interface ShopSettings {
   tax: SiteTaxRates | null;
-  lowStockThreshold: number;
+  lowStockThreshold: number | null;
 }
 
-let cachedShop: Promise<ShopSettings> | undefined;
+const shopSettingsCache = ttlCache<ShopSettings>(60_000);
 
 export function fetchShopSettings(): Promise<ShopSettings> {
-  cachedShop ??= loadShopSettings().catch((error: unknown) => {
-    cachedShop = undefined;
-    throw error;
-  });
-  return cachedShop;
+  return shopSettingsCache("shop-settings", loadShopSettings);
 }
 
 async function loadShopSettings(): Promise<ShopSettings> {
@@ -77,8 +73,7 @@ async function loadShopSettings(): Promise<ShopSettings> {
     workspaceSlug: cmssy.workspaceSlug,
   });
   const config = data.public?.siteConfig;
-  if (!config)
-    throw new Error(`site config for ${cmssy.workspaceSlug} not found`);
+  if (!config) return { tax: null, lowStockThreshold: null };
   const cart = config.publicCart ?? null;
   return {
     tax: cart

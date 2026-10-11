@@ -30,11 +30,11 @@ function parseLines(input: string): Line[] {
     .map((row) => row.trim())
     .filter(Boolean)
     .map((row) => {
-      const [sku, quantity] = row.split(/[\s,;\t]+/);
-      const parsed = Math.floor(Number(quantity));
+      const counted = row.match(/^(.+?)[\s,;]+(\d+(?:\.\d+)?)$/);
+      const parsed = counted ? Math.floor(Number(counted[2])) : 1;
       return {
-        sku: sku.trim(),
-        quantity: Number.isFinite(parsed) && parsed > 0 ? parsed : 1,
+        sku: (counted ? counted[1] : row).trim(),
+        quantity: parsed > 0 ? parsed : 1,
       };
     })
     .filter((line) => line.sku.length > 0);
@@ -59,7 +59,7 @@ export function QuickOrder() {
 
     try {
       for (const line of lines) {
-        const lookup = await findBySkuAction(PRODUCT_MODEL, line.sku);
+        const lookup = await findBySkuAction(PRODUCT_MODEL, line.sku, locale);
         if ("error" in lookup) {
           outcome.push({ ...line, ok: false, reason: lookup.error });
           continue;

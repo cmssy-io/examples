@@ -75,9 +75,10 @@ export type FindBySkuResult = { matches: SkuMatch[] } | { error: string };
 export async function findBySkuAction(
   modelSlug: string,
   sku: string,
+  locale: string,
 ): Promise<FindBySkuResult> {
   try {
-    return { matches: await cart.findBySku(modelSlug, sku) };
+    return { matches: await cart.findBySku(modelSlug, sku, locale) };
   } catch (err) {
     return { error: errorMessage(err) };
   }

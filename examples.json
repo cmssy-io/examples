@@ -19,9 +19,6 @@
           "elements": [
             "header",
             "footer"
-          ],
-          "attributes": [
-            "data-from-price"
           ]
         },
         {
@@ -36,6 +33,9 @@
           "elements": [
             "header",
             "footer"
+          ],
+          "attributes": [
+            "data-from-price"
           ]
         },
         {
@@ -187,9 +187,6 @@
           "elements": [
             "header",
             "footer"
-          ],
-          "attributes": [
-            "data-from-price"
           ]
         },
         {
@@ -204,6 +201,9 @@
           "elements": [
             "header",
             "footer"
+          ],
+          "attributes": [
+            "data-from-price"
           ]
         },
         {
@@ -379,9 +379,6 @@
           "elements": [
             "header",
             "footer"
-          ],
-          "attributes": [
-            "data-from-price"
           ]
         },
         {
@@ -396,6 +393,9 @@
           "elements": [
             "header",
             "footer"
+          ],
+          "attributes": [
+            "data-from-price"
           ]
         },
         {

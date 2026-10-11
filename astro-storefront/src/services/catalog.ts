@@ -71,7 +71,7 @@ export type Product = {
   unit: string | null;
   packaging: string | null;
   available: number | null;
-  lowStockThreshold: number;
+  lowStockThreshold: number | null;
   specs: ProductSpecs | null;
   datasheetUrl: string | null;
   tiers: PriceTier[];
@@ -175,8 +175,8 @@ type ProductRecord = {
   data: unknown;
   priceTiers?: PriceTier[];
   variantCount: number;
-  variantPriceRange?: { min: number } | null;
-  available?: number | null;
+  variantPriceRange: { min: number } | null;
+  available: number | null;
   variants?: ProductVariant[];
 };
 
@@ -205,7 +205,7 @@ function toProduct(
     ),
     unit: data.unit ?? null,
     packaging: blank(data.packaging),
-    available: item.available ?? null,
+    available: item.available,
     lowStockThreshold: shop.lowStockThreshold,
     specs: data.specs ?? null,
     datasheetUrl: blank(data.datasheetUrl),

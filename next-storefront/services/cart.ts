@@ -105,9 +105,13 @@ export function checkout(input: CheckoutInput): Promise<CheckoutOrder> {
   ).then((data) => data.cart.checkout);
 }
 
-export function findBySku(modelSlug: string, sku: string): Promise<SkuMatch[]> {
+export function findBySku(
+  modelSlug: string,
+  sku: string,
+  locale: string,
+): Promise<SkuMatch[]> {
   return cartRequest(
     ProductBySkuDocument,
-    (workspaceId) => ({ workspaceId, modelSlug, sku }),
+    (workspaceId) => ({ workspaceId, modelSlug, sku, locale }),
   ).then((data) => data.public.model.records.items);
 }

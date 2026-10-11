@@ -328,6 +328,7 @@ export type ProductBySkuQueryVariables = Exact<{
   workspaceId: string;
   modelSlug: string;
   sku: string;
+  locale?: string | null | undefined;
 }>;
 
 
@@ -1572,10 +1573,16 @@ export const PublicPagesByTypeDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<PublicPagesByTypeQuery, PublicPagesByTypeQueryVariables>;
 export const ProductBySkuDocument = new TypedDocumentString(`
-    query ProductBySku($workspaceId: String!, $modelSlug: String!, $sku: String!) {
+    query ProductBySku($workspaceId: String!, $modelSlug: String!, $sku: String!, $locale: String) {
   public {
     model {
-      records(workspaceId: $workspaceId, modelSlug: $modelSlug, sku: $sku, limit: 2) {
+      records(
+        workspaceId: $workspaceId
+        modelSlug: $modelSlug
+        sku: $sku
+        locale: $locale
+        limit: 2
+      ) {
         items {
           id
           data

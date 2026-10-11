@@ -19,7 +19,7 @@ export function StockBadge({
   threshold,
 }: {
   inventory: number;
-  threshold: number;
+  threshold: number | null;
 }) {
   const copy = useShopCopy();
   const state = stockState(inventory, threshold);
@@ -74,7 +74,7 @@ export function ProductCard({
         {bestTier ? (
           <span className={styles.tierHint}>
             {formatMoney(bestTier.price)} {copy.from} {bestTier.minQty}+ (
-            {copy.save} {savingsPercent(product.price, bestTier.price)}%)
+            {copy.save} {savingsPercent(product.fromPrice, bestTier.price)}%)
           </span>
         ) : null}
 
@@ -82,7 +82,9 @@ export function ProductCard({
           <div>
             <div
               className={styles.price}
-              data-from-price={product.hasVariants ? product.fromPrice : undefined}
+              data-from-price={
+                product.hasVariants ? product.fromPrice : undefined
+              }
             >
               {product.hasVariants ? `${copy.from} ` : ""}
               {formatMoney(product.fromPrice)}
