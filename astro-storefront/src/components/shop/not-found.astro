@@ -1,9 +1,9 @@
 ---
-import { localePath } from "../../lib/locale-path";
+import { localePath, stripLocalePrefix } from "../../lib/locale-path";
 import { copyFor } from "../../lib/shop-copy";
 import type { ShopLocation } from "./locale-ui";
 
-const FULL_SHOP_SCREEN = /^(?:\/[a-z]{2})?\/(?:account|quick-order)\/?$/;
+const FULL_SHOP_SCREEN = /^\/(?:account|quick-order)\/?$/;
 
 interface Props {
   location: ShopLocation;
@@ -12,7 +12,9 @@ interface Props {
 const { location } = Astro.props;
 const copy = copyFor(location.locale);
 const catalogHref = localePath("/c/all", location.locale, location.defaultLocale);
-const fullShopScreen = FULL_SHOP_SCREEN.test(location.pathname);
+const fullShopScreen = FULL_SHOP_SCREEN.test(
+  stripLocalePrefix(location.pathname, location),
+);
 ---
 
 <div class="shop-card not-found">

@@ -1,13 +1,13 @@
-import { isRouteErrorResponse, Link, useLocation } from "react-router";
-import { useLocalePath, useShopCopy } from "./locale-ui";
+import { isRouteErrorResponse, Link } from "react-router";
+import { useLocalePath, useShopCopy, useShopPathname } from "./locale-ui";
 import { buttonClass } from "./ui/button";
 
-const FULL_SHOP_SCREEN = /^(?:\/[a-z]{2})?\/(?:account|quick-order)\/?$/;
+const FULL_SHOP_SCREEN = /^\/(?:account|quick-order)\/?$/;
 
 export function ShopNotFound() {
   const copy = useShopCopy();
   const localePath = useLocalePath();
-  const fullShopScreen = FULL_SHOP_SCREEN.test(useLocation().pathname);
+  const fullShopScreen = FULL_SHOP_SCREEN.test(useShopPathname());
   return (
     <div
       className="shop-card"
