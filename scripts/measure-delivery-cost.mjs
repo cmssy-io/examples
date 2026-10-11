@@ -74,7 +74,9 @@ function textLength(html) {
 
 function budgetOf(res) {
   return {
-    remaining: Number(res.headers.get("x-ratelimit-remaining")),
+    remaining: remainingOf({
+      remaining: res.headers.get("x-ratelimit-remaining"),
+    }),
     reset: res.headers.get("x-ratelimit-reset"),
     scope: res.headers.get("x-ratelimit-scope"),
     retryAfter: res.headers.get("retry-after"),
@@ -195,6 +197,11 @@ async function quietBaseline(reason, knownReset) {
   await sleep(wait);
   for (;;) {
     const { budget } = await delivery(SITE_CONFIG_QUERY, { workspaceSlug });
+    if (budget.reset === null || budget.remaining === null) {
+      throw new Error(
+        `${reason}: delivery answered without x-ratelimit-reset or x-ratelimit-remaining, so no window can be measured`,
+      );
+    }
     if (Number(budget.reset) >= lastReset + 2 * WINDOW_S) return budget;
     await sleep(WINDOW_MARGIN_MS);
   }
@@ -307,7 +314,7 @@ function printTable(rows, opened) {
     cell("note", 10),
   ].join("  ");
   console.log(
-    `\n${dir} @ ${deliveryUrl} - window opened at ${opened.remaining} remaining (${opened.scope})`,
+    `\n${dir} @ ${deliveryUrl} - window opened at ${opened.remaining ?? "?"} remaining (${opened.scope})`,
   );
   console.log(header);
   console.log("-".repeat(header.length));
@@ -345,7 +352,7 @@ function printTable(rows, opened) {
 
 const slugs = await pickSlugs();
 console.log(
-  `${dir}: category "${slugs.category}", product "${slugs.product}", budget ${slugs.budget.remaining} remaining (${slugs.budget.scope})`,
+  `${dir}: category "${slugs.category}", product "${slugs.product}", budget ${slugs.budget.remaining ?? "?"} remaining (${slugs.budget.scope})`,
 );
 
 if (!skipBuild) {
