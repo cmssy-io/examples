@@ -17,6 +17,7 @@ const client = createCmssyClient(cmssy);
 
 export { PRODUCT_MODEL, CATEGORY_MODEL } from "./catalog-models";
 import { PRODUCT_MODEL, CATEGORY_MODEL } from "./catalog-models";
+import { retryMode } from "../lib/cmssy/retry-mode";
 export const PAGE_SIZE = 12;
 
 export type Category = {
@@ -92,7 +93,7 @@ export async function loadCategories(locale?: string): Promise<Category[]> {
       offset: 0,
       sort: "sortOrder",
     },
-    { retry: "interactive" },
+    { retry: retryMode() },
   );
 
   const items = data?.public?.model?.records?.items ?? [];
@@ -201,7 +202,7 @@ async function queryProducts(vars: {
       offset: vars.offset ?? 0,
       sort: vars.sort ?? null,
     },
-    { retry: "interactive" },
+    { retry: retryMode() },
   );
   const records = data?.public?.model?.records;
   return {

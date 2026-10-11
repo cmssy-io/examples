@@ -1,5 +1,6 @@
 import { createCmssyClient } from "@cmssy/react";
 import { cmssy } from "@/cmssy.config";
+import { retryMode } from "@/lib/retry-mode";
 import { PUBLIC_PAGES_BY_TYPE } from "./posts-query";
 
 // Server-only: imported via dynamic import() inside the block loader, so this
@@ -33,7 +34,7 @@ export async function loadPosts(vars: {
     public?: {
       page?: { byType?: { items?: Post[]; hasMore?: boolean } | null } | null;
     } | null;
-  }>(PUBLIC_PAGES_BY_TYPE, { ...vars, offset: 0 });
+  }>(PUBLIC_PAGES_BY_TYPE, { ...vars, offset: 0 }, { retry: retryMode() });
   const r = data?.public?.page?.byType;
   return r ? { items: r.items ?? [], hasMore: !!r.hasMore } : null;
 }

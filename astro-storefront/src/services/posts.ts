@@ -1,4 +1,5 @@
 import { PublicPagesByTypeDocument } from "../graphql/generated/graphql";
+import { retryMode } from "../lib/cmssy/retry-mode";
 import { localizedText } from "../lib/localized";
 import { client } from "./gateway";
 
@@ -19,11 +20,11 @@ export interface LoadPostsOptions {
 }
 
 export async function loadPosts(options: LoadPostsOptions): Promise<Post[]> {
-  const data = await client.queryScoped(PublicPagesByTypeDocument, {
-    parentSlug: options.parentSlug,
-    limit: options.limit,
-    offset: 0,
-  });
+  const data = await client.queryScoped(
+    PublicPagesByTypeDocument,
+    { parentSlug: options.parentSlug, limit: options.limit, offset: 0 },
+    { retry: retryMode() },
+  );
   const locale = { locale: options.locale, defaultLocale: options.defaultLocale };
   const items = data?.public?.page?.byType?.items ?? [];
   return items.map((item) => ({

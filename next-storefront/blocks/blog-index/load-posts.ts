@@ -1,6 +1,7 @@
 import { createCmssyClient } from "@cmssy/react";
 import { cmssy } from "@/cmssy.config";
 import { PublicPagesByTypeDocument } from "@/graphql/generated/graphql";
+import { retryMode } from "@/lib/cmssy/retry-mode";
 
 const client = createCmssyClient(cmssy);
 
@@ -25,10 +26,11 @@ export async function loadPosts(vars: {
   if (typeof window !== "undefined") {
     throw new Error("loadPosts is server-only");
   }
-  const data = await client.queryScoped(PublicPagesByTypeDocument, {
-    ...vars,
-    offset: 0,
-  });
+  const data = await client.queryScoped(
+    PublicPagesByTypeDocument,
+    { ...vars, offset: 0 },
+    { retry: retryMode() },
+  );
   const r = data?.public?.page?.byType;
   if (!r) return null;
 

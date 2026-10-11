@@ -1,5 +1,5 @@
 import { createCmssyClient, type CmssyTypedDocument } from "@cmssy/core";
-import { nextRetryMode } from "@cmssy/next";
+import { retryMode } from "@/lib/cmssy/retry-mode";
 import { cmssy } from "@/cmssy.config";
 
 export const client = createCmssyClient(cmssy);
@@ -10,7 +10,7 @@ export function publicRequest<Result, Variables>(
 ): Promise<Result> {
   return client.query(document, variables, {
     public: true,
-    retry: nextRetryMode(),
+    retry: retryMode(),
   });
 }
 
@@ -21,5 +21,5 @@ export function scopedRequest<
   document: CmssyTypedDocument<Result, Variables>,
   variables: Omit<Variables, "workspaceId">,
 ): Promise<Result> {
-  return client.queryScoped(document, variables);
+  return client.queryScoped(document, variables, { retry: retryMode() });
 }
