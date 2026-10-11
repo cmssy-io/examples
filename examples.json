@@ -48,9 +48,13 @@
           },
           "body": {},
           "status": 503
+        },
+        {
+          "path": "/order/000000000000000000000000?token=nope",
+          "status": 200
         }
       ],
-      "$assertComment": "No `elements` on the 404: this example answers 404 correctly but streams the body client-side, so the served HTML carries neither region. astro and remix render theirs server-side and are asserted for it. The two `/api/stripe/webhook` targets prove the route is mounted: GET is 405, and a POST with no Stripe keys in the environment is 503, not 404 - CI runs without keys, so 503 is what a mounted route answers there."
+      "$assertComment": "No `elements` on the 404: this example answers 404 correctly but streams the body client-side, so the served HTML carries neither region. astro and remix render theirs server-side and are asserted for it. The two `/api/stripe/webhook` targets prove the route is mounted: GET is 405, and a POST with no Stripe keys in the environment is 503, not 404 - CI runs without keys, so 503 is what a mounted route answers there. The wrong order token answers the not-found card, not a 500: the delivery API refuses it with a NOT_FOUND code, which the SDK surfaces as CmssyGraphqlError since 19.5.0."
     },
     {
       "dir": "simple-blog",
@@ -205,6 +209,10 @@
           },
           "body": {},
           "status": 503
+        },
+        {
+          "path": "/order/000000000000000000000000?token=nope",
+          "status": 200
         }
       ],
       "$blockDataComment": "No GET row here, unlike the Next examples: Astro answers 404 for a GET on a POST-only endpoint and React Router answers 400, so 405 is a Next-ism. The forged POST covers both claims anyway - an unmounted route 404s on the POST too, so 403 proves mounted AND refusing.",
@@ -352,6 +360,10 @@
           },
           "body": {},
           "status": 503
+        },
+        {
+          "path": "/order/000000000000000000000000?token=nope",
+          "status": 200
         }
       ],
       "$blockDataComment": "No GET row here, unlike the Next examples: Astro answers 404 for a GET on a POST-only endpoint and React Router answers 400, so 405 is a Next-ism. The forged POST covers both claims anyway - an unmounted route 404s on the POST too, so 403 proves mounted AND refusing.",

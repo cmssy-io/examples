@@ -1,4 +1,8 @@
-import { createCmssyClient, type CmssyTypedDocument } from "@cmssy/core";
+import {
+  createCmssyClient,
+  type CmssyTypedDocument,
+  type ScopedVariables,
+} from "@cmssy/core";
 import { retryMode } from "@/lib/cmssy/retry-mode";
 import { cmssy } from "@/cmssy.config";
 
@@ -19,7 +23,7 @@ export function scopedRequest<
   Variables extends { workspaceId: string },
 >(
   document: CmssyTypedDocument<Result, Variables>,
-  variables: Omit<Variables, "workspaceId">,
+  variables: ScopedVariables<Variables>,
 ): Promise<Result> {
   return client.queryScoped(document, variables, { retry: retryMode() });
 }
