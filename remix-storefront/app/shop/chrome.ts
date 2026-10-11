@@ -7,6 +7,7 @@ import {
 import { cmssy } from "../../cmssy.config";
 import { blocks } from "../cmssy/blocks";
 import { ttlCache } from "../lib/ttl-cache";
+import { retryMode } from "../lib/cmssy/retry-mode";
 
 export interface ShopChrome {
   locale: string;
@@ -26,7 +27,7 @@ async function buildChrome(locale: string): Promise<ShopChrome> {
     editMode: false,
     path: [],
     locale,
-    retry: "interactive",
+    retry: retryMode(),
   });
   const [header, footer] = await Promise.all(
     (["header", "footer"] as const).map((region) =>

@@ -1,5 +1,6 @@
 import { DEFAULT_CMSSY_API_URL, createCmssyClient } from "@cmssy/core";
 import { cmssy } from "../../cmssy.config";
+import { retryMode } from "../lib/cmssy/retry-mode";
 import Stripe from "stripe";
 import { payOnline, stripeClient } from "../lib/stripe";
 import { copyFor } from "../lib/shop-copy";
@@ -153,7 +154,7 @@ export async function recordOrderPayment(input: {
       "CMSSY_API_TOKEN is not set: a payment cannot be recorded on the order",
     );
   }
-  const workspaceId = await client.resolveWorkspaceId();
+  const workspaceId = await client.resolveWorkspaceId({ retry: retryMode() });
 
   const response = await fetch(adminEndpoint(), {
     method: "POST",

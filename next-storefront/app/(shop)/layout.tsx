@@ -8,6 +8,7 @@ import { EditableLayout } from "@/cmssy/editable-layout";
 import { getCart } from "@/services/cart";
 import { currentUser } from "@/lib/cmssy/session";
 import { shopLocale } from "@/lib/locale";
+import { retryMode } from "@/lib/cmssy/retry-mode";
 import { CartDrawer } from "@/components/shop/cart-drawer";
 import { CartUiProvider } from "@/components/shop/cart-ui";
 import { CartProvider } from "@/components/shop/cart-provider";
@@ -48,6 +49,7 @@ export default async function ShopLayout({
       locale={locale}
       editMode={editMode}
       editable={EditableLayout}
+      retry={retryMode()}
     />
   );
 

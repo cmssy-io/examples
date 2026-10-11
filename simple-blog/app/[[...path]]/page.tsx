@@ -2,6 +2,7 @@ import { createCmssyPage } from "@cmssy/next/server";
 import { cmssy } from "@/cmssy.config";
 import { blocks } from "@/cmssy/blocks";
 import { buildPageMetadata } from "@/services/seo";
+import { retryMode } from "@/lib/retry-mode";
 import { publishedPaths } from "@/services/pages";
 
 type PageProps = { params: Promise<{ path?: string[] }> };
@@ -25,4 +26,4 @@ export async function generateMetadata({ params }: PageProps) {
 
 // Public route, statically renderable. A verified editor request is rewritten
 // by the middleware onto /cmssy-edit, which mounts createCmssyEditPage.
-export default createCmssyPage(cmssy, blocks);
+export default createCmssyPage(cmssy, blocks, { retry: retryMode() });

@@ -35,6 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         # Both ends of the range in engines.node, because nothing else enforces
         # it: there is no engine-strict anywhere, so the floor is a promise the
@@ -115,6 +116,7 @@ jobs:
         env:
           CMSSY_ORG_SLUG: cmssy
           CMSSY_WORKSPACE_SLUG: cmssy-demo
+          CMSSY_RETRY_MODE: build
           # The build needs no credentials here, but the server refuses to boot
           # without this one: defineCmssyConfig throws on a missing draftSecret.
           # It guards drafts and edit mode, neither of which this step touches,

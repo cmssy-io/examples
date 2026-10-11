@@ -21,7 +21,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const READY_TIMEOUT_MS = 120_000;
+const READY_TIMEOUT_MS = 240_000;
 const READY_POLL_MS = 1000;
 
 const dir = process.argv[2];

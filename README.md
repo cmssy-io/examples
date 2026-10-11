@@ -65,6 +65,13 @@ which serves the build and asks `scripts/assert-render.mjs` whether the `assertR
 actually render. They run on pull requests and on pushes to `main`, paths-filtered on the example
 plus `examples.json` and `scripts/**`, across both ends of the Node range in `engines.node`.
 
+Every example reads the same demo workspace, whose delivery API budgets requests per workspace
+and per caller. The render step therefore serves each app with `CMSSY_RETRY_MODE=build`: every delivery
+request the apps make reads that variable into the SDK's retry option, so a 429 waits out its
+`Retry-After` instead of failing the job - nobody is waiting on a CI render. Without the variable the apps keep the short
+interactive budget a visitor expects. The matrices run one Node version at a time for the same
+reason, and a change to `examples.json` or `scripts/**` still starts every workflow at once.
+
 Each app installs the SDK from the registry, so what CI exercises is the published artifact rather
 than a symlink into a monorepo. It is not the **packed tarball** of an unreleased SDK, which is the
 remaining gap: a breaking SDK change is caught here once it is published, not before.

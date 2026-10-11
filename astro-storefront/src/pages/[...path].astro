@@ -6,6 +6,7 @@ import { cmssy } from "../cmssy.config";
 import { Blocks } from "../components/Blocks";
 import NotFound from "../components/shop/not-found.astro";
 import ShopLayout from "../layouts/shop-layout.astro";
+import { retryMode } from "../lib/cmssy/retry-mode";
 import { localizedText } from "../lib/localized";
 import { fetchPageMeta } from "../services/seo";
 import { loadShopChrome, type ShopChrome } from "../shop/chrome";
@@ -17,6 +18,7 @@ const [state, cmssyPage] = await Promise.all([
   shopPageState(Astro),
   loadCmssyPage(cmssy, Astro.request, Astro.url, {
     prerendered: Astro.isPrerendered,
+    retry: retryMode(),
   }),
 ]);
 const { page, layouts, pageContext, locale, defaultLocale, enabledLocales } =

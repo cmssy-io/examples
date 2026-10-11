@@ -18,8 +18,9 @@ import { localizedText } from "../lib/localized";
 import { fetchPageMeta } from "../services/seo";
 import { loadShopChrome } from "../shop/chrome";
 import type { Route } from "./+types/page";
+import { retryMode } from "../lib/cmssy/retry-mode";
 
-const cmssyLoader = createCmssyLoader(cmssy);
+const cmssyLoader = createCmssyLoader(cmssy, { retry: retryMode() });
 
 export async function loader(args: Route.LoaderArgs) {
   const data = await cmssyLoader(args);

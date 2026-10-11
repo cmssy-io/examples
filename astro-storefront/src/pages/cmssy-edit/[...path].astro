@@ -3,6 +3,7 @@ import { loadCmssyPage } from "@cmssy/astro";
 import { resolveEditorOrigin } from "@cmssy/core";
 import { cmssy } from "../../cmssy.config";
 import CmssyEditor from "../../cmssy/editor";
+import { retryMode } from "../../lib/cmssy/retry-mode";
 import { shopPageState } from "../../shop/page-state";
 import "../../styles/shop.css";
 
@@ -14,6 +15,7 @@ const [{ page, locale, defaultLocale, enabledLocales, blockDataToken }, shop] =
   await Promise.all([
     loadCmssyPage(cmssy, Astro.request, Astro.url, {
       prerendered: Astro.isPrerendered,
+      retry: retryMode(),
     }),
     shopPageState(Astro),
   ]);
