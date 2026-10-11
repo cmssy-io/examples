@@ -34,7 +34,7 @@ function parseLines(input: string): Line[] {
       const parsed = counted ? Math.floor(Number(counted[2])) : 1;
       return {
         sku: (counted ? counted[1] : row).trim(),
-        quantity: parsed > 0 ? parsed : 1,
+        quantity: Number.isFinite(parsed) && parsed > 0 ? parsed : 1,
       };
     })
     .filter((line) => line.sku.length > 0);
