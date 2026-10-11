@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ProductMedia } from "@/lib/catalog";
 import { Badge } from "./ui/badge";
 import { ProductImage } from "./ui/product-image";
 import styles from "./product-detail.module.css";
@@ -11,12 +12,14 @@ export function ProductGallery({
   alt,
   outOfStock,
   outOfStockLabel,
+  video,
 }: {
   images: string[];
   code: string;
   alt: string;
   outOfStock?: boolean;
   outOfStockLabel?: string;
+  video?: ProductMedia | null;
 }) {
   const [active, setActive] = useState(0);
   const current = images[active];
@@ -53,6 +56,16 @@ export function ProductGallery({
             </button>
           ))}
         </div>
+      ) : null}
+      {video ? (
+        <video
+          className={styles.video}
+          controls
+          preload="metadata"
+          playsInline
+          src={video.url}
+          aria-label={video.alt ?? alt}
+        />
       ) : null}
     </div>
   );

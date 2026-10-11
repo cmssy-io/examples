@@ -1,9 +1,10 @@
 import { cmssy } from "@/cmssy.config";
 import {
+  ProductRolesDocument,
   PublicSiteConfigDocument,
   SiteTaxRatesDocument,
 } from "@/graphql/generated/graphql";
-import { publicRequest } from "@/services/gateway";
+import { publicRequest, scopedRequest } from "@/services/gateway";
 import type { SiteLocales } from "@/lib/locale-path";
 import type { LocalizedValue } from "@/lib/localized";
 
@@ -85,4 +86,32 @@ async function loadTaxRates(): Promise<SiteTaxRates | null> {
     defaultTaxRateId: cart.defaultTaxRateId ?? null,
     rates: new Map(cart.taxRates.map((rate) => [rate.id, rate.rate])),
   };
+}
+
+export interface ProductRoles {
+  taxRate: string;
+}
+
+let cachedRoles: Promise<Map<string, ProductRoles>> | undefined;
+
+export function fetchProductRoles(
+  modelSlug: string,
+): Promise<ProductRoles | null> {
+  cachedRoles ??= loadProductRoles().catch((error: unknown) => {
+    cachedRoles = undefined;
+    throw error;
+  });
+  return cachedRoles.then((roles) => roles.get(modelSlug) ?? null);
+}
+
+async function loadProductRoles(): Promise<Map<string, ProductRoles>> {
+  const data = await scopedRequest(ProductRolesDocument, {});
+  const definitions = data?.public?.model?.definitions ?? [];
+  return new Map(
+    definitions.flatMap((definition) =>
+      definition.productRoles
+        ? [[definition.slug, { taxRate: definition.productRoles.taxRate }]]
+        : [],
+    ),
+  );
 }

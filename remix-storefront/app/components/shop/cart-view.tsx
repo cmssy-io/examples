@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { formatMoney } from "../../lib/money";
 import { fill } from "../../lib/shop-copy";
+import { selectionLabel } from "../../lib/variants";
 import { useCart } from "./cart-provider";
 import styles from "./cart.module.css";
 import { useLocalePath, useShopCopy } from "./locale-ui";
@@ -92,6 +93,7 @@ export function CartView() {
             );
             const listPrice = snapshot.price;
             const discounted = item.unitPrice < listPrice;
+            const options = selectionLabel(item.variantSelections);
 
             return (
               <div key={item.id} className={styles.line}>
@@ -99,6 +101,9 @@ export function CartView() {
                   <span className={styles.lineName}>{snapshot.name}</span>
                   {snapshot.sku ? (
                     <span className={styles.lineSku}>{snapshot.sku}</span>
+                  ) : null}
+                  {options ? (
+                    <span className={styles.lineOptions}>{options}</span>
                   ) : null}
                   <span>
                     {discounted ? (

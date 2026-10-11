@@ -85,6 +85,16 @@ export interface ProductData {
   };
   /** Datasheet URL */
   datasheetUrl?: string;
+  /** Tax rate - Cart tax rate id; empty means the cart's default rate */
+  taxRateId?: "vat23" | "vat8";
+  /** Documents - Datasheets, manuals and certificates (PDF) */
+  documents?: CmssyMedia[];
+  /** Video - Product clip shown on the product page */
+  video?: CmssyMedia | null;
+  /** Size - Variant axis: bore, thread or length */
+  size?: "6 mm" | "8 mm" | "10 mm" | "12 mm" | "20 mm" | "25 mm" | "30 mm" | "35 mm" | "40 mm" | "M16" | "M20" | "M25" | "1250 mm" | "1400 mm" | "1600 mm";
+  /** Pack - Variant axis: units per pack */
+  pack?: "1 pc" | "10 pcs" | "50 pcs";
 }
 
 export type ProductRecord = CmssyRecordOf<ProductData>;

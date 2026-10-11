@@ -2,12 +2,13 @@
 import sanitizeHtml from "sanitize-html";
 import NotFound from "../../components/shop/not-found.astro";
 import styles from "../../components/shop/product-detail.module.css";
+import { ProductDocuments } from "../../components/shop/product-documents";
 import { ProductGallery } from "../../components/shop/product-gallery";
 import { skuCode } from "../../components/shop/ui/image-placeholder";
 import ShopLayout from "../../layouts/shop-layout.astro";
 import { BuyBoxIsland } from "../../islands/buy-box";
 import { localePath } from "../../lib/locale-path";
-import { stockState } from "../../lib/money";
+import { productOutOfStock } from "../../lib/variants";
 import { copyFor } from "../../lib/shop-copy";
 import { loadCategories, loadProductBySlug } from "../../services/catalog";
 import { shopPageState } from "../../shop/page-state";
@@ -36,7 +37,7 @@ const descriptionText = product?.description
   : undefined;
 const href = (path: string) => localePath(path, locale, defaultLocale);
 const specs = product?.specs ?? null;
-const outOfStock = product ? stockState(product.inventory) === "out" : false;
+const outOfStock = product ? productOutOfStock(product) : false;
 const images = product
   ? product.gallery.length
     ? product.gallery
@@ -70,6 +71,7 @@ const title = product
           alt={product.title}
           outOfStock={outOfStock}
           outOfStockLabel={copy.outOfStock}
+          video={product.video}
         />
 
         <div>
@@ -116,6 +118,8 @@ const title = product
             </table>
           </section>
         ) : null}
+
+        <ProductDocuments documents={product.documents} title={copy.documents} />
       </div>
     </>
   )}

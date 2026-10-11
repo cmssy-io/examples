@@ -1,0 +1,12 @@
+query ProductRoles($workspaceId: String!) {
+  public {
+    model {
+      definitions(workspaceId: $workspaceId) {
+        slug
+        productRoles {
+          taxRate
+        }
+      }
+    }
+  }
+}

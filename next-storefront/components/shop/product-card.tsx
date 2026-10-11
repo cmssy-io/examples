@@ -7,6 +7,7 @@ import type { BadgeVariant } from "./ui/badge";
 import { Badge } from "./ui/badge";
 import { skuCode } from "./ui/image-placeholder";
 import { ProductImage } from "./ui/product-image";
+import { buttonClass } from "./ui/button";
 import { AddToCartButton } from "./add-to-cart-button";
 import { useLocalePath, useShopCopy } from "./locale-ui";
 import styles from "./catalog.module.css";
@@ -55,7 +56,9 @@ export function ProductCard({ product }: { product: Product }) {
         </h3>
         <span className={styles.cardSku}>{product.sku}</span>
 
-        <StockBadge inventory={product.inventory} />
+        {product.hasVariants ? null : (
+          <StockBadge inventory={product.inventory} />
+        )}
 
         {bestTier ? (
           <span className={styles.tierHint}>
@@ -66,12 +69,21 @@ export function ProductCard({ product }: { product: Product }) {
 
         <div className={styles.cardBottom}>
           <div>
-            <div className={styles.price}>{formatMoney(product.price)}</div>
+            <div className={styles.price}>
+              {product.hasVariants ? `${copy.from} ` : ""}
+              {formatMoney(product.price)}
+            </div>
             <div className={styles.cardPer}>
               {copy.netPer} {product.unit ?? "pcs"}
             </div>
           </div>
-          <AddToCartButton recordId={product.id} name={product.title} />
+          {product.hasVariants ? (
+            <Link href={href} className={buttonClass("outline", "sm")}>
+              {copy.chooseOptions}
+            </Link>
+          ) : (
+            <AddToCartButton recordId={product.id} name={product.title} />
+          )}
         </div>
       </div>
     </article>

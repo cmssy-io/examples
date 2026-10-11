@@ -286,7 +286,7 @@ export type PublicModelProductsQueryVariables = Exact<{
 }>;
 
 
-export type PublicModelProductsQuery = { public: { model: { records: { total: number, hasMore: boolean, items: Array<{ id: string, data: unknown, priceTiers: Array<{ minQty: number, price: number }> }> } } } };
+export type PublicModelProductsQuery = { public: { model: { records: { total: number, hasMore: boolean, items: Array<{ id: string, data: unknown, priceTiers: Array<{ minQty: number, price: number }>, variants: Array<{ id: string }> }> } } } };
 
 export type PublicOrderQueryVariables = Exact<{
   workspaceId: string | number;
@@ -324,10 +324,18 @@ export type PublicPagesByTypeQueryVariables = Exact<{
 
 export type PublicPagesByTypeQuery = { public: { page: { byType: { hasMore: boolean, items: Array<{ id: string, slug: string, fullSlug: string, publishedAt: string | null, displayName: unknown, seoTitle: unknown, seoDescription: unknown }> } } } };
 
+export type ProductRolesQueryVariables = Exact<{
+  workspaceId: string;
+}>;
+
+
+export type ProductRolesQuery = { public: { model: { definitions: Array<{ slug: string, productRoles: { taxRate: string } | null }> } } };
+
 export type ProductQueryVariables = Exact<{
   workspaceId: string;
   modelSlug: string;
   filter?: unknown;
+  locale?: string | null | undefined;
 }>;
 
 
@@ -1291,6 +1299,9 @@ export const PublicModelProductsDocument = new TypedDocumentString(`
             minQty
             price
           }
+          variants {
+            id
+          }
         }
         total
         hasMore
@@ -1548,14 +1559,29 @@ export const PublicPagesByTypeDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PublicPagesByTypeQuery, PublicPagesByTypeQueryVariables>;
+export const ProductRolesDocument = new TypedDocumentString(`
+    query ProductRoles($workspaceId: String!) {
+  public {
+    model {
+      definitions(workspaceId: $workspaceId) {
+        slug
+        productRoles {
+          taxRate
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ProductRolesQuery, ProductRolesQueryVariables>;
 export const ProductDocument = new TypedDocumentString(`
-    query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON) {
+    query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String) {
   public {
     model {
       records(
         workspaceId: $workspaceId
         modelSlug: $modelSlug
         filter: $filter
+        locale: $locale
         limit: 1
       ) {
         items {

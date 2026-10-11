@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCart } from "@/components/shop/cart-provider";
 import { formatMoney } from "@/lib/money";
+import { selectionLabel } from "@/lib/variants";
 import { useCartUi } from "./cart-ui";
 import { useLocalePath, useShopCopy } from "./locale-ui";
 import styles from "./cart-drawer.module.css";
@@ -85,27 +86,33 @@ export function CartDrawer() {
           {items.length === 0 ? (
             <p className={styles.empty}>{copy.cartEmpty}</p>
           ) : (
-            items.map((item) => (
-              <div key={item.id} className={styles.line}>
-                <span className={styles.thumb} aria-hidden>
-                  {item.snapshot.sku?.slice(0, 4) ?? "—"}
-                </span>
-                <div className={styles.body}>
-                  <div className={styles.name}>{item.snapshot.name}</div>
-                  {item.snapshot.sku ? (
-                    <div className={styles.sku}>{item.snapshot.sku}</div>
-                  ) : null}
-                  <div className={styles.lineFoot}>
-                    <span className={styles.qty}>
-                      {copy.qty} {item.quantity}
-                    </span>
-                    <span className={styles.lineTotal}>
-                      {formatMoney(item.unitPrice * item.quantity, currency)}
-                    </span>
+            items.map((item) => {
+              const options = selectionLabel(item.variantSelections);
+              return (
+                <div key={item.id} className={styles.line}>
+                  <span className={styles.thumb} aria-hidden>
+                    {item.snapshot.sku?.slice(0, 4) ?? "—"}
+                  </span>
+                  <div className={styles.body}>
+                    <div className={styles.name}>{item.snapshot.name}</div>
+                    {item.snapshot.sku ? (
+                      <div className={styles.sku}>{item.snapshot.sku}</div>
+                    ) : null}
+                    {options ? (
+                      <div className={styles.options}>{options}</div>
+                    ) : null}
+                    <div className={styles.lineFoot}>
+                      <span className={styles.qty}>
+                        {copy.qty} {item.quantity}
+                      </span>
+                      <span className={styles.lineTotal}>
+                        {formatMoney(item.unitPrice * item.quantity, currency)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
