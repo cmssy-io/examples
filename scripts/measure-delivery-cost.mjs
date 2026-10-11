@@ -221,18 +221,27 @@ async function quiesce(logPath, since) {
   return readLog(logPath).slice(since);
 }
 
+function remainingOf(line) {
+  if (line?.remaining === null || line?.remaining === undefined) return null;
+  const value = Number(line.remaining);
+  return line.remaining !== "" && Number.isFinite(value) ? value : null;
+}
+
 async function measurePage(path, logPath, before) {
   const since = readLog(logPath).length;
   const started = Date.now();
   const res = await fetch(new URL(path, baseUrl), { redirect: "follow" });
   const chars = textLength(await res.text());
   const lines = await quiesce(logPath, since);
-  const remaining = lines
-    .map((line) => Number(line.remaining))
-    .filter((value) => Number.isFinite(value));
+  const remaining = lines.map(remainingOf).filter((value) => value !== null);
   const last = lines.at(-1);
   const scopes = new Set(lines.map((line) => line.scope).filter(Boolean));
   const throttled = lines.filter((line) => line.status === 429);
+  const crossed = lines.some((line) => line.reset !== before.reset);
+  const comparable =
+    !crossed &&
+    scopes.size <= 1 &&
+    (scopes.size === 0 || scopes.has(before.scope));
   return {
     path,
     status: res.status,
@@ -243,18 +252,22 @@ async function measurePage(path, logPath, before) {
     slots:
       lines.length === 0
         ? 0
-        : Number.isFinite(before.remaining) && remaining.length > 0
+        : comparable &&
+            Number.isFinite(before.remaining) &&
+            remaining.length > 0
           ? before.remaining - Math.min(...remaining)
           : null,
     slotsLast:
       lines.length === 0
         ? 0
-        : Number.isFinite(before.remaining) &&
-            Number.isFinite(Number(last?.remaining))
-          ? before.remaining - Number(last.remaining)
+        : comparable &&
+            Number.isFinite(before.remaining) &&
+            remainingOf(last) !== null
+          ? before.remaining - remainingOf(last)
           : null,
     scope: [...scopes].join("+") || "-",
-    crossed: lines.some((line) => line.reset !== before.reset),
+    unread: lines.length - remaining.length,
+    crossed,
     lastReset: lastResetIn(lines, Number(before.reset) || 0),
     retryAfter: Math.max(
       0,
@@ -301,6 +314,8 @@ function printTable(rows, opened) {
   for (const row of rows) {
     const notes = [];
     if (row.crossed) notes.push("window crossed");
+    if (row.scope.includes("+")) notes.push("scope changed");
+    if (row.unread > 0) notes.push(`${row.unread} without budget headers`);
     if (row.retried) notes.push("retried");
     console.log(
       [
@@ -317,8 +332,15 @@ function printTable(rows, opened) {
     );
   }
   const totalRequests = rows.reduce((sum, row) => sum + row.requests, 0);
-  const totalSlots = rows.reduce((sum, row) => sum + (row.slots ?? 0), 0);
-  console.log(`total: ${totalRequests} requests, ${totalSlots} slots`);
+  const measured = rows.filter((row) => row.slots !== null);
+  const totalSlots = measured.reduce((sum, row) => sum + row.slots, 0);
+  const unmeasured = rows.length - measured.length;
+  console.log(
+    `total: ${totalRequests} requests, ${totalSlots} slots${unmeasured ? ` (${unmeasured} page(s) unmeasured, not summed)` : ""}`,
+  );
+  console.log(
+    `pages ran in this order in one process: ${rows.map((row) => row.path).join(", ")} - a page after the first reads what the earlier ones cached, so its cost is marginal; a cold process pays the catalogue scan on whichever catalogue page comes first.`,
+  );
 }
 
 const slugs = await pickSlugs();

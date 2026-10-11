@@ -232,15 +232,6 @@ export type ProductPage = {
   hasMore: boolean;
 };
 
-const API_SORTS: Record<string, string> = {
-  price: "price_asc",
-  "-price": "price_desc",
-};
-
-function apiSort(sort: string | undefined): string | null {
-  return API_SORTS[sort ?? ""] ?? null;
-}
-
 export function sortProducts(
   items: Product[],
   sort: string | undefined,
@@ -265,7 +256,6 @@ async function queryProducts(vars: {
   locale?: string;
   limit?: number;
   offset?: number;
-  sort?: string;
 }): Promise<{ items: ProductRecord[]; total: number; hasMore: boolean }> {
   const data = await client.queryScoped(
     PublicModelProductsDocument,
@@ -276,7 +266,6 @@ async function queryProducts(vars: {
       locale: vars.locale ?? null,
       limit: vars.limit ?? API_PAGE_SIZE,
       offset: vars.offset ?? 0,
-      sort: vars.sort ?? null,
     },
     { retry: retryMode() },
   );
@@ -344,42 +333,23 @@ function matchesSearch(product: Product, needle: string): boolean {
 
 export async function loadProducts(query: ProductQuery): Promise<ProductPage> {
   const page = Math.max(1, query.page ?? 1);
-  const limit = Math.min(Math.max(1, query.limit ?? PAGE_SIZE), API_PAGE_SIZE);
+  const limit = Math.max(1, query.limit ?? PAGE_SIZE);
   const offset = (page - 1) * limit;
-  const filter = productFilter(query);
   const needle = query.search?.trim().toLowerCase();
-  const sort = apiSort(query.sort);
-
-  if (needle || sort === null) {
-    const all = await scanProducts(filter, query.stockState, query.locale);
-    const sorted = sortProducts(
-      needle ? all.filter((product) => matchesSearch(product, needle)) : all,
-      query.sort,
-    );
-    const items = sorted.slice(offset, offset + limit);
-    return {
-      items,
-      total: sorted.length,
-      hasMore: offset + items.length < sorted.length,
-    };
-  }
-
-  const [result, tax, roles] = await Promise.all([
-    queryProducts({
-      filter,
-      stockState: query.stockState,
-      locale: query.locale,
-      limit,
-      offset,
-      sort,
-    }),
-    fetchTaxRates(),
-    fetchProductRoles(PRODUCT_MODEL),
-  ]);
+  const all = await scanProducts(
+    productFilter(query),
+    query.stockState,
+    query.locale,
+  );
+  const sorted = sortProducts(
+    needle ? all.filter((product) => matchesSearch(product, needle)) : all,
+    query.sort,
+  );
+  const items = sorted.slice(offset, offset + limit);
   return {
-    items: result.items.map((item) => toProduct(item, tax, roles)),
-    total: result.total,
-    hasMore: result.hasMore,
+    items,
+    total: sorted.length,
+    hasMore: offset + items.length < sorted.length,
   };
 }
 

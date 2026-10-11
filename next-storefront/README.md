@@ -17,7 +17,7 @@ storefront** with member sign-in, products, cart and checkout.
 > characters, which `/api/draft` requires of any secret before it will run. For your own
 > site, use the real secret generated under **Settings → Headless**.
 
-> **Deploying?** `CMSSY_SESSION_SECRET` signs the cart and customer session cookies. The value in
+> **Deploying?** `CMSSY_SESSION_SECRET` seals the customer session cookie; the cart cookie is a random token minted on the first cart write. The value in
 > `.env.example` is a placeholder - generate your own before putting this anywhere real:
 > `openssl rand -base64 32`.
 
@@ -50,7 +50,7 @@ so every read and write here is this app's own typed GraphQL:
 - **Products** - `lib/catalog.ts` reads the `product` and `category` models (server-rendered,
   filtered by category, brand and stock state).
 - **Cart + checkout** - Server Actions in `lib/actions/`, optimistic UI with `useOptimistic`,
-  cart bound to a signed cart cookie and merged into the member's cart on sign-in.
+  cart bound to a random cart token, minted on the first write and merged into the member's cart on sign-in.
 - **Order history** - `/account` and `/order/[id]`, read through `services/orders.ts`.
 
 The storefront routes (`/c`, `/p`, `/cart`, `/account`, `/order`, `/quick-order`) are plain
@@ -181,7 +181,7 @@ styles/                  plain CSS - cmssy does not control styling (no Tailwind
   editor), so dependencies like `sanitize-html` and the delivery client stay out of the client
   bundle. See `blocks/prose` and `blocks/product-grid`.
 - **Sessions** - the member session is sealed with `jose` into an httpOnly cookie and refreshed
-  in `proxy.ts`; the cart rides a separate signed cookie and merges into the member cart on
+  in `proxy.ts`; the cart rides a separate random token, minted on the first cart write, and merges into the member cart on
   sign-in. All of it is app-owned - the SDK ships no auth or commerce helpers.
 
 ## Add your own block

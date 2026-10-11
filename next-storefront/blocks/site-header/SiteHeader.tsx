@@ -68,7 +68,7 @@ export default function SiteHeader({
   content,
   data,
 }: BlockProps<typeof siteHeaderProps, SiteHeaderData>) {
-  const { cart } = useCart();
+  const { itemCount } = useCart();
   const { openDrawer } = useCartUi();
   const { user } = useCmssyUser();
   const localePath = useLocalePath();
@@ -81,7 +81,6 @@ export default function SiteHeader({
     data?.categories ?? [],
     content.navCategories ?? [],
   );
-  const itemCount = cart?.itemCount ?? 0;
   const brandName = content.brandName ?? "";
   const signInLabel = content.signInLabel ?? copy.tradeSignIn;
   const closeMega = () => setMegaOpen(false);

@@ -31,14 +31,13 @@ function CartIcon() {
 export function CartDrawer() {
   const localePath = useLocalePath();
   const copy = useShopCopy();
-  const { cart } = useCart();
+  const { cart, itemCount } = useCart();
   const { drawerOpen, toastName, closeDrawer, dismissToast } = useCartUi();
 
   if (!drawerOpen) return null;
 
   const currency = cart?.currency ?? "EUR";
   const items = cart?.items ?? [];
-  const itemCount = cart?.itemCount ?? 0;
 
   return (
     <div className={styles.overlay}>
