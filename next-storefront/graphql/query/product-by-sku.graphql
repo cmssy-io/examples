@@ -1,0 +1,24 @@
+query ProductBySku($workspaceId: String!, $modelSlug: String!, $sku: String!) {
+  public {
+    model {
+      records(
+        workspaceId: $workspaceId
+        modelSlug: $modelSlug
+        sku: $sku
+        limit: 2
+      ) {
+        items {
+          id
+          data
+          variantCount
+          variants(sku: $sku, limit: 1) {
+            selectedOptions {
+              name
+              value
+            }
+          }
+        }
+      }
+    }
+  }
+}

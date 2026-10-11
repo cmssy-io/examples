@@ -3,6 +3,7 @@ query Product(
   $modelSlug: String!
   $filter: JSON
   $locale: String
+  $variantOffset: Int
 ) {
   public {
     model {
@@ -20,7 +21,12 @@ query Product(
             minQty
             price
           }
-          variants {
+          variantCount
+          variantPriceRange {
+            min
+          }
+          available
+          variants(offset: $variantOffset) {
             id
             sku
             price

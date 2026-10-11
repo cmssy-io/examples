@@ -2,7 +2,7 @@ import { cmssy } from "@/cmssy.config";
 import {
   ProductRolesDocument,
   PublicSiteConfigDocument,
-  SiteTaxRatesDocument,
+  ShopSettingsDocument,
 } from "@/graphql/generated/graphql";
 import { publicRequest, scopedRequest } from "@/services/gateway";
 import type { SiteLocales } from "@/lib/locale-path";
@@ -66,25 +66,37 @@ export interface SiteTaxRates {
   rates: Map<string, number>;
 }
 
-let cachedTax: Promise<SiteTaxRates | null> | undefined;
-
-export function fetchTaxRates(): Promise<SiteTaxRates | null> {
-  cachedTax ??= loadTaxRates().catch((error: unknown) => {
-    cachedTax = undefined;
-    throw error;
-  });
-  return cachedTax;
+export interface ShopSettings {
+  tax: SiteTaxRates | null;
+  lowStockThreshold: number;
 }
 
-async function loadTaxRates(): Promise<SiteTaxRates | null> {
-  const data = await publicRequest(SiteTaxRatesDocument, {
+let cachedShop: Promise<ShopSettings> | undefined;
+
+export function fetchShopSettings(): Promise<ShopSettings> {
+  cachedShop ??= loadShopSettings().catch((error: unknown) => {
+    cachedShop = undefined;
+    throw error;
+  });
+  return cachedShop;
+}
+
+async function loadShopSettings(): Promise<ShopSettings> {
+  const data = await publicRequest(ShopSettingsDocument, {
     workspaceSlug: cmssy.workspaceSlug,
   });
-  const cart = data.public?.siteConfig?.publicCart ?? null;
-  if (!cart) return null;
+  const config = data.public?.siteConfig;
+  if (!config)
+    throw new Error(`site config for ${cmssy.workspaceSlug} not found`);
+  const cart = config.publicCart ?? null;
   return {
-    defaultTaxRateId: cart.defaultTaxRateId ?? null,
-    rates: new Map(cart.taxRates.map((rate) => [rate.id, rate.rate])),
+    tax: cart
+      ? {
+          defaultTaxRateId: cart.defaultTaxRateId ?? null,
+          rates: new Map(cart.taxRates.map((rate) => [rate.id, rate.rate])),
+        }
+      : null,
+    lowStockThreshold: config.lowStockThreshold,
   };
 }
 

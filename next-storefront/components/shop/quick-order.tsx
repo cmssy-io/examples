@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/components/shop/cart-provider";
 import type { ProductData } from "@/graphql/models";
-import { addItemAction, findProductAction } from "@/lib/actions/cart";
+import { addItemAction, findBySkuAction } from "@/lib/actions/cart";
 import { localizedText } from "@/lib/localized";
 import { PRODUCT_MODEL } from "@/lib/catalog-models";
+import { selectionsOf } from "@/lib/variants";
 import { Badge } from "./ui/badge";
 import { Button, buttonClass } from "./ui/button";
 import { useLocalePath, useShopCopy, useShopLocale } from "./locale-ui";
@@ -58,24 +59,28 @@ export function QuickOrder() {
 
     try {
       for (const line of lines) {
-        const lookup = await findProductAction(PRODUCT_MODEL, {
-          sku: line.sku,
-        });
+        const lookup = await findBySkuAction(PRODUCT_MODEL, line.sku);
         if ("error" in lookup) {
           outcome.push({ ...line, ok: false, reason: lookup.error });
           continue;
         }
-        const product = lookup.product;
-        if (!product) {
+        if (lookup.matches.length === 0) {
           outcome.push({ ...line, ok: false, reason: copy.skuNotFound });
           continue;
         }
-        if ((product.variants ?? []).length > 0) {
-          const data = product.data as ProductData;
+        if (lookup.matches.length > 1) {
+          outcome.push({ ...line, ok: false, reason: copy.skuAmbiguous });
+          continue;
+        }
+        const [product] = lookup.matches;
+        const data = product.data as ProductData;
+        const name = localizedText(data.title, { locale, defaultLocale });
+        const variant = product.variants[0];
+        if (product.variantCount > 0 && !variant) {
           outcome.push({
             ...line,
             ok: false,
-            name: localizedText(data.title, { locale, defaultLocale }),
+            name,
             reason: copy.hasOptions,
             href: localePath(`/p/${data.slug}`),
           });
@@ -84,18 +89,12 @@ export function QuickOrder() {
         const result = await addItemAction({
           recordId: product.id,
           quantity: line.quantity,
+          ...(variant ? { variantSelections: selectionsOf(variant) } : {}),
         });
         if ("error" in result) {
-          outcome.push({ ...line, ok: false, reason: result.error });
+          outcome.push({ ...line, ok: false, name, reason: result.error });
         } else {
-          outcome.push({
-            ...line,
-            ok: true,
-            name: localizedText((product.data as ProductData).title, {
-              locale,
-              defaultLocale,
-            }),
-          });
+          outcome.push({ ...line, ok: true, name });
         }
       }
       setResults(outcome);
@@ -109,7 +108,7 @@ export function QuickOrder() {
   const added = results?.filter((line) => line.ok).length ?? 0;
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: 640 }}>
+    <form onSubmit={handleSubmit} style={{ maxWidth: 640 }} data-quick-order>
       <label className="shop-label" htmlFor="lines">
         {copy.quickOrderHint}
       </label>

@@ -16,8 +16,9 @@ import { localizedText } from "@/lib/localized";
 import { ttlCache } from "@/lib/ttl-cache";
 import {
   fetchProductRoles,
-  fetchTaxRates,
+  fetchShopSettings,
   type ProductRoles,
+  type ShopSettings,
   type SiteTaxRates,
 } from "@/services/site";
 
@@ -57,8 +58,6 @@ export type ProductVariant = {
   tiers: PriceTier[];
 };
 
-type VariantRow = Pick<ProductVariant, "id"> | ProductVariant;
-
 export type Product = {
   id: string;
   title: string;
@@ -71,7 +70,8 @@ export type Product = {
   taxRate: number | null;
   unit: string | null;
   packaging: string | null;
-  inventory: number;
+  available: number | null;
+  lowStockThreshold: number;
   specs: ProductSpecs | null;
   datasheetUrl: string | null;
   tiers: PriceTier[];
@@ -79,7 +79,9 @@ export type Product = {
   gallery: string[];
   documents: ProductMedia[];
   video: ProductMedia | null;
+  fromPrice: number;
   hasVariants: boolean;
+  variantCount: number;
   variants: ProductVariant[];
 };
 
@@ -168,17 +170,23 @@ export function resolveTaxRate(
   return null;
 }
 
+type ProductRecord = {
+  id: string;
+  data: unknown;
+  priceTiers?: PriceTier[];
+  variantCount: number;
+  variantPriceRange?: { min: number } | null;
+  available?: number | null;
+  variants?: ProductVariant[];
+};
+
 function toProduct(
-  item: {
-    id: string;
-    data: unknown;
-    priceTiers?: PriceTier[];
-    variants?: VariantRow[];
-  },
-  tax: SiteTaxRates | null,
+  item: ProductRecord,
+  shop: ShopSettings,
   roles: ProductRoles | null,
 ): Product {
   const data = item.data as ProductData;
+  const price = Math.round((data.price ?? 0) * 100);
 
   return {
     id: item.id,
@@ -190,14 +198,15 @@ function toProduct(
     categoryId: blank(data.category),
     description: blank(text(data.description)),
     // The model stores a net price in major units; the app works in cents.
-    price: Math.round((data.price ?? 0) * 100),
+    price,
     taxRate: resolveTaxRate(
       (data as unknown as Record<string, unknown>)[roles?.taxRate ?? "taxRate"],
-      tax,
+      shop.tax,
     ),
     unit: data.unit ?? null,
     packaging: blank(data.packaging),
-    inventory: data.inventory ?? 0,
+    available: item.available ?? null,
+    lowStockThreshold: shop.lowStockThreshold,
     specs: data.specs ?? null,
     datasheetUrl: blank(data.datasheetUrl),
     tiers: [...(item.priceTiers ?? [])].sort(byMinQty),
@@ -205,10 +214,10 @@ function toProduct(
     gallery: mediaUrls(data.gallery),
     documents: (data.documents ?? []).flatMap((media) => toMedia(media) ?? []),
     video: toMedia(data.video),
-    hasVariants: (item.variants ?? []).length > 0,
-    variants: (item.variants ?? []).flatMap((row) =>
-      "selectedOptions" in row ? [toVariant(row)] : [],
-    ),
+    fromPrice: item.variantPriceRange?.min ?? price,
+    hasVariants: item.variantCount > 0,
+    variantCount: item.variantCount,
+    variants: (item.variants ?? []).map(toVariant),
   };
 }
 
@@ -237,18 +246,11 @@ export function sortProducts(
   sort: string | undefined,
 ): Product[] {
   const sorted = [...items];
-  if (sort === "price") sorted.sort((a, b) => a.price - b.price);
-  else if (sort === "-price") sorted.sort((a, b) => b.price - a.price);
+  if (sort === "price") sorted.sort((a, b) => a.fromPrice - b.fromPrice);
+  else if (sort === "-price") sorted.sort((a, b) => b.fromPrice - a.fromPrice);
   else sorted.sort((a, b) => a.title.localeCompare(b.title));
   return sorted;
 }
-
-type ProductRecord = {
-  id: string;
-  data: unknown;
-  priceTiers?: PriceTier[];
-  variants?: VariantRow[];
-};
 
 async function queryProducts(vars: {
   filter?: Record<string, unknown>;
@@ -283,8 +285,8 @@ async function fetchAllProducts(
   locale: string | undefined,
 ): Promise<Product[]> {
   const items: Product[] = [];
-  const [tax, roles] = await Promise.all([
-    fetchTaxRates(),
+  const [shop, roles] = await Promise.all([
+    fetchShopSettings(),
     fetchProductRoles(PRODUCT_MODEL),
   ]);
   let offset = 0;
@@ -296,7 +298,7 @@ async function fetchAllProducts(
       limit: API_PAGE_SIZE,
       offset,
     });
-    items.push(...result.items.map((item) => toProduct(item, tax, roles)));
+    items.push(...result.items.map((item) => toProduct(item, shop, roles)));
     if (!result.hasMore || result.items.length === 0) break;
     offset += result.items.length;
   }
@@ -366,17 +368,38 @@ export async function loadProductBySlug(
   slug: string,
   locale?: string,
 ): Promise<Product | null> {
-  const [data, tax, roles] = await Promise.all([
-    client.queryScoped(
-      ProductDocument,
-      { modelSlug: PRODUCT_MODEL, filter: { slug }, locale: locale ?? null },
-      { retry: retryMode() },
-    ),
-    fetchTaxRates(),
+  const [data, shop, roles] = await Promise.all([
+    queryProduct(slug, locale, 0),
+    fetchShopSettings(),
     fetchProductRoles(PRODUCT_MODEL),
   ]);
   const record = data?.public?.model?.records?.items[0];
-  return record ? toProduct(record, tax, roles) : null;
+  if (!record) return null;
+  const variants = [...record.variants];
+  while (variants.length < record.variantCount) {
+    const next = await queryProduct(slug, locale, variants.length);
+    const page = next?.public?.model?.records?.items[0]?.variants ?? [];
+    if (page.length === 0) break;
+    variants.push(...page);
+  }
+  return toProduct({ ...record, variants }, shop, roles);
+}
+
+function queryProduct(
+  slug: string,
+  locale: string | undefined,
+  variantOffset: number,
+) {
+  return client.queryScoped(
+    ProductDocument,
+    {
+      modelSlug: PRODUCT_MODEL,
+      filter: { slug },
+      locale: locale ?? null,
+      variantOffset,
+    },
+    { retry: retryMode() },
+  );
 }
 
 export async function loadBrandFacets(

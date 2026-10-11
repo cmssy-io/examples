@@ -1,7 +1,7 @@
 "use server";
 
 import type { ShippingAddressInput } from "@/graphql/generated/graphql";
-import type { Cart, CheckoutOrder, Product } from "@/graphql/types";
+import type { Cart, CheckoutOrder, SkuMatch } from "@/graphql/types";
 import * as cart from "@/services/cart";
 import { fetchOrderByToken, getMyOrder } from "@/services/orders";
 import { createPaymentSession } from "@/services/payments";
@@ -70,16 +70,14 @@ export async function mergeCartAction(): Promise<CartResult> {
   return settle(cart.mergeCart());
 }
 
-export type FindProductResult =
-  | { product: Product | null }
-  | { error: string };
+export type FindBySkuResult = { matches: SkuMatch[] } | { error: string };
 
-export async function findProductAction(
+export async function findBySkuAction(
   modelSlug: string,
-  filter: Record<string, unknown>,
-): Promise<FindProductResult> {
+  sku: string,
+): Promise<FindBySkuResult> {
   try {
-    return { product: await cart.findProduct(modelSlug, filter) };
+    return { matches: await cart.findBySku(modelSlug, sku) };
   } catch (err) {
     return { error: errorMessage(err) };
   }

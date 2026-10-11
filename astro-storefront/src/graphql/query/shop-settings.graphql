@@ -1,7 +1,8 @@
-query SiteTaxRates($workspaceSlug: String!) {
+query ShopSettings($workspaceSlug: String!) {
   public {
     siteConfig(workspaceSlug: $workspaceSlug) {
       id
+      lowStockThreshold
       publicCart {
         defaultTaxRateId
         taxRates {

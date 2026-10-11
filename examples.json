@@ -19,6 +19,9 @@
           "elements": [
             "header",
             "footer"
+          ],
+          "attributes": [
+            "data-from-price"
           ]
         },
         {
@@ -33,6 +36,16 @@
           "elements": [
             "header",
             "footer"
+          ]
+        },
+        {
+          "path": "/quick-order",
+          "elements": [
+            "header",
+            "footer"
+          ],
+          "attributes": [
+            "data-quick-order"
           ]
         },
         {
@@ -174,6 +187,9 @@
           "elements": [
             "header",
             "footer"
+          ],
+          "attributes": [
+            "data-from-price"
           ]
         },
         {
@@ -363,6 +379,9 @@
           "elements": [
             "header",
             "footer"
+          ],
+          "attributes": [
+            "data-from-price"
           ]
         },
         {

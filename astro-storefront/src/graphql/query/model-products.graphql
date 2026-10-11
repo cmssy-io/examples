@@ -27,9 +27,11 @@ query PublicModelProducts(
             minQty
             price
           }
-          variants {
-            id
+          variantCount
+          variantPriceRange {
+            min
           }
+          available
         }
         total
         hasMore
