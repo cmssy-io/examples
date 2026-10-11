@@ -15,8 +15,6 @@ import {
   applyDiscountAction,
   checkoutAction,
   clearCartAction,
-  getCartAction,
-  mergeCartAction,
   removeDiscountAction,
   removeItemAction,
   setShippingAction,
@@ -24,7 +22,6 @@ import {
   type CheckoutInput,
   type CheckoutOutcome,
 } from "../../lib/actions/cart";
-import { useShopLocale } from "./locale-ui";
 
 export type { CheckoutInput, CheckoutOutcome } from "../../lib/actions/cart";
 
@@ -94,13 +91,10 @@ export interface CartContextValue {
   applyDiscount(code: string): Promise<boolean>;
   removeDiscount(): Promise<boolean>;
   setShippingMethod(shippingMethodId: string | null): Promise<boolean>;
-  merge(): Promise<boolean>;
   checkout(input: CheckoutInput): Promise<CheckoutOutcome>;
-  refresh(): Promise<void>;
 }
 
 export function useCart(): CartContextValue {
-  const { locale } = useShopLocale();
   const seed = useContext(CartSeedContext);
   const stored = useStore($cart);
   const cart = stored === undefined ? seed : stored;
@@ -154,24 +148,16 @@ export function useCart(): CartContextValue {
       removeDiscount: () => run(null, removeDiscountAction),
       setShippingMethod: (shippingMethodId) =>
         run(null, () => setShippingAction(shippingMethodId)),
-      merge: () => run(null, mergeCartAction),
       checkout: async (input) => {
         let outcome: CheckoutOutcome;
         try {
-          outcome = await checkoutAction(input, locale);
+          outcome = await checkoutAction(input);
         } catch (err) {
           throw new Error(actionErrorMessage(err, "Checkout failed"));
         }
         $cart.set(null);
         return outcome;
       },
-      refresh: async () => {
-        try {
-          $cart.set(await getCartAction());
-        } catch (err) {
-          setError(actionErrorMessage(err, "Commerce request failed"));
-        }
-      },
     };
-  }, [optimisticCart, isPending, error, applyOptimistic, startTransition, locale]);
+  }, [optimisticCart, isPending, error, applyOptimistic, startTransition]);
 }

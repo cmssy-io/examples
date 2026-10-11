@@ -32,9 +32,6 @@ importers:
       astro:
         specifier: ^7.2.2
         version: 7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0)
-      jose:
-        specifier: ^6.2.12
-        version: 6.2.12
       nanostores:
         specifier: ^1.5.5
         version: 1.5.5
@@ -47,9 +44,6 @@ importers:
       sanitize-html:
         specifier: ^2.17.7
         version: 2.17.7
-      stripe:
-        specifier: ^23.0.0
-        version: 23.0.0(@types/node@26.2.0)
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.10
@@ -2403,8 +2397,8 @@ packages:
   jose@5.10.0:
     resolution: {integrity: sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==}
 
-  jose@6.2.12:
-    resolution: {integrity: sha512-9NiFmJEex0sy2Dk58j2UGBSHgUs2ypF9eZSu4L6vjOX3Dp96Sw1F3uL+H+D1sx02jZZdzUT0HgvCy59CuvXcWw==}
+  jose@6.2.8:
+    resolution: {integrity: sha512-Bsdjwm3Qsd/P0jR+BHDe3LytDfY7WBq2HmCCLIwuVRHMuEC9ae7/R474GIUdF1NgCyZjzVo/A9DOiOBtXq8ZoQ==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -3062,15 +3056,6 @@ packages:
   strip-final-newline@2.0.0:
     resolution: {integrity: sha512-BrpvfNAE3dcvq7ll3xVumzjKjZQ5tI1sEUIKr3Uoks0XUl45St3FlatVqef9prk4jRDzhW6WZg+3bk93y6pLjA==}
     engines: {node: '>=6'}
-
-  stripe@23.0.0:
-    resolution: {integrity: sha512-MDE2A5ZVVluYURORaZEVghSmnLJc3w6aHAlZSxDQMsOjOb3V0O6ro/CiaeFlJS4N7uIVmsg98ocRsPmUK6YfyA==}
-    engines: {node: '>=20'}
-    peerDependencies:
-      '@types/node': '>=20'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
 
   supports-color@7.2.0:
     resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
@@ -3902,7 +3887,7 @@ snapshots:
   '@cmssy/core@19.5.0':
     dependencies:
       '@cmssy/types': 0.60.0
-      jose: 6.2.12
+      jose: 6.2.8
 
   '@cmssy/react@19.5.0(react@19.2.8)':
     dependencies:
@@ -5960,7 +5945,7 @@ snapshots:
 
   jose@5.10.0: {}
 
-  jose@6.2.12: {}
+  jose@6.2.8: {}
 
   js-tokens@4.0.0: {}
 
@@ -6575,10 +6560,6 @@ snapshots:
       ansi-regex: 6.2.2
 
   strip-final-newline@2.0.0: {}
-
-  stripe@23.0.0(@types/node@26.2.0):
-    optionalDependencies:
-      '@types/node': 26.2.0
 
   supports-color@7.2.0:
     dependencies:

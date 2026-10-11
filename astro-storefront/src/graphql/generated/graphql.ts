@@ -60,19 +60,6 @@ export type ShippingAddressInput = {
   vatId?: string | null | undefined;
 };
 
-export type SiteMemberLoginInput = {
-  identity: string;
-  modelSlug: string;
-  password: string;
-};
-
-export type SiteMemberRegisterInput = {
-  fields?: unknown;
-  identity: string;
-  modelSlug: string;
-  password: string;
-};
-
 export type SubmitFormInput = {
   data: unknown;
   website?: string | null | undefined;
@@ -178,7 +165,7 @@ export type AddToCartMutationVariables = Exact<{
 }>;
 
 
-export type AddToCartMutation = { cart: { addItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type AddToCartMutation = { cart: { addItem: { id: string, status: string, itemCount: number, userId: string | null, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type ApplyDiscountMutationVariables = Exact<{
   workspaceId: string | number;
@@ -186,7 +173,7 @@ export type ApplyDiscountMutationVariables = Exact<{
 }>;
 
 
-export type ApplyDiscountMutation = { cart: { applyDiscount: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type ApplyDiscountMutation = { cart: { applyDiscount: { id: string, status: string, itemCount: number, userId: string | null, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type CheckoutMutationVariables = Exact<{
   input: CheckoutInput;
@@ -200,14 +187,7 @@ export type ClearCartMutationVariables = Exact<{
 }>;
 
 
-export type ClearCartMutation = { cart: { clear: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
-
-export type MergeCartMutationVariables = Exact<{
-  workspaceId: string | number;
-}>;
-
-
-export type MergeCartMutation = { cart: { merge: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type ClearCartMutation = { cart: { clear: { id: string, status: string, itemCount: number, userId: string | null, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type RemoveCartItemMutationVariables = Exact<{
   workspaceId: string | number;
@@ -215,14 +195,14 @@ export type RemoveCartItemMutationVariables = Exact<{
 }>;
 
 
-export type RemoveCartItemMutation = { cart: { removeItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type RemoveCartItemMutation = { cart: { removeItem: { id: string, status: string, itemCount: number, userId: string | null, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type RemoveDiscountMutationVariables = Exact<{
   workspaceId: string | number;
 }>;
 
 
-export type RemoveDiscountMutation = { cart: { removeDiscount: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type RemoveDiscountMutation = { cart: { removeDiscount: { id: string, status: string, itemCount: number, userId: string | null, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type SetShippingMethodMutationVariables = Exact<{
   workspaceId: string | number;
@@ -230,49 +210,21 @@ export type SetShippingMethodMutationVariables = Exact<{
 }>;
 
 
-export type SetShippingMethodMutation = { cart: { setShippingMethod: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
-
-export type SiteMemberLoginMutationVariables = Exact<{
-  input: SiteMemberLoginInput;
-}>;
-
-
-export type SiteMemberLoginMutation = { siteMember: { login: { success: boolean, message: string, accessToken: string | null, refreshToken: string | null, accessTokenExpiresIn: number | null } } };
-
-export type SiteMemberLogoutMutationVariables = Exact<{
-  refreshToken: string;
-}>;
-
-
-export type SiteMemberLogoutMutation = { siteMember: { logout: { success: boolean, message: string } } };
-
-export type SiteMemberRefreshMutationVariables = Exact<{
-  refreshToken: string;
-}>;
-
-
-export type SiteMemberRefreshMutation = { siteMember: { refresh: { success: boolean, message: string, accessToken: string | null, refreshToken: string | null, accessTokenExpiresIn: number | null } } };
-
-export type SiteMemberRegisterMutationVariables = Exact<{
-  input: SiteMemberRegisterInput;
-}>;
-
-
-export type SiteMemberRegisterMutation = { siteMember: { register: { success: boolean, message: string } } };
+export type SetShippingMethodMutation = { cart: { setShippingMethod: { id: string, status: string, itemCount: number, userId: string | null, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type UpdateCartItemMutationVariables = Exact<{
   input: UpdateCartItemInput;
 }>;
 
 
-export type UpdateCartItemMutation = { cart: { updateItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type UpdateCartItemMutation = { cart: { updateItem: { id: string, status: string, itemCount: number, userId: string | null, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type CartQueryVariables = Exact<{
   workspaceId: string | number;
 }>;
 
 
-export type CartQuery = { cart: { get: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type CartQuery = { cart: { get: { id: string, status: string, itemCount: number, userId: string | null, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type PublicModelProductsQueryVariables = Exact<{
   workspaceId: string;
@@ -297,23 +249,6 @@ export type PublicOrderQueryVariables = Exact<{
 
 export type PublicOrderQuery = { public: { order: { byToken: { id: string, orderNumber: number | null, status: string, paymentStatus: string, fulfillmentStatus: string, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, poNumber: string | null, customerNote: string | null, shippingTotal: number, amountPaid: number, balanceDue: number, refundedAmount: number, trackingNumber: string | null, trackingCarrier: string | null, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, createdAt: string, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null, taxRate: number, taxAmount: number }> } } } };
 
-export type MyOrdersQueryVariables = Exact<{
-  workspaceId: string | number;
-  skip?: number | null | undefined;
-  limit?: number | null | undefined;
-}>;
-
-
-export type MyOrdersQuery = { account: { orders: { total: number, hasMore: boolean, items: Array<{ id: string, status: string, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, refundedAmount: number, paymentStatus: string, fulfillmentStatus: string, amountPaid: number, balanceDue: number, trackingNumber: string | null, trackingCarrier: string | null, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }> }> } } };
-
-export type MyOrderQueryVariables = Exact<{
-  workspaceId: string | number;
-  id: string | number;
-}>;
-
-
-export type MyOrderQuery = { account: { order: { id: string, status: string, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, refundedAmount: number, paymentStatus: string, fulfillmentStatus: string, amountPaid: number, balanceDue: number, trackingNumber: string | null, trackingCarrier: string | null, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }> } | null } };
-
 export type PublicPagesByTypeQueryVariables = Exact<{
   workspaceId: string;
   parentSlug?: string | null | undefined;
@@ -323,15 +258,6 @@ export type PublicPagesByTypeQueryVariables = Exact<{
 
 
 export type PublicPagesByTypeQuery = { public: { page: { byType: { hasMore: boolean, items: Array<{ id: string, slug: string, fullSlug: string, publishedAt: string | null, displayName: unknown, seoTitle: unknown, seoDescription: unknown }> } } } };
-
-export type ProductQueryVariables = Exact<{
-  workspaceId: string;
-  modelSlug: string;
-  filter?: unknown;
-}>;
-
-
-export type ProductQuery = { public: { model: { records: { items: Array<{ id: string, data: unknown, priceTiers: Array<{ minQty: number, price: number }>, variants: Array<{ id: string, sku: string | null, price: number, inventory: number | null, tiers: Array<{ minQty: number, price: number }>, selectedOptions: Array<{ name: string, value: string }> }> }> } } } };
 
 export type SiteTaxRatesQueryVariables = Exact<{
   workspaceSlug: string;
@@ -598,6 +524,7 @@ export const AddToCartDocument = new TypedDocumentString(`
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal
@@ -661,6 +588,7 @@ export const ApplyDiscountDocument = new TypedDocumentString(`
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal
@@ -787,6 +715,7 @@ export const ClearCartDocument = new TypedDocumentString(`
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal
@@ -843,69 +772,6 @@ export const ClearCartDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ClearCartMutation, ClearCartMutationVariables>;
-export const MergeCartDocument = new TypedDocumentString(`
-    mutation MergeCart($workspaceId: ID!) {
-  cart {
-    merge(workspaceId: $workspaceId) {
-      id
-      status
-      itemCount
-      subtotal
-      currency
-      discountedTotal
-      tax
-      totalGross
-      pricesIncludeTax
-      shippingTotal
-      taxSummary {
-        rateId
-        name
-        rate
-        base
-        amount
-      }
-      shippingMethod {
-        id
-        label
-        price
-        etaLabel
-      }
-      availableShippingMethods {
-        id
-        label
-        price
-        etaLabel
-      }
-      appliedDiscount {
-        code
-        type
-        value
-        computedAmount
-      }
-      items {
-        id
-        recordId
-        quantity
-        variantSelections
-        unitPrice
-        currentPrice
-        priceMismatch
-        snapshot {
-          name
-          price
-          currency
-          imageUrl
-          sku
-          tiers {
-            minQty
-            price
-          }
-        }
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<MergeCartMutation, MergeCartMutationVariables>;
 export const RemoveCartItemDocument = new TypedDocumentString(`
     mutation RemoveCartItem($workspaceId: ID!, $itemId: ID!) {
   cart {
@@ -913,6 +779,7 @@ export const RemoveCartItemDocument = new TypedDocumentString(`
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal
@@ -976,6 +843,7 @@ export const RemoveDiscountDocument = new TypedDocumentString(`
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal
@@ -1042,6 +910,7 @@ export const SetShippingMethodDocument = new TypedDocumentString(`
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal
@@ -1098,52 +967,6 @@ export const SetShippingMethodDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SetShippingMethodMutation, SetShippingMethodMutationVariables>;
-export const SiteMemberLoginDocument = new TypedDocumentString(`
-    mutation SiteMemberLogin($input: SiteMemberLoginInput!) {
-  siteMember {
-    login(input: $input) {
-      success
-      message
-      accessToken
-      refreshToken
-      accessTokenExpiresIn
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<SiteMemberLoginMutation, SiteMemberLoginMutationVariables>;
-export const SiteMemberLogoutDocument = new TypedDocumentString(`
-    mutation SiteMemberLogout($refreshToken: String!) {
-  siteMember {
-    logout(refreshToken: $refreshToken) {
-      success
-      message
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<SiteMemberLogoutMutation, SiteMemberLogoutMutationVariables>;
-export const SiteMemberRefreshDocument = new TypedDocumentString(`
-    mutation SiteMemberRefresh($refreshToken: String!) {
-  siteMember {
-    refresh(refreshToken: $refreshToken) {
-      success
-      message
-      accessToken
-      refreshToken
-      accessTokenExpiresIn
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<SiteMemberRefreshMutation, SiteMemberRefreshMutationVariables>;
-export const SiteMemberRegisterDocument = new TypedDocumentString(`
-    mutation SiteMemberRegister($input: SiteMemberRegisterInput!) {
-  siteMember {
-    register(input: $input) {
-      success
-      message
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<SiteMemberRegisterMutation, SiteMemberRegisterMutationVariables>;
 export const UpdateCartItemDocument = new TypedDocumentString(`
     mutation UpdateCartItem($input: UpdateCartItemInput!) {
   cart {
@@ -1151,6 +974,7 @@ export const UpdateCartItemDocument = new TypedDocumentString(`
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal
@@ -1214,6 +1038,7 @@ export const CartDocument = new TypedDocumentString(`
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal
@@ -1375,154 +1200,6 @@ export const PublicOrderDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PublicOrderQuery, PublicOrderQueryVariables>;
-export const MyOrdersDocument = new TypedDocumentString(`
-    query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int) {
-  account {
-    orders(workspaceId: $workspaceId, skip: $skip, limit: $limit) {
-      total
-      hasMore
-      items {
-        id
-        status
-        subtotal
-        discount
-        appliedDiscount {
-          code
-          type
-          value
-          amount
-        }
-        tax
-        total
-        pricesIncludeTax
-        taxSummary {
-          rateId
-          name
-          rate
-          base
-          amount
-        }
-        currency
-        customerEmail
-        refundedAmount
-        paymentStatus
-        fulfillmentStatus
-        amountPaid
-        balanceDue
-        trackingNumber
-        trackingCarrier
-        invoiceNumber
-        invoiceUrl
-        paidAt
-        fulfilledAt
-        createdAt
-        orderNumber
-        poNumber
-        customerNote
-        shippingTotal
-        shippingMethod {
-          id
-          label
-          price
-        }
-        shippingAddress {
-          name
-          company
-          line1
-          line2
-          postalCode
-          city
-          region
-          country
-          phone
-          vatId
-        }
-        items {
-          name
-          price
-          listPrice
-          tierMinQty
-          currency
-          quantity
-          sku
-        }
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<MyOrdersQuery, MyOrdersQueryVariables>;
-export const MyOrderDocument = new TypedDocumentString(`
-    query MyOrder($workspaceId: ID!, $id: ID!) {
-  account {
-    order(workspaceId: $workspaceId, id: $id) {
-      id
-      status
-      subtotal
-      discount
-      appliedDiscount {
-        code
-        type
-        value
-        amount
-      }
-      tax
-      total
-      pricesIncludeTax
-      taxSummary {
-        rateId
-        name
-        rate
-        base
-        amount
-      }
-      currency
-      customerEmail
-      refundedAmount
-      paymentStatus
-      fulfillmentStatus
-      amountPaid
-      balanceDue
-      trackingNumber
-      trackingCarrier
-      invoiceNumber
-      invoiceUrl
-      paidAt
-      fulfilledAt
-      createdAt
-      orderNumber
-      poNumber
-      customerNote
-      shippingTotal
-      shippingMethod {
-        id
-        label
-        price
-      }
-      shippingAddress {
-        name
-        company
-        line1
-        line2
-        postalCode
-        city
-        region
-        country
-        phone
-        vatId
-      }
-      items {
-        name
-        price
-        listPrice
-        tierMinQty
-        currency
-        quantity
-        sku
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<MyOrderQuery, MyOrderQueryVariables>;
 export const PublicPagesByTypeDocument = new TypedDocumentString(`
     query PublicPagesByType($workspaceId: String!, $parentSlug: String, $limit: Int, $offset: Int) {
   public {
@@ -1548,43 +1225,6 @@ export const PublicPagesByTypeDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PublicPagesByTypeQuery, PublicPagesByTypeQueryVariables>;
-export const ProductDocument = new TypedDocumentString(`
-    query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON) {
-  public {
-    model {
-      records(
-        workspaceId: $workspaceId
-        modelSlug: $modelSlug
-        filter: $filter
-        limit: 1
-      ) {
-        items {
-          id
-          data
-          priceTiers {
-            minQty
-            price
-          }
-          variants {
-            id
-            sku
-            price
-            inventory
-            tiers {
-              minQty
-              price
-            }
-            selectedOptions {
-              name
-              value
-            }
-          }
-        }
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<ProductQuery, ProductQueryVariables>;
 export const SiteTaxRatesDocument = new TypedDocumentString(`
     query SiteTaxRates($workspaceSlug: String!) {
   public {

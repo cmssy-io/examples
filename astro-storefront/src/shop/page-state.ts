@@ -1,23 +1,30 @@
 import type { AstroGlobal } from "astro";
 import type { ShopState } from "../components/shop/island";
-import { payOnline } from "../lib/stripe";
+import type { Cart } from "../graphql/types";
 import { getCart } from "../services/cart";
-import { currentUser, shopAuth } from "./context";
+import { clearCartToken, shopAuth, type ShopRequest } from "./context";
 import { shopLocale } from "./locale";
 
-type PageContext = Pick<AstroGlobal, "request" | "locals" | "originPathname" | "url">;
+type PageContext = Pick<
+  AstroGlobal,
+  "request" | "locals" | "originPathname" | "url"
+>;
 
 function requestPathname(astro: PageContext): string {
   return astro.originPathname.replace(/\/+$/, "") || "/";
+}
+
+function guestCart(shop: ShopRequest, cart: Cart | null): Cart | null {
+  if (!cart?.userId) return cart;
+  clearCartToken(shop);
+  return null;
 }
 
 export async function shopPageState(astro: PageContext): Promise<ShopState> {
   const { shop } = astro.locals;
   const [locale, cart] = await Promise.all([
     shopLocale(astro.request),
-    shop.cartToken || shop.session
-      ? getCart(shopAuth(shop)).catch(() => null)
-      : null,
+    shop.cartToken ? getCart(shopAuth(shop)).catch(() => null) : null,
   ]);
   return {
     location: {
@@ -25,8 +32,6 @@ export async function shopPageState(astro: PageContext): Promise<ShopState> {
       pathname: requestPathname(astro),
       search: astro.url.search,
     },
-    user: currentUser(shop),
-    cart,
-    payOnline: payOnline(),
+    cart: guestCart(shop, cart),
   };
 }

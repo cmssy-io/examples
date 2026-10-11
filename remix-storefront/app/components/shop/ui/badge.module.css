@@ -1,6 +1,6 @@
 /* Shared Badge — mirrors the cmssy design-system Badge. Small pill with a
    tinted subtle background, strong-hue text and a matching hairline border.
-   Used for stock state, order/payment/fulfilment status, quick-order results. */
+   Used for stock state on product cards and in the gallery. */
 
 .badge {
   display: inline-flex;

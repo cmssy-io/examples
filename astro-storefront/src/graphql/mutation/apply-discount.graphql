@@ -4,6 +4,7 @@ mutation ApplyDiscount($workspaceId: ID!, $code: String!) {
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal

@@ -4,9 +4,8 @@ import { fill } from "../../lib/shop-copy";
 import { useCart } from "./cart-store";
 import styles from "./cart.module.css";
 import { useLocalePath, useShopCopy } from "./locale-ui";
-import { useCmssyUser } from "./user-provider";
 
-export function CartView({ payOnline }: { payOnline: boolean }) {
+export function CartView() {
   const localePath = useLocalePath();
   const copy = useShopCopy();
   const {
@@ -20,7 +19,6 @@ export function CartView({ payOnline }: { payOnline: boolean }) {
     setShippingMethod,
     checkout,
   } = useCart();
-  const { user } = useCmssyUser();
 
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -48,7 +46,7 @@ export function CartView({ payOnline }: { payOnline: boolean }) {
     const value = (key: string) => String(form.get(key) ?? "").trim();
 
     try {
-      const { order, paymentUrl } = await checkout({
+      const { order } = await checkout({
         customerEmail: value("customerEmail"),
         poNumber: value("poNumber") || null,
         customerNote: value("customerNote") || null,
@@ -71,12 +69,6 @@ export function CartView({ payOnline }: { payOnline: boolean }) {
           ? `/order/${order.id}?token=${encodeURIComponent(token)}`
           : `/order/${order.id}`,
       );
-
-      if (paymentUrl) {
-        window.history.pushState(null, "", confirmation);
-        window.location.assign(paymentUrl);
-        return;
-      }
 
       window.location.assign(confirmation);
     } catch (cause) {
@@ -167,7 +159,6 @@ export function CartView({ payOnline }: { payOnline: boolean }) {
                 type="email"
                 required
                 className="shop-input"
-                defaultValue={user?.email ?? ""}
               />
             </div>
             <div>
@@ -362,11 +353,7 @@ export function CartView({ payOnline }: { payOnline: boolean }) {
           className="shop-btn shop-btn-primary"
           disabled={submitting || loading || !cart.shippingMethod}
         >
-          {submitting
-            ? copy.placingOrder
-            : payOnline
-              ? copy.placeOrderAndPay
-              : copy.placeOrder}
+          {submitting ? copy.placingOrder : copy.placeOrder}
         </button>
 
         {!cart.shippingMethod ? (

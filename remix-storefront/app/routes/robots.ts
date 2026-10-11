@@ -4,7 +4,7 @@ import { isDemoOrigin, siteUrlFor } from "../lib/site-url";
 import { resolveSiteLocales } from "../services/site";
 import type { Route } from "./+types/robots";
 
-const PRIVATE_PATHS = ["/cart", "/account", "/order"];
+const PRIVATE_PATHS = ["/cart", "/order"];
 
 function privatePaths({ defaultLocale, locales }: SiteLocales): string[] {
   const prefixes = locales.filter((locale) => locale !== defaultLocale);

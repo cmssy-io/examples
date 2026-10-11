@@ -6,7 +6,7 @@ import { resolveSiteLocales } from "../services/site";
 
 export const prerender = false;
 
-const PRIVATE_PATHS = ["/cart", "/account", "/order"];
+const PRIVATE_PATHS = ["/cart", "/order"];
 
 function privatePaths({ defaultLocale, locales }: SiteLocales): string[] {
   const prefixes = locales.filter((locale) => locale !== defaultLocale);

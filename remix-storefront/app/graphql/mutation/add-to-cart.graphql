@@ -4,6 +4,7 @@ mutation AddToCart($input: AddToCartInput!) {
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal

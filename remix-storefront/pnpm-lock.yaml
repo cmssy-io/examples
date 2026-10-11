@@ -35,9 +35,6 @@ importers:
       isbot:
         specifier: ^5.2.1
         version: 5.2.1
-      jose:
-        specifier: ^6.2.9
-        version: 6.2.12
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -50,9 +47,6 @@ importers:
       sanitize-html:
         specifier: ^2.17.7
         version: 2.17.7
-      stripe:
-        specifier: ^23.0.0
-        version: 23.0.0(@types/node@26.2.0)
     devDependencies:
       '@cmssy/cli':
         specifier: ^19.5.0
@@ -1655,8 +1649,8 @@ packages:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
 
-  jose@6.2.12:
-    resolution: {integrity: sha512-9NiFmJEex0sy2Dk58j2UGBSHgUs2ypF9eZSu4L6vjOX3Dp96Sw1F3uL+H+D1sx02jZZdzUT0HgvCy59CuvXcWw==}
+  jose@6.2.8:
+    resolution: {integrity: sha512-Bsdjwm3Qsd/P0jR+BHDe3LytDfY7WBq2HmCCLIwuVRHMuEC9ae7/R474GIUdF1NgCyZjzVo/A9DOiOBtXq8ZoQ==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -2180,15 +2174,6 @@ packages:
     resolution: {integrity: sha512-yDPMNjp4WyfYBkHnjIRLfca1i6KMyGCtsVgoKe/z1+6vukgaENdgGBZt+ZmKPc4gavvEZ5OgHfHdrazhgNyG7w==}
     engines: {node: '>=12'}
 
-  stripe@23.0.0:
-    resolution: {integrity: sha512-MDE2A5ZVVluYURORaZEVghSmnLJc3w6aHAlZSxDQMsOjOb3V0O6ro/CiaeFlJS4N7uIVmsg98ocRsPmUK6YfyA==}
-    engines: {node: '>=20'}
-    peerDependencies:
-      '@types/node': '>=20'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-
   swap-case@3.0.3:
     resolution: {integrity: sha512-6p4op8wE9CQv7uDFzulI6YXUw4lD9n4oQierdbFThEKVWVQcbQcUjdP27W8XE7V4QnWmnq9jueSHceyyQnqQVA==}
 
@@ -2583,7 +2568,7 @@ snapshots:
   '@cmssy/core@19.5.0':
     dependencies:
       '@cmssy/types': 0.60.0
-      jose: 6.2.12
+      jose: 6.2.8
 
   '@cmssy/react@19.5.0(react@19.2.8)':
     dependencies:
@@ -4049,7 +4034,7 @@ snapshots:
 
   jiti@2.7.0: {}
 
-  jose@6.2.12: {}
+  jose@6.2.8: {}
 
   js-tokens@4.0.0: {}
 
@@ -4529,10 +4514,6 @@ snapshots:
   strip-ansi@7.2.0:
     dependencies:
       ansi-regex: 6.4.0
-
-  stripe@23.0.0(@types/node@26.2.0):
-    optionalDependencies:
-      '@types/node': 26.2.0
 
   swap-case@3.0.3: {}
 

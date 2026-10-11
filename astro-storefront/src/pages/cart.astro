@@ -12,5 +12,5 @@ const copy = copyFor(state.location.locale);
 
 <ShopLayout state={state} title={`${copy.cart} - MACHTEC`} noindex>
   <h1 style="margin-top: 0">{copy.cartAndCheckout}</h1>
-  <CartViewIsland client:load shop={state} payOnline={state.payOnline} />
+  <CartViewIsland client:load shop={state} />
 </ShopLayout>
