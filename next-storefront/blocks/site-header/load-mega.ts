@@ -1,13 +1,13 @@
-import { loadCategories, loadProducts } from "@/lib/catalog";
+import { loadAllProducts, sortProducts, type Product } from "@/lib/catalog";
+import { loadCategories } from "@/lib/catalog-cached";
+import { ttlCache } from "@/lib/ttl-cache";
 
 export interface MegaCategory {
   id: string;
   name: string;
   slug: string;
   code: string;
-
   count: number;
-
   lines: Array<{ slug: string; title: string }>;
   brands: string[];
   featured: { slug: string; title: string } | null;
@@ -15,41 +15,51 @@ export interface MegaCategory {
 
 const LINES_PER_CATEGORY = 8;
 const MAX_BRANDS = 5;
+const cachedMenu = ttlCache<MegaCategory[]>(60_000);
 
-export async function loadMegaMenu(locale?: string): Promise<MegaCategory[]> {
-  const categories = await loadCategories(locale);
+async function buildMegaMenu(locale?: string): Promise<MegaCategory[]> {
+  const [categories, products] = await Promise.all([
+    loadCategories(locale),
+    loadAllProducts(locale),
+  ]);
 
-  return Promise.all(
-    categories.map(async (category) => {
-      const { items, total } = await loadProducts({
-        categoryId: category.id,
-        locale,
-        limit: LINES_PER_CATEGORY,
-        sort: "title",
-      });
+  const byCategory = new Map<string, Product[]>();
+  for (const product of sortProducts(products, "title")) {
+    if (!product.categoryId) continue;
+    const list = byCategory.get(product.categoryId) ?? [];
+    list.push(product);
+    byCategory.set(product.categoryId, list);
+  }
 
-      const brands: string[] = [];
-      for (const product of items) {
-        if (product.brand && !brands.includes(product.brand)) {
-          brands.push(product.brand);
-        }
+  return categories.map((category) => {
+    const all = byCategory.get(category.id) ?? [];
+    const items = all.slice(0, LINES_PER_CATEGORY);
+
+    const brands: string[] = [];
+    for (const product of items) {
+      if (product.brand && !brands.includes(product.brand)) {
+        brands.push(product.brand);
       }
+    }
 
-      return {
-        id: category.id,
-        name: category.name,
-        slug: category.slug,
-        code: category.code ?? category.slug.slice(0, 3).toUpperCase(),
-        count: total,
-        lines: items.map((product) => ({
-          slug: product.slug,
-          title: product.title,
-        })),
-        brands: brands.slice(0, MAX_BRANDS),
-        featured: items[0]
-          ? { slug: items[0].slug, title: items[0].title }
-          : null,
-      };
-    }),
-  );
+    return {
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      code: category.code ?? category.slug.slice(0, 3).toUpperCase(),
+      count: all.length,
+      lines: items.map((product) => ({
+        slug: product.slug,
+        title: product.title,
+      })),
+      brands: brands.slice(0, MAX_BRANDS),
+      featured: items[0]
+        ? { slug: items[0].slug, title: items[0].title }
+        : null,
+    };
+  });
+}
+
+export function loadMegaMenu(locale?: string): Promise<MegaCategory[]> {
+  return cachedMenu(locale ?? "", () => buildMegaMenu(locale));
 }

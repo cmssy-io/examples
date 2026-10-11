@@ -15,6 +15,27 @@
           ]
         },
         {
+          "path": "/c/all",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/c/all?sort=price",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/c/all?q=bearing",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
           "path": "/p/bearing-6205-2rs",
           "elements": [
             "header",
@@ -150,6 +171,20 @@
         },
         {
           "path": "/c/all",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/c/all?sort=price",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/c/all?q=bearing",
           "elements": [
             "header",
             "footer"
@@ -325,6 +360,20 @@
         },
         {
           "path": "/c/all",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/c/all?sort=price",
+          "elements": [
+            "header",
+            "footer"
+          ]
+        },
+        {
+          "path": "/c/all?q=bearing",
           "elements": [
             "header",
             "footer"

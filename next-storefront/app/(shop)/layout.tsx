@@ -6,6 +6,8 @@ import { cmssy } from "@/cmssy.config";
 import { blocks } from "@/cmssy/blocks";
 import { EditableLayout } from "@/cmssy/editable-layout";
 import { getCart } from "@/services/cart";
+import { readCartToken } from "@/lib/cmssy/cart-cookie";
+import { memberAccessToken } from "@/lib/cmssy/member-token";
 import { currentUser } from "@/lib/cmssy/session";
 import { shopLocale } from "@/lib/locale";
 import { retryMode } from "@/lib/cmssy/retry-mode";
@@ -28,8 +30,12 @@ export default async function ShopLayout({
 }: {
   children: ReactNode;
 }) {
+  const [cartToken, accessToken] = await Promise.all([
+    readCartToken(),
+    memberAccessToken(),
+  ]);
   const [initialCart, initialUser, { locale }, editMode] = await Promise.all([
-    getCart().catch(() => null),
+    cartToken || accessToken ? getCart().catch(() => null) : null,
     currentUser(),
     shopLocale(),
     isCmssyEditMode(),

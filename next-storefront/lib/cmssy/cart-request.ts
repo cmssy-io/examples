@@ -1,11 +1,15 @@
 import { createCmssyClient } from "@cmssy/core";
 import type { TypedDocumentString } from "@/graphql/generated/graphql";
 import { cmssy } from "@/cmssy.config";
-import { readCartToken } from "@/lib/cmssy/cart-cookie";
+import { ensureCartToken, readCartToken } from "@/lib/cmssy/cart-cookie";
 import { memberAccessToken } from "@/lib/cmssy/member-token";
 import { retryMode } from "@/lib/cmssy/retry-mode";
 
 const client = createCmssyClient(cmssy);
+
+function isMutation(document: { toString(): string }): boolean {
+  return /^\s*mutation\b/.test(String(document));
+}
 
 export async function cartRequest<R, V>(
   document: TypedDocumentString<R, V>,
@@ -13,18 +17,16 @@ export async function cartRequest<R, V>(
 ): Promise<R> {
   const workspaceId = await client.resolveWorkspaceId({ retry: retryMode() });
   const accessToken = await memberAccessToken();
-  const cartToken = await readCartToken();
-  return client.query<R, V>(
-    document,
-    buildVariables(workspaceId),
-    {
-      public: true,
-      retry: retryMode(),
-      headers: {
-        "x-workspace-id": workspaceId,
-        "x-cart-session": cartToken,
-        ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
-      },
+  const cartToken = isMutation(document)
+    ? await ensureCartToken()
+    : await readCartToken();
+  return client.query<R, V>(document, buildVariables(workspaceId), {
+    public: true,
+    retry: retryMode(),
+    headers: {
+      "x-workspace-id": workspaceId,
+      "x-cart-session": cartToken,
+      ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
     },
-      );
+  });
 }

@@ -89,6 +89,7 @@ export interface AddToCartOptions {
 
 export interface CartContextValue {
   cart: Cart | null;
+  itemCount: number;
   loading: boolean;
   error: string | null;
   addToCart(
@@ -130,6 +131,10 @@ export function CartProvider({
 }) {
   const [cart, setCart] = useState(initialCart);
   const [optimisticCart, applyOptimistic] = useOptimistic(cart, cartReducer);
+  const [pendingAdds, addPending] = useOptimistic(
+    0,
+    (count: number, quantity: number) => count + quantity,
+  );
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -144,6 +149,7 @@ export function CartProvider({
       });
       startTransition(async () => {
         if (optimistic) applyOptimistic(optimistic);
+        if (optimistic?.type === "add") addPending(optimistic.quantity);
         try {
           const result = await action();
           if ("error" in result) {
@@ -166,6 +172,7 @@ export function CartProvider({
 
     return {
       cart: optimisticCart,
+      itemCount: optimisticCart ? optimisticCart.itemCount : pendingAdds,
       loading: isPending,
       error,
       addToCart: (recordId, quantity = 1, options) =>
@@ -216,7 +223,15 @@ export function CartProvider({
         }
       },
     };
-  }, [optimisticCart, isPending, error, applyOptimistic, startTransition]);
+  }, [
+    optimisticCart,
+    pendingAdds,
+    isPending,
+    error,
+    applyOptimistic,
+    addPending,
+    startTransition,
+  ]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
