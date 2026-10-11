@@ -364,7 +364,7 @@ export async function loadProducts(query: ProductQuery): Promise<ProductPage> {
     };
   }
 
-  const [result, tax] = await Promise.all([
+  const [result, tax, roles] = await Promise.all([
     queryProducts({
       filter,
       stockState: query.stockState,
@@ -374,9 +374,10 @@ export async function loadProducts(query: ProductQuery): Promise<ProductPage> {
       sort,
     }),
     fetchTaxRates(),
+    fetchProductRoles(PRODUCT_MODEL),
   ]);
   return {
-    items: result.items.map((item) => toProduct(item, tax)),
+    items: result.items.map((item) => toProduct(item, tax, roles)),
     total: result.total,
     hasMore: result.hasMore,
   };
