@@ -2,12 +2,7 @@ import { useMemo, useState } from "react";
 import { useCart } from "./cart-store";
 import { useCartUi } from "./cart-ui";
 import type { Product } from "../../services/catalog";
-import {
-  formatMoney,
-  savingsPercent,
-  stockState,
-  unitPriceFor,
-} from "../../lib/money";
+import { formatMoney, savingsPercent, unitPriceFor } from "../../lib/money";
 import { StockBadge } from "./product-card";
 import { Button } from "./ui/button";
 import { useLocalePath, useShopCopy } from "./locale-ui";
@@ -20,6 +15,8 @@ import {
   selectionsOf,
   variantAxes,
   type VariantSelection,
+  variantInStock,
+  productOutOfStock,
 } from "../../lib/variants";
 import styles from "./product-detail.module.css";
 
@@ -54,9 +51,13 @@ export function BuyBox({
   const tiers =
     variant && variant.tiers.length > 0 ? variant.tiers : product.tiers;
   const inventory = variant
-    ? (variant.inventory ?? product.inventory)
-    : product.inventory;
-  const outOfStock = stockState(inventory) === "out";
+    ? variant.inventory
+    : hasVariants
+      ? null
+      : product.inventory;
+  const outOfStock = variant
+    ? !variantInStock(variant)
+    : productOutOfStock(product);
 
   const unitPrice = unitPriceFor(basePrice, tiers, quantity);
   const lineTotal = unitPrice * quantity;
@@ -160,7 +161,9 @@ export function BuyBox({
         </div>
       ) : null}
 
-      {needsVariant ? null : <StockBadge inventory={inventory} />}
+      {needsVariant || inventory === null ? null : (
+        <StockBadge inventory={inventory} />
+      )}
 
       {outOfStock && !hasVariants ? (
         <div className={styles.backorder}>
@@ -244,7 +247,9 @@ export function BuyBox({
             max={999}
             value={quantity}
             onChange={(event) =>
-              setQuantity(Math.max(1, Number(event.target.value) || 1))
+              setQuantity(
+                Math.max(1, Math.floor(Number(event.target.value)) || 1),
+              )
             }
           />
         </div>

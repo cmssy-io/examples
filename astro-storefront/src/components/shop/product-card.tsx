@@ -69,7 +69,10 @@ export function ProductCard({
 
         <div className={styles.cardBottom}>
           <div>
-            <div className={styles.price}>{formatMoney(product.price)}</div>
+            <div className={styles.price}>
+              {product.hasVariants ? `${copy.from} ` : ""}
+              {formatMoney(product.price)}
+            </div>
             <div className={styles.cardPer}>
               {copy.netPer} {product.unit ?? "pcs"}
             </div>

@@ -1,4 +1,9 @@
-import type { ProductVariant, VariantOption } from "../services/catalog";
+import type {
+  Product,
+  ProductVariant,
+  VariantOption,
+} from "../services/catalog";
+import { stockState } from "./money";
 import type { ShopCopy } from "./shop-copy";
 
 const AXIS_ORDER = ["size", "pack"];
@@ -137,4 +142,19 @@ export function selectionKey(selections: unknown): string {
   return JSON.stringify(
     selectionEntries(selections).map(({ name, value }) => [name, value]),
   );
+}
+
+export function variantInStock(
+  variant: Pick<ProductVariant, "inventory">,
+): boolean {
+  return variant.inventory === null || variant.inventory > 0;
+}
+
+export function productOutOfStock(
+  product: Pick<Product, "inventory" | "variants">,
+): boolean {
+  if (product.variants.length === 0) {
+    return stockState(product.inventory) === "out";
+  }
+  return !product.variants.some(variantInStock);
 }

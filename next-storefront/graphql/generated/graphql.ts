@@ -324,6 +324,13 @@ export type PublicPagesByTypeQueryVariables = Exact<{
 
 export type PublicPagesByTypeQuery = { public: { page: { byType: { hasMore: boolean, items: Array<{ id: string, slug: string, fullSlug: string, publishedAt: string | null, displayName: unknown, seoTitle: unknown, seoDescription: unknown }> } } } };
 
+export type ProductRolesQueryVariables = Exact<{
+  workspaceId: string;
+}>;
+
+
+export type ProductRolesQuery = { public: { model: { definitions: Array<{ slug: string, productRoles: { taxRate: string } | null }> } } };
+
 export type ProductQueryVariables = Exact<{
   workspaceId: string;
   modelSlug: string;
@@ -1552,6 +1559,20 @@ export const PublicPagesByTypeDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PublicPagesByTypeQuery, PublicPagesByTypeQueryVariables>;
+export const ProductRolesDocument = new TypedDocumentString(`
+    query ProductRoles($workspaceId: String!) {
+  public {
+    model {
+      definitions(workspaceId: $workspaceId) {
+        slug
+        productRoles {
+          taxRate
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ProductRolesQuery, ProductRolesQueryVariables>;
 export const ProductDocument = new TypedDocumentString(`
     query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String) {
   public {

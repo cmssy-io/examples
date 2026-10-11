@@ -7,7 +7,7 @@ import { ProductDocuments } from "@/components/shop/product-documents";
 import { ProductGallery } from "@/components/shop/product-gallery";
 import { skuCode } from "@/components/shop/ui/image-placeholder";
 import { localePath, shopLocale } from "@/lib/locale";
-import { stockState } from "@/lib/money";
+import { productOutOfStock } from "@/lib/variants";
 import { copyFor } from "@/lib/shop-copy";
 import styles from "@/components/shop/product-detail.module.css";
 
@@ -50,7 +50,7 @@ export default async function ProductPage({
 
   const category = categories.find((item) => item.id === product.categoryId);
   const specs = product.specs;
-  const outOfStock = stockState(product.inventory) === "out";
+  const outOfStock = productOutOfStock(product);
 
   return (
     <>

@@ -8,7 +8,7 @@ import { ShopErrorBoundary } from "../components/shop/shop-error";
 import { skuCode } from "../components/shop/ui/image-placeholder";
 import { localePath } from "../lib/locale-path";
 import { shopRouteLocale } from "../lib/locale";
-import { stockState } from "../lib/money";
+import { productOutOfStock } from "../lib/variants";
 import { copyFor } from "../lib/shop-copy";
 import { loadCategories, loadProductBySlug } from "../services/catalog";
 import type { Route } from "./+types/product";
@@ -58,7 +58,7 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
   const href = (path: string) => localePath(path, locale, defaultLocale);
   const copy = copyFor(locale);
   const specs = product.specs;
-  const outOfStock = stockState(product.inventory) === "out";
+  const outOfStock = productOutOfStock(product);
 
   return (
     <>

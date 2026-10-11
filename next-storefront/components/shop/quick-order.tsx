@@ -20,6 +20,7 @@ type Result = {
   ok: boolean;
   name?: string;
   reason?: string;
+  href?: string;
 };
 
 function parseLines(input: string): Line[] {
@@ -57,7 +58,9 @@ export function QuickOrder() {
 
     try {
       for (const line of lines) {
-        const lookup = await findProductAction(PRODUCT_MODEL, { sku: line.sku });
+        const lookup = await findProductAction(PRODUCT_MODEL, {
+          sku: line.sku,
+        });
         if ("error" in lookup) {
           outcome.push({ ...line, ok: false, reason: lookup.error });
           continue;
@@ -65,6 +68,17 @@ export function QuickOrder() {
         const product = lookup.product;
         if (!product) {
           outcome.push({ ...line, ok: false, reason: copy.skuNotFound });
+          continue;
+        }
+        if ((product.variants ?? []).length > 0) {
+          const data = product.data as ProductData;
+          outcome.push({
+            ...line,
+            ok: false,
+            name: localizedText(data.title, { locale, defaultLocale }),
+            reason: copy.hasOptions,
+            href: localePath(`/p/${data.slug}`),
+          });
           continue;
         }
         const result = await addItemAction({
@@ -78,9 +92,9 @@ export function QuickOrder() {
             ...line,
             ok: true,
             name: localizedText((product.data as ProductData).title, {
-            locale,
-            defaultLocale,
-          }),
+              locale,
+              defaultLocale,
+            }),
           });
         }
       }
@@ -103,7 +117,7 @@ export function QuickOrder() {
         id="lines"
         className="shop-input"
         rows={8}
-        placeholder={"BRG-6204-2RS, 50\nFTG-PI08G14 200\nSEA-RS254707;25"}
+        placeholder={"BRG-6204-2RS, 50\nHYD-H2SN12 200\nPNU-SILG14;25"}
         value={input}
         onChange={(event) => setInput(event.target.value)}
         style={{
@@ -121,14 +135,20 @@ export function QuickOrder() {
           {busy ? copy.addingLines : copy.addAllToCart}
         </Button>
         {added > 0 ? (
-          <Link className={buttonClass("outline", "md")} href={localePath("/cart")}>
+          <Link
+            className={buttonClass("outline", "md")}
+            href={localePath("/cart")}
+          >
             {fill(copy.goToCartAdded, { count: added })}
           </Link>
         ) : null}
       </div>
 
       {results ? (
-        <div className={`shop-card ${styles.qResult}`} style={{ marginTop: 20 }}>
+        <div
+          className={`shop-card ${styles.qResult}`}
+          style={{ marginTop: 20 }}
+        >
           <div className={`${styles.qRow} ${styles.qHead}`}>
             <span>SKU</span>
             <span>{copy.product}</span>
@@ -141,9 +161,18 @@ export function QuickOrder() {
               <span className="shop-muted">{line.name ?? "—"}</span>
               <span className={styles.qNum}>{line.quantity}</span>
               <span className={styles.qStatus}>
-                <Badge variant={line.ok ? "success" : "destructive"}>
-                  {line.ok ? copy.added : (line.reason ?? copy.couldNotAdd)}
-                </Badge>
+                {line.href ? (
+                  <Link
+                    href={line.href}
+                    className={buttonClass("outline", "sm")}
+                  >
+                    {copy.chooseOptions}
+                  </Link>
+                ) : (
+                  <Badge variant={line.ok ? "success" : "destructive"}>
+                    {line.ok ? copy.added : (line.reason ?? copy.couldNotAdd)}
+                  </Badge>
+                )}
               </span>
             </div>
           ))}
