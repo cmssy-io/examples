@@ -4,6 +4,7 @@ mutation RemoveCartItem($workspaceId: ID!, $itemId: ID!) {
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal

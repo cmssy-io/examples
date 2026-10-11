@@ -4,6 +4,7 @@ mutation SetShippingMethod($workspaceId: ID!, $shippingMethodId: String) {
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal

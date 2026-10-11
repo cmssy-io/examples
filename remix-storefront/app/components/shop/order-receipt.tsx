@@ -1,17 +1,11 @@
-import type { Order, PublicOrder } from "../../graphql/types";
+import type { PublicOrder } from "../../graphql/types";
 import { formatMoney } from "../../lib/money";
 import type { ShopCopy } from "../../lib/shop-copy";
 import styles from "./order.module.css";
 
-type ReceiptOrder = Order | PublicOrder;
-
-export function paymentLabel(
-  order: ReceiptOrder,
-  copy: ShopCopy,
-  payOnline = false,
-) {
+export function paymentLabel(order: PublicOrder, copy: ShopCopy) {
   const labels: Record<string, string> = {
-    unpaid: payOnline ? copy.awaitingPaymentOnline : copy.awaitingPayment,
+    unpaid: copy.awaitingPayment,
     partially_paid: copy.partiallyPaid,
     paid: copy.paid,
     refunded: copy.refunded,
@@ -23,7 +17,7 @@ export function OrderReceipt({
   order,
   copy,
 }: {
-  order: ReceiptOrder;
+  order: PublicOrder;
   copy: ShopCopy;
 }) {
   const currency = order.currency;

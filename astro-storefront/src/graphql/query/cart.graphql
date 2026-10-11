@@ -4,6 +4,7 @@ query Cart($workspaceId: ID!) {
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal

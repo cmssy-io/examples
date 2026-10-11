@@ -18,25 +18,6 @@ function Icon({ children }: { children: ReactNode }) {
   );
 }
 
-export function QuickOrderIcon() {
-  return (
-    <Icon>
-      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" />
-      <path d="M9 13h6M9 17h3" />
-    </Icon>
-  );
-}
-
-export function AccountIcon() {
-  return (
-    <Icon>
-      <circle cx="12" cy="8" r="4" />
-      <path d="M6 21v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1" />
-    </Icon>
-  );
-}
-
 export function CartIcon() {
   return (
     <Icon>

@@ -25,12 +25,10 @@
     "@graphql-typed-document-node/core": "3.2.0",
     "@nanostores/react": "^2.0.1",
     "astro": "^7.2.2",
-    "jose": "^6.2.12",
     "nanostores": "^1.5.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "sanitize-html": "^2.17.7",
-    "stripe": "^23.0.0"
+    "sanitize-html": "^2.17.7"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

@@ -2,12 +2,9 @@
 import styles from "../../components/shop/order.module.css";
 import { OrderReceipt, paymentLabel } from "../../components/shop/order-receipt";
 import ShopLayout from "../../layouts/shop-layout.astro";
-import { AccountOrderIsland } from "../../islands/account-order";
-import { PayOrderButtonIsland } from "../../islands/pay-order-button";
 import { localePath } from "../../lib/locale-path";
 import { copyFor } from "../../lib/shop-copy";
-import { fetchOrderByToken, getMyOrder } from "../../services/orders";
-import { memberAccessToken } from "../../shop/context";
+import { fetchOrderByToken } from "../../services/orders";
 import { shopPageState } from "../../shop/page-state";
 
 export const prerender = false;
@@ -17,40 +14,20 @@ const { locale, defaultLocale } = state.location;
 const copy = copyFor(locale);
 const id = Astro.params.id ?? "";
 const token = Astro.url.searchParams.get("token");
-const paid = Boolean(Astro.url.searchParams.get("paid"));
 const href = (path: string) => localePath(path, locale, defaultLocale);
 
-const memberOrder =
-  !token && state.user
-    ? await getMyOrder(memberAccessToken(Astro.locals.shop), id)
-    : null;
-const publicOrder = token ? await fetchOrderByToken(id, token) : null;
-const canPay = (order: { balanceDue: number; status: string }) =>
-  state.payOnline && order.balanceDue > 0 && order.status !== "canceled";
+const order = token ? await fetchOrderByToken(id, token) : null;
+if (!order) {
+  Astro.response.status = 404;
+}
 ---
 
 <ShopLayout state={state} title={`${copy.orderConfirmation} - MACHTEC`} noindex>
-  {!token ? (
-    memberOrder ? (
-      <AccountOrderIsland
-        client:load
-        shop={state}
-        order={memberOrder}
-        payOnline={state.payOnline}
-        paid={paid}
-      />
-    ) : (
-      <div class={`shop-card ${styles.notFound}`}>
-        <h1>{copy.orderNotAvailable}</h1>
-        <p class="shop-muted">{copy.orderNotAvailableHint}</p>
-        <a class="shop-btn" href={href("/account")}>{copy.goToAccount}</a>
-      </div>
-    )
-  ) : !publicOrder ? (
+  {!order ? (
     <div class={`shop-card ${styles.notFound}`}>
       <h1>{copy.orderNotFound}</h1>
       <p class="shop-muted">{copy.orderLinkExpired}</p>
-      <a class="shop-btn" href={href("/account")}>{copy.goToAccount}</a>
+      <a class="shop-btn" href={href("/c/all")}>{copy.continueShopping}</a>
     </div>
   ) : (
     <div class={styles.page}>
@@ -71,56 +48,37 @@ const canPay = (order: { balanceDue: number; status: string }) =>
         </span>
         <h1 class={styles.title}>{copy.orderPlaced}</h1>
         <p class={styles.subtitle}>
-          {publicOrder.orderNumber ? (
+          {order.orderNumber ? (
             <>
-              {copy.order} <span class={styles.strong}>#{publicOrder.orderNumber}</span>{" · "}
+              {copy.order} <span class={styles.strong}>#{order.orderNumber}</span>{" · "}
             </>
           ) : null}
-          {publicOrder.poNumber ? (
+          {order.poNumber ? (
             <>
-              {copy.po} <span class={styles.strong}>{publicOrder.poNumber}</span>{" · "}
+              {copy.po} <span class={styles.strong}>{order.poNumber}</span>{" · "}
             </>
           ) : null}
           {copy.confirmationSentTo}{" "}
-          <span class={styles.strong}>{publicOrder.customerEmail}</span>
+          <span class={styles.strong}>{order.customerEmail}</span>
         </p>
-        <span class={styles.badge}>{paymentLabel(publicOrder, copy, state.payOnline)}</span>
-        {paid && publicOrder.balanceDue > 0 ? (
-          <p class={styles.subtitle}>
-            {copy.paymentConfirming}{" "}
-            <a
-              class={styles.strong}
-              href={href(`/order/${publicOrder.id}?token=${encodeURIComponent(token)}`)}
-            >
-              {copy.checkOrderStatus}
-            </a>
-          </p>
-        ) : null}
+        <span class={styles.badge}>{paymentLabel(order, copy)}</span>
       </div>
 
-      <OrderReceipt order={publicOrder} copy={copy} />
+      <OrderReceipt order={order} copy={copy} />
 
-      {publicOrder.customerNote ? (
+      {order.customerNote ? (
         <div class={styles.meta}>
           <div class={styles.metaRow}>
             <span class={styles.metaLabel}>{copy.note}</span>
-            <span>{publicOrder.customerNote}</span>
+            <span>{order.customerNote}</span>
           </div>
         </div>
       ) : null}
 
       <div class={styles.actions}>
-        {canPay(publicOrder) && !paid ? (
-          <PayOrderButtonIsland
-            client:load
-            shop={state}
-            orderId={publicOrder.id}
-            token={token}
-          />
-        ) : null}
         <a class="shop-btn shop-btn-primary" href={href("/c/all")}>{copy.continueShopping}</a>
-        {publicOrder.invoiceUrl ? (
-          <a class="shop-btn" href={publicOrder.invoiceUrl}>{copy.downloadInvoice}</a>
+        {order.invoiceUrl ? (
+          <a class="shop-btn" href={order.invoiceUrl}>{copy.downloadInvoice}</a>
         ) : null}
       </div>
 

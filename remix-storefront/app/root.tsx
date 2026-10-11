@@ -10,11 +10,15 @@ import type { Route } from "./+types/root";
 import { CartProvider } from "./components/shop/cart-provider";
 import { CartUiProvider } from "./components/shop/cart-ui";
 import { LocaleProvider } from "./components/shop/locale-ui";
-import { UserProvider } from "./components/shop/user-provider";
 import { shopLocale } from "./lib/locale";
-import { payOnline } from "./lib/stripe";
 import { getCart } from "./services/cart";
-import { currentUser, shopAuth, shopContext } from "./shop/context";
+import {
+  clearCartToken,
+  shopAuth,
+  shopContext,
+  type ShopRequest,
+} from "./shop/context";
+import type { Cart } from "./graphql/types";
 import { shopMiddleware } from "./shop/middleware";
 import shopStyles from "./styles/shop.css?url";
 
@@ -34,21 +38,23 @@ export const links: Route.LinksFunction = () => [
   { rel: "stylesheet", href: shopStyles },
 ];
 
+function guestCart(shop: ShopRequest, cart: Cart | null): Cart | null {
+  if (!cart?.userId) return cart;
+  clearCartToken(shop);
+  return null;
+}
+
 export async function loader({ request, context }: Route.LoaderArgs) {
   const shop = context.get(shopContext);
   const [{ locale, defaultLocale, locales }, cart] = await Promise.all([
     shopLocale(request),
-    shop.cartToken || shop.session
-      ? getCart(shopAuth(shop)).catch(() => null)
-      : null,
+    shop.cartToken ? getCart(shopAuth(shop)).catch(() => null) : null,
   ]);
   return {
     locale,
     defaultLocale,
     locales,
-    cart,
-    user: currentUser(shop),
-    payOnline: payOnline(),
+    cart: guestCart(shop, cart),
   };
 }
 
@@ -82,16 +88,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
-  const { locale, defaultLocale, locales, cart, user } = loaderData;
+  const { locale, defaultLocale, locales, cart } = loaderData;
   return (
     <LocaleProvider value={{ locale, defaultLocale, locales }}>
-      <UserProvider initialUser={user}>
-        <CartProvider initialCart={cart}>
-          <CartUiProvider>
-            <Outlet />
-          </CartUiProvider>
-        </CartProvider>
-      </UserProvider>
+      <CartProvider initialCart={cart}>
+        <CartUiProvider>
+          <Outlet />
+        </CartUiProvider>
+      </CartProvider>
     </LocaleProvider>
   );
 }

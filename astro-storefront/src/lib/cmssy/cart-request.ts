@@ -7,7 +7,6 @@ const client = createCmssyClient(cmssy);
 
 export interface ShopAuth {
   cartToken: string;
-  accessToken?: string;
 }
 
 export async function cartRequest<R, V>(
@@ -22,9 +21,6 @@ export async function cartRequest<R, V>(
     headers: {
       "x-workspace-id": workspaceId,
       "x-cart-session": auth.cartToken,
-      ...(auth.accessToken
-        ? { authorization: `Bearer ${auth.accessToken}` }
-        : {}),
     },
   });
 }

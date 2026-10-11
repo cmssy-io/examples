@@ -3,6 +3,8 @@ import { localePath } from "../../lib/locale-path";
 import { copyFor } from "../../lib/shop-copy";
 import type { ShopLocation } from "./locale-ui";
 
+const FULL_SHOP_SCREEN = /^(?:\/[a-z]{2})?\/(?:account|quick-order)\/?$/;
+
 interface Props {
   location: ShopLocation;
 }
@@ -10,12 +12,13 @@ interface Props {
 const { location } = Astro.props;
 const copy = copyFor(location.locale);
 const catalogHref = localePath("/c/all", location.locale, location.defaultLocale);
+const fullShopScreen = FULL_SHOP_SCREEN.test(location.pathname);
 ---
 
 <div class="shop-card not-found">
   <div class="code" aria-hidden>404</div>
-  <h1>{copy.notFoundTitle}</h1>
-  <p class="shop-muted">{copy.notFoundBody}</p>
+  <h1>{fullShopScreen ? copy.fullShopOnlyTitle : copy.notFoundTitle}</h1>
+  <p class="shop-muted">{fullShopScreen ? copy.fullShopOnlyBody : copy.notFoundBody}</p>
   <a href={catalogHref} class="shop-btn shop-btn-primary">{copy.backToCatalog}</a>
 </div>
 

@@ -5,21 +5,16 @@ import { useCart } from "../components/shop/cart-provider";
 import { useCartUi } from "../components/shop/cart-ui";
 import { LanguageSwitcher } from "../components/shop/language-switcher";
 import { useLocalePath, useShopCopy } from "../components/shop/locale-ui";
-import { useCmssyUser } from "../components/shop/user-provider";
 import { CATEGORY_MODEL } from "../services/catalog-models";
 import { HeaderNav } from "./header-nav";
 import { HeaderSearch } from "./header-search";
-import { AccountIcon, CartIcon, QuickOrderIcon } from "./icons";
+import { CartIcon } from "./icons";
 import type { MegaCategory } from "./load-mega";
 import styles from "./site-header.module.css";
 
 export const siteHeaderProps = {
   utilityNote: fields.text({ label: "Utility bar note" }),
   hoursNote: fields.text({ label: "Opening hours" }),
-  signInLabel: fields.text({
-    label: "Sign-in label",
-    defaultValue: "Trade sign in",
-  }),
   brandName: fields.text({ label: "Brand name", required: true }),
   brandKicker: fields.text({ label: "Brand kicker" }),
   searchPlaceholder: fields.text({ label: "Search placeholder" }),
@@ -68,7 +63,6 @@ export function SiteHeader({
 }: BlockProps<typeof siteHeaderProps, SiteHeaderData>) {
   const { cart } = useCart();
   const { openDrawer } = useCartUi();
-  const { user } = useCmssyUser();
   const localePath = useLocalePath();
   const copy = useShopCopy();
 
@@ -81,7 +75,6 @@ export function SiteHeader({
   );
   const itemCount = cart?.itemCount ?? 0;
   const brandName = content.brandName ?? "";
-  const signInLabel = content.signInLabel ?? copy.tradeSignIn;
   const closeMega = () => setMegaOpen(false);
 
   return (
@@ -98,9 +91,6 @@ export function SiteHeader({
                 {content.dispatchNote}
               </span>
             ) : null}
-            <Link to={localePath("/account")}>
-              {user ? user.email : signInLabel}
-            </Link>
             <LanguageSwitcher />
           </div>
         </div>
@@ -125,14 +115,6 @@ export function SiteHeader({
           <HeaderSearch placeholder={content.searchPlaceholder} />
 
           <div className={styles.actions}>
-            <Link to={localePath("/quick-order")} className={styles.action}>
-              <QuickOrderIcon />
-              <span>{copy.quickOrder}</span>
-            </Link>
-            <Link to={localePath("/account")} className={styles.action}>
-              <AccountIcon />
-              <span>{copy.account}</span>
-            </Link>
             <Link
               to={localePath("/cart")}
               className={`${styles.action} ${styles.actionStrong}`}

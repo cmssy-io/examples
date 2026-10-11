@@ -4,6 +4,7 @@ mutation UpdateCartItem($input: UpdateCartItemInput!) {
       id
       status
       itemCount
+      userId
       subtotal
       currency
       discountedTotal

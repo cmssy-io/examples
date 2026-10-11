@@ -15,15 +15,12 @@ import {
   applyDiscountAction,
   checkoutAction,
   clearCartAction,
-  getCartAction,
-  mergeCartAction,
   removeDiscountAction,
   removeItemAction,
   setShippingAction,
   updateItemAction,
   type CartResult,
 } from "../../lib/actions/cart";
-import { useShopLocale } from "./locale-ui";
 
 type CartAction =
   | { type: "add"; recordId: string; quantity: number }
@@ -88,9 +85,7 @@ export interface CartContextValue {
   applyDiscount(code: string): Promise<boolean>;
   removeDiscount(): Promise<boolean>;
   setShippingMethod(shippingMethodId: string | null): Promise<boolean>;
-  merge(): Promise<boolean>;
   checkout(input: CheckoutInput): Promise<CheckoutOutcome>;
-  refresh(): Promise<void>;
 }
 
 export interface CheckoutInput {
@@ -102,7 +97,6 @@ export interface CheckoutInput {
 
 export interface CheckoutOutcome {
   order: CheckoutOrder;
-  paymentUrl: string | null;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -114,7 +108,6 @@ export function CartProvider({
   children: ReactNode;
   initialCart: Cart | null;
 }) {
-  const { locale } = useShopLocale();
   const [cart, setCart] = useState(initialCart);
   const [optimisticCart, applyOptimistic] = useOptimistic(cart, cartReducer);
   const [isPending, startTransition] = useTransition();
@@ -172,11 +165,10 @@ export function CartProvider({
       removeDiscount: () => run(null, () => removeDiscountAction()),
       setShippingMethod: (shippingMethodId) =>
         run(null, () => setShippingAction(shippingMethodId)),
-      merge: () => run(null, () => mergeCartAction()),
       checkout: async (input) => {
         let result: Awaited<ReturnType<typeof checkoutAction>>;
         try {
-          result = await checkoutAction(input, locale);
+          result = await checkoutAction(input);
         } catch (err) {
           throw new Error(actionErrorMessage(err, "Checkout failed"));
         }
@@ -184,15 +176,8 @@ export function CartProvider({
         setCart(null);
         return result;
       },
-      refresh: async () => {
-        try {
-          setCart(await getCartAction());
-        } catch (err) {
-          setError(actionErrorMessage(err, "Commerce request failed"));
-        }
-      },
     };
-  }, [optimisticCart, isPending, error, applyOptimistic, startTransition, locale]);
+  }, [optimisticCart, isPending, error, applyOptimistic, startTransition]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

@@ -1,6 +1,6 @@
 import { actions } from "astro:actions";
 import type { ShippingAddressInput } from "../../graphql/generated/graphql";
-import type { Cart, CheckoutOrder, Product } from "../../graphql/types";
+import type { Cart, CheckoutOrder } from "../../graphql/types";
 import { unwrap } from "./unwrap";
 
 export interface CheckoutInput {
@@ -12,11 +12,6 @@ export interface CheckoutInput {
 
 export interface CheckoutOutcome {
   order: CheckoutOrder;
-  paymentUrl: string | null;
-}
-
-export function getCartAction(): Promise<Cart | null> {
-  return actions.cart.get().then(unwrap).then((result) => result.cart);
 }
 
 export function addItemAction(input: {
@@ -56,43 +51,6 @@ export function setShippingAction(
   return actions.cart.setShipping({ shippingMethodId }).then(unwrap);
 }
 
-export function mergeCartAction(): Promise<Cart> {
-  return actions.cart.merge().then(unwrap);
-}
-
-export function findProductAction(
-  filter: Record<string, unknown>,
-): Promise<Product | null> {
-  return actions.cart
-    .findProduct({ filter })
-    .then(unwrap)
-    .then((result) => result.product);
-}
-
-export function checkoutAction(
-  input: CheckoutInput,
-  locale: string,
-): Promise<CheckoutOutcome> {
-  return actions.cart.checkout({ ...input, locale }).then(unwrap);
-}
-
-export function payOrderAction(
-  orderId: string,
-  accessToken: string,
-  locale: string,
-): Promise<string> {
-  return actions.cart
-    .payOrder({ orderId, accessToken, locale })
-    .then(unwrap)
-    .then((result) => result.url);
-}
-
-export function payMyOrderAction(
-  orderId: string,
-  locale: string,
-): Promise<string> {
-  return actions.cart
-    .payOrder({ orderId, locale })
-    .then(unwrap)
-    .then((result) => result.url);
+export function checkoutAction(input: CheckoutInput): Promise<CheckoutOutcome> {
+  return actions.cart.checkout(input).then(unwrap);
 }

@@ -1,34 +1,18 @@
-import { Link } from "react-router";
-import { AccountOrder } from "../components/shop/account-order";
+import { data, Link } from "react-router";
 import styles from "../components/shop/order.module.css";
 import { OrderReceipt, paymentLabel } from "../components/shop/order-receipt";
-import { PayOrderButton } from "../components/shop/pay-order-button";
 import { ShopErrorBoundary } from "../components/shop/shop-error";
 import { localePath } from "../lib/locale-path";
 import { shopRouteLocale } from "../lib/locale";
 import { copyFor } from "../lib/shop-copy";
-import { payOnline } from "../lib/stripe";
-import { fetchOrderByToken, getMyOrder } from "../services/orders";
-import { currentUser, memberAccessToken, shopContext } from "../shop/context";
+import { fetchOrderByToken } from "../services/orders";
 import type { Route } from "./+types/order";
 
-export async function loader({ request, params, context }: Route.LoaderArgs) {
-  const shop = context.get(shopContext);
+export async function loader({ request, params }: Route.LoaderArgs) {
   const { locale, defaultLocale } = await shopRouteLocale(request, params);
-  const search = new URL(request.url).searchParams;
-  const token = search.get("token");
-  const paid = Boolean(search.get("paid"));
-  const common = { locale, defaultLocale, paid, payOnline: payOnline() };
-
-  if (!token) {
-    const order = currentUser(shop)
-      ? await getMyOrder(memberAccessToken(shop), params.id)
-      : null;
-    return { ...common, mode: "account" as const, token: null, order };
-  }
-
-  const order = await fetchOrderByToken(params.id, token);
-  return { ...common, mode: "public" as const, token, order };
+  const token = new URL(request.url).searchParams.get("token");
+  const order = token ? await fetchOrderByToken(params.id, token) : null;
+  return data({ locale, defaultLocale, order }, { status: order ? 200 : 404 });
 }
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -44,34 +28,17 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 }
 
 export default function OrderPage({ loaderData }: Route.ComponentProps) {
-  const { locale, defaultLocale, paid, payOnline } = loaderData;
+  const { locale, defaultLocale, order } = loaderData;
   const href = (path: string) => localePath(path, locale, defaultLocale);
   const copy = copyFor(locale);
 
-  if (loaderData.mode === "account") {
-    const order = loaderData.order;
-    if (!order) {
-      return (
-        <div className={`shop-card ${styles.notFound}`}>
-          <h1>{copy.orderNotAvailable}</h1>
-          <p className="shop-muted">{copy.orderNotAvailableHint}</p>
-          <Link className="shop-btn" to={href("/account")}>
-            {copy.goToAccount}
-          </Link>
-        </div>
-      );
-    }
-    return <AccountOrder order={order} payOnline={payOnline} paid={paid} />;
-  }
-
-  const { order, token } = loaderData;
   if (!order) {
     return (
       <div className={`shop-card ${styles.notFound}`}>
         <h1>{copy.orderNotFound}</h1>
         <p className="shop-muted">{copy.orderLinkExpired}</p>
-        <Link className="shop-btn" to={href("/account")}>
-          {copy.goToAccount}
+        <Link className="shop-btn" to={href("/c/all")}>
+          {copy.continueShopping}
         </Link>
       </div>
     );
@@ -112,20 +79,7 @@ export default function OrderPage({ loaderData }: Route.ComponentProps) {
           {copy.confirmationSentTo}{" "}
           <span className={styles.strong}>{order.customerEmail}</span>
         </p>
-        <span className={styles.badge}>
-          {paymentLabel(order, copy, payOnline)}
-        </span>
-        {paid && order.balanceDue > 0 ? (
-          <p className={styles.subtitle}>
-            {copy.paymentConfirming}{" "}
-            <Link
-              className={styles.strong}
-              to={href(`/order/${order.id}?token=${encodeURIComponent(token)}`)}
-            >
-              {copy.checkOrderStatus}
-            </Link>
-          </p>
-        ) : null}
+        <span className={styles.badge}>{paymentLabel(order, copy)}</span>
       </div>
 
       <OrderReceipt order={order} copy={copy} />
@@ -140,12 +94,6 @@ export default function OrderPage({ loaderData }: Route.ComponentProps) {
       ) : null}
 
       <div className={styles.actions}>
-        {payOnline &&
-        order.balanceDue > 0 &&
-        order.status !== "canceled" &&
-        !paid ? (
-          <PayOrderButton orderId={order.id} token={token} />
-        ) : null}
         <Link className="shop-btn shop-btn-primary" to={href("/c/all")}>
           {copy.continueShopping}
         </Link>

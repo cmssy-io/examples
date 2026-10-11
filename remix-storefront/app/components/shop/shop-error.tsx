@@ -1,10 +1,13 @@
-import { isRouteErrorResponse, Link } from "react-router";
+import { isRouteErrorResponse, Link, useLocation } from "react-router";
 import { useLocalePath, useShopCopy } from "./locale-ui";
 import { buttonClass } from "./ui/button";
+
+const FULL_SHOP_SCREEN = /^(?:\/[a-z]{2})?\/(?:account|quick-order)\/?$/;
 
 export function ShopNotFound() {
   const copy = useShopCopy();
   const localePath = useLocalePath();
+  const fullShopScreen = FULL_SHOP_SCREEN.test(useLocation().pathname);
   return (
     <div
       className="shop-card"
@@ -31,10 +34,10 @@ export function ShopNotFound() {
         404
       </div>
       <h1 style={{ fontSize: "var(--text-xl)", margin: 0 }}>
-        {copy.notFoundTitle}
+        {fullShopScreen ? copy.fullShopOnlyTitle : copy.notFoundTitle}
       </h1>
       <p className="shop-muted" style={{ maxWidth: "42ch", margin: 0 }}>
-        {copy.notFoundBody}
+        {fullShopScreen ? copy.fullShopOnlyBody : copy.notFoundBody}
       </p>
       <Link
         to={localePath("/c/all")}

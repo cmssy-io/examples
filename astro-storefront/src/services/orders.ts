@@ -1,40 +1,10 @@
 import { CmssyGraphqlError, createCmssyClient } from "@cmssy/core";
 import { cmssy } from "../cmssy.config";
-import type { Order, MyOrders, PublicOrder } from "../graphql/types";
-import { memberRequest } from "../lib/cmssy/member-request";
+import type { PublicOrder } from "../graphql/types";
+import { PublicOrderDocument } from "../graphql/generated/graphql";
 import { retryMode } from "../lib/cmssy/retry-mode";
-import {
-  MyOrderDocument,
-  MyOrdersDocument,
-  PublicOrderDocument,
-} from "../graphql/generated/graphql";
-
-const EMPTY_ORDERS: MyOrders = { total: 0, hasMore: false, items: [] };
 
 const client = createCmssyClient(cmssy);
-
-export async function listMyOrders(
-  accessToken: string | undefined,
-  options: { skip?: number; limit?: number } = {},
-): Promise<MyOrders> {
-  const data = await memberRequest(accessToken, MyOrdersDocument, (workspaceId) => ({
-    workspaceId,
-    skip: options.skip ?? 0,
-    limit: options.limit ?? 20,
-  }));
-  return data?.account.orders ?? EMPTY_ORDERS;
-}
-
-export async function getMyOrder(
-  accessToken: string | undefined,
-  id: string,
-): Promise<Order | null> {
-  const data = await memberRequest(accessToken, MyOrderDocument, (workspaceId) => ({
-    workspaceId,
-    id,
-  }));
-  return data?.account.order ?? null;
-}
 
 export async function fetchOrderByToken(
   orderId: string,
