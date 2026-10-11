@@ -169,6 +169,108 @@
   height: 100%;
 }
 
+.video {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--muted);
+}
+
+.documentsSection {
+  margin-top: 24px;
+}
+
+.documents {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.document {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.document:hover {
+  text-decoration: underline;
+}
+
+.document svg {
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.optionGroup {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.optionGroup legend {
+  padding: 0;
+  margin-bottom: 6px;
+}
+
+.optionValues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.option {
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.option:hover:not(:disabled) {
+  border-color: var(--muted-foreground);
+}
+
+.optionActive,
+.optionActive:hover:not(:disabled) {
+  border-color: var(--foreground);
+  box-shadow: inset 0 0 0 1px var(--foreground);
+}
+
+.option:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.variantSku {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+}
+
+.from {
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+
 .priceRow {
   display: flex;
   align-items: baseline;

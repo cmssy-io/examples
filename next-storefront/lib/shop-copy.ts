@@ -1,4 +1,3 @@
-
 const en = {
   search: "Search",
   searchPlaceholder: "Search the catalog",
@@ -85,6 +84,10 @@ const en = {
   unitPrice: "Unit price",
   lineTotalNet: "Line total (net)",
   datasheet: "Datasheet (PDF)",
+  documents: "Documents",
+  optionSize: "Size",
+  optionPack: "Pack",
+  chooseOptions: "Choose options",
   contractDiscount: "contract",
   inclVat: "incl. {rate}% VAT",
   packaging: "Packaging",
@@ -303,6 +306,10 @@ const no: ShopCopy = {
   unitPrice: "Enhetspris",
   lineTotalNet: "Linjesum (netto)",
   datasheet: "Datablad (PDF)",
+  documents: "Dokumenter",
+  optionSize: "Størrelse",
+  optionPack: "Pakke",
+  chooseOptions: "Velg alternativer",
   contractDiscount: "avtalepris",
   inclVat: "inkl. {rate}% mva.",
   packaging: "Pakning",

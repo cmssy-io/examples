@@ -4,6 +4,7 @@ import { AddToCartButton } from "./add-to-cart-button";
 import styles from "./catalog.module.css";
 import { useLocalePath, useShopCopy } from "./locale-ui";
 import { Badge, type BadgeVariant } from "./ui/badge";
+import { buttonClass } from "./ui/button";
 import { skuCode } from "./ui/image-placeholder";
 import { ProductImage } from "./ui/product-image";
 
@@ -74,7 +75,13 @@ export function ProductCard({
             </div>
           </div>
           {quickAdd ? (
-            <AddToCartButton recordId={product.id} name={product.title} />
+            product.hasVariants ? (
+              <a href={href} className={buttonClass("outline", "sm")}>
+                {copy.chooseOptions}
+              </a>
+            ) : (
+              <AddToCartButton recordId={product.id} name={product.title} />
+            )
           ) : null}
         </div>
       </div>

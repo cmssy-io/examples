@@ -10,6 +10,7 @@ import {
 } from "react";
 import type { Cart, CartItem } from "../../graphql/types";
 import { actionErrorMessage } from "../../lib/action-errors";
+import { selectionKey } from "../../lib/variants";
 import {
   addItemAction,
   applyDiscountAction,
@@ -30,7 +31,12 @@ export const $cart = atom<Cart | null | undefined>(undefined);
 export const CartSeedContext = createContext<Cart | null>(null);
 
 type CartAction =
-  | { type: "add"; recordId: string; quantity: number }
+  | {
+      type: "add";
+      recordId: string;
+      quantity: number;
+      variantSelections?: Record<string, string>;
+    }
   | { type: "update"; itemId: string; quantity: number }
   | { type: "remove"; itemId: string }
   | { type: "clear" };
@@ -43,10 +49,14 @@ function cartReducer(cart: Cart | null, action: CartAction): Cart | null {
   if (!cart) return cart;
   switch (action.type) {
     case "add": {
-      const has = cart.items.some((item) => item.recordId === action.recordId);
+      const key = selectionKey(action.variantSelections);
+      const sameLine = (item: CartItem) =>
+        item.recordId === action.recordId &&
+        selectionKey(item.variantSelections) === key;
+      const has = cart.items.some(sameLine);
       const items = has
         ? cart.items.map((item) =>
-            item.recordId === action.recordId
+            sameLine(item)
               ? { ...item, quantity: item.quantity + action.quantity }
               : item,
           )
@@ -130,12 +140,19 @@ export function useCart(): CartContextValue {
       loading: isPending,
       error,
       addToCart: (recordId, quantity = 1, options) =>
-        run({ type: "add", recordId, quantity }, () =>
-          addItemAction({
+        run(
+          {
+            type: "add",
             recordId,
             quantity,
             variantSelections: options?.variantSelections,
-          }),
+          },
+          () =>
+            addItemAction({
+              recordId,
+              quantity,
+              variantSelections: options?.variantSelections,
+            }),
         ),
       updateItem: (itemId, quantity) =>
         run({ type: "update", itemId, quantity }, () =>

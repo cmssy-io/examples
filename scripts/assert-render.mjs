@@ -17,7 +17,10 @@
  * answering 200 with the same blocks whether it served Norwegian or fell back
  * to English. And a page that renders no layout region at all is not a page
  * with a broken block - it is a page one <header> short, which nothing above
- * counts, so `elements` names the tags that have to be on it.
+ * counts, so `elements` names the tags that have to be on it. `attributes`
+ * names the data attributes that have to be on it, for an element with no tag
+ * of its own: a product's documents list is a <ul> like any other, and only the
+ * `data-product-documents` it marks itself with says which one.
  *
  * `status` says what the URL is supposed to answer, and defaults to 200. Give
  * it another code and the block checks step aside - a 404 has nothing to prove
@@ -34,6 +37,7 @@
  * Usage: node scripts/assert-render.mjs <baseUrl> <target> [...targets]
  * where a target is a path, or an object as JSON:
  *   {"path": "/no", "lang": "no", "elements": ["header", "footer"]}
+ *   {"path": "/p/bearing", "elements": ["video"], "attributes": ["data-variant-selector"]}
  *   {"path": "/no-such-page", "status": 404}
  *   {"path": "/api/x", "method": "POST", "headers": {"x-y": "1"}, "body": {}, "status": 403}
  */
@@ -153,6 +157,7 @@ for (const {
   path,
   lang,
   elements = [],
+  attributes = [],
   status = 200,
   method = "GET",
   headers,
@@ -255,6 +260,16 @@ for (const {
     continue;
   }
 
+  const unmarked = attributes.filter(
+    (name) => !new RegExp(`\\s${name}(?:[\\s=>]|/>)`).test(html),
+  );
+  if (unmarked.length > 0) {
+    failures.push(
+      `${label}: renders ${blocks} blocks but nothing on it carries ${unmarked.join(", ")} - the element that marks itself with it never rendered`,
+    );
+    continue;
+  }
+
   if (lang) {
     const served = html.match(HTML_LANG)?.[1];
     if (served !== lang) {
@@ -266,7 +281,7 @@ for (const {
   }
 
   console.log(
-    `  ${label}: HTTP ${res.status}, ${blocks} blocks, ${text.length} characters${lang ? `, lang="${lang}"` : ""}${elements.length ? `, <${elements.join(">, <")}>` : ""}`,
+    `  ${label}: HTTP ${res.status}, ${blocks} blocks, ${text.length} characters${lang ? `, lang="${lang}"` : ""}${elements.length ? `, <${elements.join(">, <")}>` : ""}${attributes.length ? `, ${attributes.join(", ")}` : ""}`,
   );
 }
 

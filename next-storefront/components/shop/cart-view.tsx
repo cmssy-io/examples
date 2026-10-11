@@ -7,6 +7,7 @@ import { useCart } from "@/components/shop/cart-provider";
 import { useCmssyUser } from "@/components/shop/user-provider";
 import { formatMoney } from "@/lib/money";
 import { fill } from "@/lib/shop-copy";
+import { selectionLabel } from "@/lib/variants";
 import { useLocalePath, useShopCopy } from "./locale-ui";
 import styles from "./cart.module.css";
 
@@ -35,10 +36,7 @@ export function CartView({ payOnline }: { payOnline: boolean }) {
     return (
       <div className={`shop-card ${styles.empty}`}>
         <p>{copy.cartEmpty}</p>
-        <Link
-          className="shop-btn shop-btn-primary"
-          href={localePath("/c/all")}
-        >
+        <Link className="shop-btn shop-btn-primary" href={localePath("/c/all")}>
           {copy.browseCatalog}
         </Link>
       </div>
@@ -106,6 +104,7 @@ export function CartView({ payOnline }: { payOnline: boolean }) {
             );
             const listPrice = snapshot.price;
             const discounted = item.unitPrice < listPrice;
+            const options = selectionLabel(item.variantSelections);
 
             return (
               <div key={item.id} className={styles.line}>
@@ -113,6 +112,9 @@ export function CartView({ payOnline }: { payOnline: boolean }) {
                   <span className={styles.lineName}>{snapshot.name}</span>
                   {snapshot.sku ? (
                     <span className={styles.lineSku}>{snapshot.sku}</span>
+                  ) : null}
+                  {options ? (
+                    <span className={styles.lineOptions}>{options}</span>
                   ) : null}
                   <span>
                     {discounted ? (

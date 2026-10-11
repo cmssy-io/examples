@@ -46,6 +46,11 @@
   color: var(--muted-foreground);
 }
 
+.lineOptions {
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
 .lineTier {
   font-size: 13px;
   font-weight: 600;

@@ -2,6 +2,7 @@ import { data, Link } from "react-router";
 import sanitizeHtml from "sanitize-html";
 import { BuyBox } from "../components/shop/buy-box";
 import styles from "../components/shop/product-detail.module.css";
+import { ProductDocuments } from "../components/shop/product-documents";
 import { ProductGallery } from "../components/shop/product-gallery";
 import { ShopErrorBoundary } from "../components/shop/shop-error";
 import { skuCode } from "../components/shop/ui/image-placeholder";
@@ -84,6 +85,7 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
           alt={product.title}
           outOfStock={outOfStock}
           outOfStockLabel={copy.outOfStock}
+          video={product.video}
         />
 
         <div>
@@ -150,6 +152,11 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
             </table>
           </section>
         ) : null}
+
+        <ProductDocuments
+          documents={product.documents}
+          title={copy.documents}
+        />
       </div>
     </>
   );

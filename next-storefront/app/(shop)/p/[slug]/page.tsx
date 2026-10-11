@@ -3,6 +3,7 @@ import Link from "next/link";
 import sanitizeHtml from "sanitize-html";
 import { loadCategories, loadProductBySlug } from "@/lib/catalog";
 import { BuyBox } from "@/components/shop/buy-box";
+import { ProductDocuments } from "@/components/shop/product-documents";
 import { ProductGallery } from "@/components/shop/product-gallery";
 import { skuCode } from "@/components/shop/ui/image-placeholder";
 import { localePath, shopLocale } from "@/lib/locale";
@@ -77,6 +78,7 @@ export default async function ProductPage({
           alt={product.title}
           outOfStock={outOfStock}
           outOfStockLabel={copy.outOfStock}
+          video={product.video}
         />
 
         <div>
@@ -108,43 +110,48 @@ export default async function ProductPage({
             <table className={styles.specs}>
               <tbody>
                 {specs.material ? (
-                    <tr>
-                      <th scope="row">{copy.material}</th>
-                      <td>{specs.material}</td>
-                    </tr>
-                  ) : null}
-                  {specs.dimensions ? (
-                    <tr>
-                      <th scope="row">{copy.dimensions}</th>
-                      <td>{specs.dimensions}</td>
-                    </tr>
-                  ) : null}
-                  {specs.weightKg ? (
-                    <tr>
-                      <th scope="row">{copy.weight}</th>
-                      <td>{specs.weightKg} kg</td>
-                    </tr>
-                  ) : null}
-                  {specs.standard ? (
-                    <tr>
-                      <th scope="row">{copy.standard}</th>
-                      <td>{specs.standard}</td>
-                    </tr>
-                  ) : null}
-                  {specs.operatingTemp ? (
-                    <tr>
-                      <th scope="row">{copy.operatingTemperature}</th>
-                      <td>{specs.operatingTemp}</td>
-                    </tr>
-                  ) : null}
                   <tr>
-                    <th scope="row">{copy.unit}</th>
-                    <td>{product.unit ?? "pcs"}</td>
+                    <th scope="row">{copy.material}</th>
+                    <td>{specs.material}</td>
                   </tr>
-                </tbody>
-              </table>
-            </section>
+                ) : null}
+                {specs.dimensions ? (
+                  <tr>
+                    <th scope="row">{copy.dimensions}</th>
+                    <td>{specs.dimensions}</td>
+                  </tr>
+                ) : null}
+                {specs.weightKg ? (
+                  <tr>
+                    <th scope="row">{copy.weight}</th>
+                    <td>{specs.weightKg} kg</td>
+                  </tr>
+                ) : null}
+                {specs.standard ? (
+                  <tr>
+                    <th scope="row">{copy.standard}</th>
+                    <td>{specs.standard}</td>
+                  </tr>
+                ) : null}
+                {specs.operatingTemp ? (
+                  <tr>
+                    <th scope="row">{copy.operatingTemperature}</th>
+                    <td>{specs.operatingTemp}</td>
+                  </tr>
+                ) : null}
+                <tr>
+                  <th scope="row">{copy.unit}</th>
+                  <td>{product.unit ?? "pcs"}</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
         ) : null}
+
+        <ProductDocuments
+          documents={product.documents}
+          title={copy.documents}
+        />
       </div>
     </>
   );

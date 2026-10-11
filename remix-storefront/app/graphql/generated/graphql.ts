@@ -152,7 +152,7 @@ export type PublicModelProductsQueryVariables = Exact<{
 }>;
 
 
-export type PublicModelProductsQuery = { public: { model: { records: { total: number, hasMore: boolean, items: Array<{ id: string, data: unknown, priceTiers: Array<{ minQty: number, price: number }> }> } } } };
+export type PublicModelProductsQuery = { public: { model: { records: { total: number, hasMore: boolean, items: Array<{ id: string, data: unknown, priceTiers: Array<{ minQty: number, price: number }>, variants: Array<{ id: string }> }> } } } };
 
 export type PublicOrderQueryVariables = Exact<{
   workspaceId: string | number;
@@ -172,6 +172,16 @@ export type PublicPagesByTypeQueryVariables = Exact<{
 
 
 export type PublicPagesByTypeQuery = { public: { page: { byType: { hasMore: boolean, items: Array<{ id: string, slug: string, fullSlug: string, publishedAt: string | null, displayName: unknown, seoTitle: unknown, seoDescription: unknown }> } } } };
+
+export type ProductQueryVariables = Exact<{
+  workspaceId: string;
+  modelSlug: string;
+  filter?: unknown;
+  locale?: string | null | undefined;
+}>;
+
+
+export type ProductQuery = { public: { model: { records: { items: Array<{ id: string, data: unknown, priceTiers: Array<{ minQty: number, price: number }>, variants: Array<{ id: string, sku: string | null, price: number, inventory: number | null, tiers: Array<{ minQty: number, price: number }>, selectedOptions: Array<{ name: string, value: string }> }> }> } } } };
 
 export type SiteTaxRatesQueryVariables = Exact<{
   workspaceSlug: string;
@@ -884,6 +894,9 @@ export const PublicModelProductsDocument = new TypedDocumentString(`
             minQty
             price
           }
+          variants {
+            id
+          }
         }
         total
         hasMore
@@ -993,6 +1006,44 @@ export const PublicPagesByTypeDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PublicPagesByTypeQuery, PublicPagesByTypeQueryVariables>;
+export const ProductDocument = new TypedDocumentString(`
+    query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String) {
+  public {
+    model {
+      records(
+        workspaceId: $workspaceId
+        modelSlug: $modelSlug
+        filter: $filter
+        locale: $locale
+        limit: 1
+      ) {
+        items {
+          id
+          data
+          priceTiers {
+            minQty
+            price
+          }
+          variants {
+            id
+            sku
+            price
+            inventory
+            tiers {
+              minQty
+              price
+            }
+            selectedOptions {
+              name
+              value
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ProductQuery, ProductQueryVariables>;
 export const SiteTaxRatesDocument = new TypedDocumentString(`
     query SiteTaxRates($workspaceSlug: String!) {
   public {

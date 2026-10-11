@@ -1,6 +1,7 @@
-import { createCmssyClient, mediaUrl, mediaUrls } from "@cmssy/core";
+import { createCmssyClient, mediaAlt, mediaUrl, mediaUrls } from "@cmssy/core";
 import { cmssy } from "@/cmssy.config";
 import {
+  ProductDocument,
   PublicModelProductsDocument,
   PublicModelRecordsDocument,
 } from "@/graphql/generated/graphql";
@@ -8,6 +9,7 @@ import {
 import type {
   CategoryData,
   CmssyLocalized,
+  CmssyMedia,
   ProductData,
 } from "@/graphql/models";
 import { localizedText } from "@/lib/localized";
@@ -34,6 +36,21 @@ export type ProductSpecs = NonNullable<ProductData["specs"]>;
 
 export type PriceTier = { minQty: number; price: number };
 
+export type ProductMedia = { url: string; alt: string | null };
+
+export type VariantOption = { name: string; value: string };
+
+export type ProductVariant = {
+  id: string;
+  sku: string | null;
+  price: number;
+  inventory: number | null;
+  selectedOptions: VariantOption[];
+  tiers: PriceTier[];
+};
+
+type VariantRow = Pick<ProductVariant, "id"> | ProductVariant;
+
 export type Product = {
   id: string;
   title: string;
@@ -52,6 +69,10 @@ export type Product = {
   tiers: PriceTier[];
   image: string | null;
   gallery: string[];
+  documents: ProductMedia[];
+  video: ProductMedia | null;
+  hasVariants: boolean;
+  variants: ProductVariant[];
 };
 
 type RecordRow = { id: string; data: unknown };
@@ -67,6 +88,29 @@ function text(value: CmssyLocalized | undefined, fallback = ""): string {
 
 function blank(value: string | null | undefined): string | null {
   return value?.trim() ? value : null;
+}
+
+function toMedia(media: CmssyMedia | null | undefined): ProductMedia | null {
+  const url = mediaUrl(media);
+  return url ? { url, alt: blank(mediaAlt(media)) } : null;
+}
+
+function byMinQty(a: PriceTier, b: PriceTier): number {
+  return a.minQty - b.minQty;
+}
+
+function toVariant(variant: ProductVariant): ProductVariant {
+  return {
+    id: variant.id,
+    sku: blank(variant.sku),
+    price: variant.price,
+    inventory: variant.inventory ?? null,
+    selectedOptions: variant.selectedOptions.map(({ name, value }) => ({
+      name,
+      value,
+    })),
+    tiers: [...variant.tiers].sort(byMinQty),
+  };
 }
 
 function toCategory(row: RecordRow): Category {
@@ -121,6 +165,7 @@ function toProduct(
     id: string;
     data: unknown;
     priceTiers?: PriceTier[];
+    variants?: VariantRow[];
   },
   tax: SiteTaxRates | null,
 ): Product {
@@ -143,9 +188,15 @@ function toProduct(
     inventory: data.inventory ?? 0,
     specs: data.specs ?? null,
     datasheetUrl: blank(data.datasheetUrl),
-    tiers: [...(item.priceTiers ?? [])].sort((a, b) => a.minQty - b.minQty),
+    tiers: [...(item.priceTiers ?? [])].sort(byMinQty),
     image: mediaUrl(data.image),
     gallery: mediaUrls(data.gallery),
+    documents: (data.documents ?? []).flatMap((media) => toMedia(media) ?? []),
+    video: toMedia(data.video),
+    hasVariants: (item.variants ?? []).length > 0,
+    variants: (item.variants ?? []).flatMap((row) =>
+      "selectedOptions" in row ? [toVariant(row)] : [],
+    ),
   };
 }
 
@@ -181,6 +232,7 @@ type ProductRecord = {
   id: string;
   data: unknown;
   priceTiers?: PriceTier[];
+  variants?: VariantRow[];
 };
 
 async function queryProducts(vars: {
@@ -273,11 +325,15 @@ export async function loadProductBySlug(
   slug: string,
   locale?: string,
 ): Promise<Product | null> {
-  const [page, tax] = await Promise.all([
-    queryProducts({ filter: { slug }, locale, limit: 1 }),
+  const [data, tax] = await Promise.all([
+    client.queryScoped(
+      ProductDocument,
+      { modelSlug: PRODUCT_MODEL, filter: { slug }, locale: locale ?? null },
+      { retry: retryMode() },
+    ),
     fetchTaxRates(),
   ]);
-  const record = page.items[0];
+  const record = data?.public?.model?.records?.items[0];
   return record ? toProduct(record, tax) : null;
 }
 

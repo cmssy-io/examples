@@ -1,19 +1,28 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
+import { useCart } from "./cart-provider";
+import { useCartUi } from "./cart-ui";
+import type { Product } from "../../services/catalog";
 import {
   formatMoney,
   savingsPercent,
   stockState,
   unitPriceFor,
 } from "../../lib/money";
-import { fill } from "../../lib/shop-copy";
-import type { Product } from "../../services/catalog";
-import { useCart } from "./cart-provider";
-import { useCartUi } from "./cart-ui";
-import { useLocalePath, useShopCopy } from "./locale-ui";
 import { StockBadge } from "./product-card";
-import styles from "./product-detail.module.css";
 import { Button } from "./ui/button";
+import { useLocalePath, useShopCopy } from "./locale-ui";
+import { fill } from "../../lib/shop-copy";
+import {
+  axisLabel,
+  findVariant,
+  optionAvailable,
+  selectOption,
+  selectionsOf,
+  variantAxes,
+  type VariantSelection,
+} from "../../lib/variants";
+import styles from "./product-detail.module.css";
 
 export function BuyBox({
   product,
@@ -27,23 +36,50 @@ export function BuyBox({
   const { addToCart, error } = useCart();
   const { announceAdded } = useCartUi();
   const [quantity, setQuantity] = useState(1);
-  const [adding, setAdding] = useState(false);
-  const outOfStock = stockState(product.inventory) === "out";
+  const [selection, setSelection] = useState<VariantSelection>({});
 
-  const unitPrice = unitPriceFor(product.price, product.tiers, quantity);
+  const [adding, setAdding] = useState(false);
+
+  const hasVariants = product.variants.length > 0;
+  const axes = useMemo(() => variantAxes(product.variants), [product.variants]);
+  const variant = hasVariants
+    ? findVariant(product.variants, axes, selection)
+    : null;
+  const needsVariant = hasVariants && !variant;
+
+  const basePrice = variant
+    ? variant.price
+    : hasVariants
+      ? Math.min(...product.variants.map((candidate) => candidate.price))
+      : product.price;
+  const tiers =
+    variant && variant.tiers.length > 0 ? variant.tiers : product.tiers;
+  const inventory = variant
+    ? (variant.inventory ?? product.inventory)
+    : product.inventory;
+  const outOfStock = stockState(inventory) === "out";
+
+  const unitPrice = unitPriceFor(basePrice, tiers, quantity);
   const lineTotal = unitPrice * quantity;
   const taxRate = product.taxRate ?? 0;
   const grossUnit = Math.round(unitPrice * (1 + taxRate / 100));
 
-  const activeTier = [...product.tiers]
+  const activeTier = [...tiers]
     .sort((a, b) => a.minQty - b.minQty)
     .filter((tier) => quantity >= tier.minQty)
     .at(-1);
 
+  const blocked = needsVariant || (hasVariants && outOfStock);
+
   async function handleAdd() {
     setAdding(true);
     try {
-      if (await addToCart(product.id, quantity)) announceAdded(product.title);
+      const added = await addToCart(
+        product.id,
+        quantity,
+        variant ? { variantSelections: selectionsOf(variant) } : undefined,
+      );
+      if (added) announceAdded(product.title);
     } finally {
       setAdding(false);
     }
@@ -53,17 +89,18 @@ export function BuyBox({
     <aside className={`shop-card ${styles.buyBox}`}>
       <div>
         <div className={styles.priceRow}>
+          {needsVariant ? (
+            <span className={styles.from}>{copy.from}</span>
+          ) : null}
           <span className={styles.price}>{formatMoney(unitPrice)}</span>
           {activeTier ? (
-            <span className={styles.listPrice}>
-              {formatMoney(product.price)}
-            </span>
+            <span className={styles.listPrice}>{formatMoney(basePrice)}</span>
           ) : null}
         </div>
         <span className={styles.per}>
           net / {product.unit ?? "pcs"}
           {activeTier
-            ? ` - ${copy.contractDiscount} -${savingsPercent(product.price, activeTier.price)}%`
+            ? ` - ${copy.contractDiscount} -${savingsPercent(basePrice, activeTier.price)}%`
             : ""}
         </span>
         <span className={styles.gross}>
@@ -71,9 +108,62 @@ export function BuyBox({
         </span>
       </div>
 
-      <StockBadge inventory={product.inventory} />
+      {axes.length > 0 ? (
+        <div className={styles.options} data-variant-selector>
+          {axes.map((axis, index) => (
+            <fieldset key={axis.name} className={styles.optionGroup}>
+              <legend className="shop-label">
+                {axisLabel(copy, axis.name)}
+                {selection[axis.name] ? `: ${selection[axis.name]}` : ""}
+              </legend>
+              <div className={styles.optionValues}>
+                {axis.values.map((value) => {
+                  const active = selection[axis.name] === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`${styles.option} ${
+                        active ? styles.optionActive : ""
+                      }`}
+                      aria-pressed={active}
+                      disabled={
+                        !optionAvailable(
+                          product.variants,
+                          axes,
+                          selection,
+                          index,
+                          value,
+                        )
+                      }
+                      onClick={() =>
+                        setSelection((current) =>
+                          selectOption(
+                            product.variants,
+                            axes,
+                            current,
+                            axis.name,
+                            value,
+                          ),
+                        )
+                      }
+                    >
+                      {value}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+          ))}
+          {variant?.sku ? (
+            <span className={styles.variantSku}>{variant.sku}</span>
+          ) : null}
+        </div>
+      ) : null}
 
-      {outOfStock ? (
+      {needsVariant ? null : <StockBadge inventory={inventory} />}
+
+      {outOfStock && !hasVariants ? (
         <div className={styles.backorder}>
           <svg
             width="18"
@@ -96,7 +186,7 @@ export function BuyBox({
         </div>
       ) : null}
 
-      {product.tiers.length > 0 ? (
+      {tiers.length > 0 ? (
         <div>
           <h2 className={styles.sectionTitle}>{copy.volumePricing}</h2>
           <table className={styles.tiers}>
@@ -111,12 +201,12 @@ export function BuyBox({
             </thead>
             <tbody>
               <tr className={!activeTier ? styles.tierActive : undefined}>
-                <td>1 - {product.tiers[0].minQty - 1}</td>
-                <td>{formatMoney(product.price)}</td>
+                <td>1 - {tiers[0].minQty - 1}</td>
+                <td>{formatMoney(basePrice)}</td>
                 <td className={styles.save}>-</td>
               </tr>
-              {product.tiers.map((tier, index) => {
-                const next = product.tiers[index + 1];
+              {tiers.map((tier, index) => {
+                const next = tiers[index + 1];
                 const range = next
                   ? `${tier.minQty} - ${next.minQty - 1}`
                   : `${tier.minQty}+`;
@@ -132,7 +222,7 @@ export function BuyBox({
                     <td>{range}</td>
                     <td>{formatMoney(tier.price)}</td>
                     <td className={styles.save}>
-                      {savingsPercent(product.price, tier.price)}%
+                      {savingsPercent(basePrice, tier.price)}%
                     </td>
                   </tr>
                 );
@@ -163,13 +253,17 @@ export function BuyBox({
           size="lg"
           style={{ flex: 1 }}
           onClick={handleAdd}
-          disabled={adding}
+          disabled={adding || blocked}
         >
           {adding
             ? copy.adding
-            : outOfStock
-              ? copy.backorderNow
-              : fill(copy.addWithTotal, { total: formatMoney(lineTotal) })}
+            : needsVariant
+              ? copy.chooseOptions
+              : hasVariants && outOfStock
+                ? copy.outOfStock
+                : outOfStock
+                  ? copy.backorderNow
+                  : fill(copy.addWithTotal, { total: formatMoney(lineTotal) })}
         </Button>
       </div>
 
