@@ -7,7 +7,7 @@ export const categoryGridBlock = defineBlock({
   component: CategoryGrid,
   props: categoryGridProps,
   loader: async ({ context }) => {
-    const { loadCategories } = await import("@/lib/catalog");
+    const { loadCategories } = await import("@/lib/catalog-cached");
     return { items: await loadCategories(context?.locale.current) };
   },
 });

@@ -1,7 +1,13 @@
 import type { NextRequest } from "next/server";
-import { createCmssyProxy, type CmssyProxyCookie } from "@cmssy/next/middleware";
+import {
+  createCmssyProxy,
+  type CmssyProxyCookie,
+} from "@cmssy/next/middleware";
 import { cmssy } from "@/cmssy.config";
-import { SESSION_COOKIE, sessionCookieOptions } from "@/lib/cmssy/session-crypto";
+import {
+  SESSION_COOKIE,
+  sessionCookieOptions,
+} from "@/lib/cmssy/session-crypto";
 import { refreshMemberSession } from "@/lib/cmssy/session-refresh";
 import { CART_COOKIE, mintCartToken } from "@/lib/cmssy/cart-token";
 
@@ -15,7 +21,7 @@ async function cookies(request: NextRequest): Promise<CmssyProxyCookie[]> {
   }
 
   const sessionDropped = refresh?.sealed === "";
-  if (sessionDropped || !request.cookies.get(CART_COOKIE)?.value) {
+  if (sessionDropped && request.cookies.get(CART_COOKIE)?.value) {
     writes.push({ name: CART_COOKIE, value: mintCartToken(), options });
   }
 

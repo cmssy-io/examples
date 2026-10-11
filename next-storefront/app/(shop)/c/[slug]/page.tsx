@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import {
   PAGE_SIZE,
   loadBrandFacets,
-  loadCategories,
   loadProducts,
   loadStockFacets,
   type StockState,
 } from "@/lib/catalog";
+import { loadCategories } from "@/lib/catalog-cached";
 import { ProductCard } from "@/components/shop/product-card";
 import { localePath, shopLocale } from "@/lib/locale";
 import { copyFor, fill } from "@/lib/shop-copy";

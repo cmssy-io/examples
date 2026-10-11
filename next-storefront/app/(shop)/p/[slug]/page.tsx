@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import sanitizeHtml from "sanitize-html";
-import { loadCategories, loadProductBySlug } from "@/lib/catalog";
+import { loadCategories, loadProductBySlug } from "@/lib/catalog-cached";
 import { BuyBox } from "@/components/shop/buy-box";
 import { ProductDocuments } from "@/components/shop/product-documents";
 import { ProductGallery } from "@/components/shop/product-gallery";

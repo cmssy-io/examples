@@ -13,6 +13,7 @@ import type {
   ProductData,
 } from "@/graphql/models";
 import { localizedText } from "@/lib/localized";
+import { ttlCache } from "@/lib/ttl-cache";
 import {
   fetchProductRoles,
   fetchTaxRates,
@@ -26,6 +27,8 @@ export { PRODUCT_MODEL, CATEGORY_MODEL } from "./catalog-models";
 import { PRODUCT_MODEL, CATEGORY_MODEL } from "./catalog-models";
 import { retryMode } from "@/lib/cmssy/retry-mode";
 export const PAGE_SIZE = 12;
+const API_PAGE_SIZE = 50;
+const SCAN_TTL_MS = 60_000;
 
 export type Category = {
   id: string;
@@ -138,9 +141,9 @@ export async function loadCategories(locale?: string): Promise<Category[]> {
     {
       modelSlug: CATEGORY_MODEL,
       locale: locale ?? null,
-      limit: 50,
+      limit: API_PAGE_SIZE,
       offset: 0,
-      sort: "sortOrder",
+      sort: "sortOrder_asc",
     },
     { retry: retryMode() },
   );
@@ -229,7 +232,19 @@ export type ProductPage = {
   hasMore: boolean;
 };
 
-function sortProducts(items: Product[], sort: string | undefined): Product[] {
+const API_SORTS: Record<string, string> = {
+  price: "price_asc",
+  "-price": "price_desc",
+};
+
+function apiSort(sort: string | undefined): string | null {
+  return API_SORTS[sort ?? ""] ?? null;
+}
+
+export function sortProducts(
+  items: Product[],
+  sort: string | undefined,
+): Product[] {
   const sorted = [...items];
   if (sort === "price") sorted.sort((a, b) => a.price - b.price);
   else if (sort === "-price") sorted.sort((a, b) => b.price - a.price);
@@ -259,7 +274,7 @@ async function queryProducts(vars: {
       filter: vars.filter ?? {},
       stockState: vars.stockState ?? null,
       locale: vars.locale ?? null,
-      limit: vars.limit ?? 50,
+      limit: vars.limit ?? API_PAGE_SIZE,
       offset: vars.offset ?? 0,
       sort: vars.sort ?? null,
     },
@@ -289,7 +304,7 @@ async function fetchAllProducts(
       filter,
       stockState,
       locale,
-      limit: 50,
+      limit: API_PAGE_SIZE,
       offset,
     });
     items.push(...result.items.map((item) => toProduct(item, tax, roles)));
@@ -299,37 +314,80 @@ async function fetchAllProducts(
   return items;
 }
 
-export async function loadProducts(query: ProductQuery): Promise<ProductPage> {
-  const page = Math.max(1, query.page ?? 1);
-  const limit = Math.max(1, query.limit ?? PAGE_SIZE);
+const scanCache = ttlCache<Product[]>(SCAN_TTL_MS);
+
+function scanProducts(
+  filter: Record<string, unknown>,
+  stockState: StockState | undefined,
+  locale: string | undefined,
+): Promise<Product[]> {
+  const key = JSON.stringify([filter, stockState ?? "", locale ?? ""]);
+  return scanCache(key, () => fetchAllProducts(filter, stockState, locale));
+}
+
+function productFilter(query: {
+  categoryId?: string;
+  brand?: string;
+}): Record<string, unknown> {
   const filter: Record<string, unknown> = {};
   if (query.categoryId) filter.category = query.categoryId;
   if (query.brand) filter.brand = query.brand;
+  return filter;
+}
 
-  const all = await fetchAllProducts(filter, query.stockState, query.locale);
+function matchesSearch(product: Product, needle: string): boolean {
+  return [product.title, product.sku, product.brand ?? ""]
+    .join(" ")
+    .toLowerCase()
+    .includes(needle);
+}
+
+export async function loadProducts(query: ProductQuery): Promise<ProductPage> {
+  const page = Math.max(1, query.page ?? 1);
+  const limit = Math.min(Math.max(1, query.limit ?? PAGE_SIZE), API_PAGE_SIZE);
+  const offset = (page - 1) * limit;
+  const filter = productFilter(query);
   const needle = query.search?.trim().toLowerCase();
-  const matched = needle
-    ? all.filter((product) =>
-        [product.title, product.sku, product.brand ?? ""]
-          .join(" ")
-          .toLowerCase()
-          .includes(needle),
-      )
-    : all;
-  const sorted = sortProducts(matched, query.sort);
-  const total = sorted.length;
-  const start = (page - 1) * limit;
-  const items = sorted.slice(start, start + limit);
+  const sort = apiSort(query.sort);
 
+  if (needle || sort === null) {
+    const all = await scanProducts(filter, query.stockState, query.locale);
+    const sorted = sortProducts(
+      needle ? all.filter((product) => matchesSearch(product, needle)) : all,
+      query.sort,
+    );
+    const items = sorted.slice(offset, offset + limit);
+    return {
+      items,
+      total: sorted.length,
+      hasMore: offset + items.length < sorted.length,
+    };
+  }
+
+  const [result, tax] = await Promise.all([
+    queryProducts({
+      filter,
+      stockState: query.stockState,
+      locale: query.locale,
+      limit,
+      offset,
+      sort,
+    }),
+    fetchTaxRates(),
+  ]);
   return {
-    items,
-    total,
-    hasMore: start + items.length < total,
+    items: result.items.map((item) => toProduct(item, tax)),
+    total: result.total,
+    hasMore: result.hasMore,
   };
 }
 
+export function loadAllProducts(locale?: string): Promise<Product[]> {
+  return scanProducts({}, undefined, locale);
+}
+
 export async function loadProductSlugs(locale?: string): Promise<string[]> {
-  const products = await fetchAllProducts({}, undefined, locale);
+  const products = await loadAllProducts(locale);
   return products.map((product) => product.slug);
 }
 
@@ -354,10 +412,11 @@ export async function loadBrandFacets(
   categoryId?: string,
   locale?: string,
 ): Promise<Array<{ brand: string; count: number }>> {
-  const filter: Record<string, unknown> = {};
-  if (categoryId) filter.category = categoryId;
-
-  const all = await fetchAllProducts(filter, undefined, locale);
+  const all = await scanProducts(
+    productFilter({ categoryId }),
+    undefined,
+    locale,
+  );
 
   const counts = new Map<string, number>();
   for (const product of all) {
@@ -370,23 +429,25 @@ export async function loadBrandFacets(
     .sort((a, b) => a.brand.localeCompare(b.brand));
 }
 
-export async function loadStockFacets(
+const STOCK_STATES: StockState[] = ["in", "low", "out"];
+const stockFacetCache =
+  ttlCache<Array<{ state: StockState; count: number }>>(SCAN_TTL_MS);
+
+export function loadStockFacets(
   categoryId?: string,
   brand?: string,
   locale?: string,
 ): Promise<Array<{ state: StockState; count: number }>> {
-  const filter: Record<string, unknown> = {};
-  if (categoryId) filter.category = categoryId;
-  if (brand) filter.brand = brand;
-
-  const states: StockState[] = ["in", "low", "out"];
-  const counts = await Promise.all(
-    states.map((state) =>
-      queryProducts({ filter, stockState: state, locale, limit: 1 }).then(
-        (page) => ({ state, count: page.total }),
+  const filter = productFilter({ categoryId, brand });
+  const key = JSON.stringify([filter, locale ?? ""]);
+  return stockFacetCache(key, async () => {
+    const counts = await Promise.all(
+      STOCK_STATES.map((state) =>
+        queryProducts({ filter, stockState: state, locale, limit: 1 }).then(
+          (page) => ({ state, count: page.total }),
+        ),
       ),
-    ),
-  );
-
-  return counts.filter((facet) => facet.count > 0);
+    );
+    return counts.filter((facet) => facet.count > 0);
+  });
 }
