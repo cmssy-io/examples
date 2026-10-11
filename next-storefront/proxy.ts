@@ -14,7 +14,8 @@ async function cookies(request: NextRequest): Promise<CmssyProxyCookie[]> {
     writes.push({ name: SESSION_COOKIE, value: refresh.sealed, options });
   }
 
-  if (!request.cookies.get(CART_COOKIE)?.value) {
+  const sessionDropped = refresh?.sealed === "";
+  if (sessionDropped || !request.cookies.get(CART_COOKIE)?.value) {
     writes.push({ name: CART_COOKIE, value: mintCartToken(), options });
   }
 
