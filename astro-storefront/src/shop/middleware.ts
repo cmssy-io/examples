@@ -4,6 +4,7 @@ import {
   isCartToken,
   requestIsSecure,
 } from "../lib/cmssy/cart-token";
+import { visitorAddress } from "../lib/cmssy/visitor-headers";
 import type { ShopRequest } from "./context";
 
 export const shopMiddleware = defineMiddleware(
@@ -11,6 +12,7 @@ export const shopMiddleware = defineMiddleware(
     const stored = cookies.get(CART_COOKIE)?.value ?? "";
     const shop: ShopRequest = {
       cartToken: isCartToken(stored) ? stored : "",
+      visitorAddress: visitorAddress(request.headers),
       cookies,
       secure: requestIsSecure(url, request.headers),
     };

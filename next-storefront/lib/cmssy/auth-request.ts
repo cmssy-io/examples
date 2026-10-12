@@ -3,6 +3,7 @@ import type { TypedDocumentString } from "@/graphql/generated/graphql";
 import { cmssy } from "@/cmssy.config";
 
 import { retryMode } from "@/lib/cmssy/retry-mode";
+import { visitorHeaders } from "@/lib/cmssy/visitor-headers";
 
 const client = createCmssyClient(cmssy);
 
@@ -14,6 +15,6 @@ export async function authRequest<R, V>(
   return client.query<R, V>(document, variables, {
     public: true,
     retry: retryMode(),
-    headers: { "x-workspace-id": workspaceId },
+    headers: { ...(await visitorHeaders()), "x-workspace-id": workspaceId },
   });
 }

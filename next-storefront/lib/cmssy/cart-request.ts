@@ -4,6 +4,7 @@ import { cmssy } from "@/cmssy.config";
 import { ensureCartToken, readCartToken } from "@/lib/cmssy/cart-cookie";
 import { memberAccessToken } from "@/lib/cmssy/member-token";
 import { retryMode } from "@/lib/cmssy/retry-mode";
+import { visitorHeaders } from "@/lib/cmssy/visitor-headers";
 
 const client = createCmssyClient(cmssy);
 
@@ -24,6 +25,7 @@ export async function cartRequest<R, V>(
     public: true,
     retry: retryMode(),
     headers: {
+      ...(await visitorHeaders()),
       "x-workspace-id": workspaceId,
       "x-cart-session": cartToken,
       ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),

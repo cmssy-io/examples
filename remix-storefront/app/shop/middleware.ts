@@ -4,6 +4,7 @@ import {
   isCartToken,
   requestIsSecure,
 } from "../lib/cmssy/cart-token";
+import { visitorAddress } from "../lib/cmssy/visitor-headers";
 import { shopContext, type ShopRequest } from "./context";
 import { readShopCookie, serializeShopCookie } from "./cookies";
 
@@ -17,6 +18,7 @@ export const shopMiddleware: Route.MiddlewareFunction = async (
   );
   const shop: ShopRequest = {
     cartToken: isCartToken(storedCartToken) ? storedCartToken : "",
+    visitorAddress: visitorAddress(request.headers),
     cookies: new Map(),
   };
   context.set(shopContext, shop);

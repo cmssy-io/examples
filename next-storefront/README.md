@@ -98,7 +98,7 @@ order and the confirmation page reads "awaiting payment", which is the net-30 fl
 | ----------------------- | -------------------------------------------------------------------------------------------------- |
 | `STRIPE_SECRET_KEY`     | `sk_test_...` from the Stripe dashboard, Developers -> API keys, test mode                         |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_...` of a webhook endpoint at `<origin>/api/stripe/webhook` subscribed to `checkout.session.completed` and `checkout.session.async_payment_succeeded` |
-| `CMSSY_API_TOKEN`       | `cs_...` from cmssy dashboard -> Settings -> API tokens, created by a member whose role can manage orders; the token acts as that member. Server-only. |
+| `CMSSY_API_TOKEN`       | `cs_...` from cmssy dashboard -> Settings -> API tokens, created by a member whose role can manage orders; the token acts as that member. Server-only. Cart, checkout, order and member-auth calls also send it with the shopper's address, so cmssy's per-address limits count each shopper rather than this server; without it every shopper shares the server's budget. The address is the first `x-forwarded-for` hop, so the host must set that header itself (Vercel does). |
 
 ### Paying an order with Stripe
 

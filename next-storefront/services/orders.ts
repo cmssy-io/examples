@@ -3,6 +3,7 @@ import { cmssy } from "@/cmssy.config";
 import type { Order, MyOrders, PublicOrder } from "@/graphql/types";
 import { memberRequest } from "@/lib/cmssy/member-request";
 import { retryMode } from "@/lib/cmssy/retry-mode";
+import { visitorHeaders } from "@/lib/cmssy/visitor-headers";
 import {
   MyOrderDocument,
   MyOrdersDocument,
@@ -47,7 +48,10 @@ export async function fetchOrderByToken(
       {
         public: true,
         retry: retryMode(),
-        headers: { "x-workspace-id": workspaceId },
+        headers: {
+          ...(await visitorHeaders()),
+          "x-workspace-id": workspaceId,
+        },
       },
     );
     return data.public.order.byToken;
