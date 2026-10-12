@@ -9,10 +9,12 @@ export function visitorAddress(incoming: Headers): string | null {
   );
 }
 
-export async function visitorHeaders(): Promise<Record<string, string>> {
+export async function visitorHeaders(
+  incoming?: Headers,
+): Promise<Record<string, string>> {
   const token = process.env.CMSSY_API_TOKEN;
   if (!token) return {};
-  const address = visitorAddress(await headers());
+  const address = visitorAddress(incoming ?? (await headers()));
   if (!address) return {};
   return { [CLIENT_IP_HEADER_NAME]: address, [API_TOKEN_HEADER_NAME]: token };
 }

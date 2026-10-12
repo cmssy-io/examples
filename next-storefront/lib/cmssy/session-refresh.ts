@@ -23,7 +23,7 @@ export async function refreshMemberSession(
 
   let result;
   try {
-    result = await refreshTokens(session.refreshToken);
+    result = await refreshTokens(session.refreshToken, request.headers);
   } catch {
 
     return null;

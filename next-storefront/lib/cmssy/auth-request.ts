@@ -10,11 +10,15 @@ const client = createCmssyClient(cmssy);
 export async function authRequest<R, V>(
   document: TypedDocumentString<R, V>,
   variables: V,
+  incoming?: Headers,
 ): Promise<R> {
   const workspaceId = await client.resolveWorkspaceId({ retry: retryMode() });
   return client.query<R, V>(document, variables, {
     public: true,
     retry: retryMode(),
-    headers: { ...(await visitorHeaders()), "x-workspace-id": workspaceId },
+    headers: {
+      ...(await visitorHeaders(incoming)),
+      "x-workspace-id": workspaceId,
+    },
   });
 }

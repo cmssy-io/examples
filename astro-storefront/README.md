@@ -149,7 +149,7 @@ CMS - then `pnpm typecheck`, which runs `astro check` and covers the `.astro` fi
 | `CMSSY_DRAFT_SECRET`   | cmssy dashboard -> Settings -> Headless (generated per workspace)                                                       |
 | `CMSSY_SITE_URL`       | The public origin, used in `sitemap.xml` and `robots.txt`. On Vercel, `VERCEL_PROJECT_PRODUCTION_URL` stands in for it. |
 | `CMSSY_RETRY_MODE`     | Optional: `build` or `interactive`, applied to every delivery request. CI sets `build` (see the root README); unset, the framework default applies. |
-| `CMSSY_API_TOKEN`      | Optional, server-only: a `cs_...` API token of this workspace (cmssy dashboard -> Settings -> API tokens). Set, the cart calls forward each shopper's address with it, so cmssy's per-address cart limits count shoppers rather than this server; unset, every shopper shares this server's budget. The address is the first `x-forwarded-for` hop, so the host must set that header itself (Vercel does). |
+| `CMSSY_API_TOKEN`      | Optional, server-only: a `cs_...` API token of this workspace (cmssy dashboard -> Settings -> API tokens). Set, the cart calls forward each shopper's address with it, so cmssy's per-address cart limits count shoppers rather than this server; unset, every shopper shares this server's budget. The address is the first `x-forwarded-for` hop, else `x-real-ip`, so deploy behind a proxy that overwrites both with the connecting address (Vercel does); behind one that passes a client's value through, a shopper can pick the address cmssy counts them under. |
 
 ## Project structure
 
