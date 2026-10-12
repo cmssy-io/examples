@@ -155,3 +155,77 @@ export function productOutOfStock(
   }
   return !product.variants.some(variantInStock);
 }
+
+const VARIANT_STATE_PAGES = [
+  "v0",
+  "v1",
+  "v2",
+  "v3",
+  "v4",
+  "v5",
+  "v6",
+  "v7",
+  "v8",
+  "v9",
+] as const;
+
+const MAX_VARIANT_READS = 2 * VARIANT_STATE_PAGES.length + 1;
+
+export interface VariantState {
+  id: string;
+  sku: string | null;
+  price: number;
+}
+
+export type VariantStatePages = Record<
+  (typeof VARIANT_STATE_PAGES)[number],
+  VariantState[]
+>;
+
+export function variantStates(pages: VariantStatePages): VariantState[] {
+  return VARIANT_STATE_PAGES.flatMap((key) => pages[key]);
+}
+
+export interface VariantRead<V, H> {
+  id: string;
+  variantCount: number;
+  states: VariantState[];
+  page: V[];
+  head: H;
+}
+
+export async function readAllVariants<V extends VariantState, H>(
+  record: { id: string; variantCount: number; variants: V[] },
+  at: (offset: number) => Promise<VariantRead<V, H> | null>,
+): Promise<{ variants: V[]; head: H | null } | null> {
+  const first = record.variants;
+  if (first.length >= record.variantCount) {
+    return { variants: first, head: null };
+  }
+  const held = new Map(first.map((variant) => [variant.id, variant]));
+  let offset = first.length;
+  for (let n = 0; n < MAX_VARIANT_READS; n++) {
+    const read = await at(offset);
+    if (read === null || read.id !== record.id) return null;
+    if (read.states.length !== read.variantCount) {
+      throw new Error(
+        `The product has ${read.variantCount} variants and the variant page query reads ${read.states.length}: add a page alias to it`,
+      );
+    }
+    for (const variant of read.page) held.set(variant.id, variant);
+    const stale = read.states.findIndex((state) => {
+      const variant = held.get(state.id);
+      return (
+        !variant || variant.sku !== state.sku || variant.price !== state.price
+      );
+    });
+    if (stale === -1) {
+      return {
+        variants: read.states.map((state) => held.get(state.id) as V),
+        head: read.head,
+      };
+    }
+    offset = stale;
+  }
+  throw new Error("The product's variants kept changing while it was read");
+}

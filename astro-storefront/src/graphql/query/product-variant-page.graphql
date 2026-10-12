@@ -1,0 +1,92 @@
+query ProductVariantPage(
+  $workspaceId: String!
+  $modelSlug: String!
+  $filter: JSON
+  $locale: String
+  $offset: Int!
+) {
+  public {
+    model {
+      records(
+        workspaceId: $workspaceId
+        modelSlug: $modelSlug
+        filter: $filter
+        locale: $locale
+        limit: 1
+      ) {
+        items {
+          id
+          variantCount
+          available
+          variantPriceRange {
+            min
+          }
+          v0: variants(offset: 0) {
+            id
+            sku
+            price
+          }
+          v1: variants(offset: 50) {
+            id
+            sku
+            price
+          }
+          v2: variants(offset: 100) {
+            id
+            sku
+            price
+          }
+          v3: variants(offset: 150) {
+            id
+            sku
+            price
+          }
+          v4: variants(offset: 200) {
+            id
+            sku
+            price
+          }
+          v5: variants(offset: 250) {
+            id
+            sku
+            price
+          }
+          v6: variants(offset: 300) {
+            id
+            sku
+            price
+          }
+          v7: variants(offset: 350) {
+            id
+            sku
+            price
+          }
+          v8: variants(offset: 400) {
+            id
+            sku
+            price
+          }
+          v9: variants(offset: 450) {
+            id
+            sku
+            price
+          }
+          page: variants(offset: $offset) {
+            id
+            sku
+            price
+            inventory
+            tiers {
+              minQty
+              price
+            }
+            selectedOptions {
+              name
+              value
+            }
+          }
+        }
+      }
+    }
+  }
+}
