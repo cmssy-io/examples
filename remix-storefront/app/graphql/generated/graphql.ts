@@ -180,12 +180,22 @@ export type ProductRolesQueryVariables = Exact<{
 
 export type ProductRolesQuery = { public: { model: { definitions: Array<{ slug: string, productRoles: { taxRate: string } | null }> } } };
 
+export type ProductVariantPageQueryVariables = Exact<{
+  workspaceId: string;
+  modelSlug: string;
+  filter?: unknown;
+  locale?: string | null | undefined;
+  offset: number;
+}>;
+
+
+export type ProductVariantPageQuery = { public: { model: { records: { items: Array<{ id: string, variantCount: number, available: number | null, variantPriceRange: { min: number } | null, v0: Array<{ id: string, sku: string | null, price: number }>, v1: Array<{ id: string, sku: string | null, price: number }>, v2: Array<{ id: string, sku: string | null, price: number }>, v3: Array<{ id: string, sku: string | null, price: number }>, v4: Array<{ id: string, sku: string | null, price: number }>, v5: Array<{ id: string, sku: string | null, price: number }>, v6: Array<{ id: string, sku: string | null, price: number }>, v7: Array<{ id: string, sku: string | null, price: number }>, v8: Array<{ id: string, sku: string | null, price: number }>, v9: Array<{ id: string, sku: string | null, price: number }>, page: Array<{ id: string, sku: string | null, price: number, inventory: number | null, tiers: Array<{ minQty: number, price: number }>, selectedOptions: Array<{ name: string, value: string }> }> }> } } } };
+
 export type ProductQueryVariables = Exact<{
   workspaceId: string;
   modelSlug: string;
   filter?: unknown;
   locale?: string | null | undefined;
-  variantOffset?: number | null | undefined;
 }>;
 
 
@@ -1030,8 +1040,96 @@ export const ProductRolesDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ProductRolesQuery, ProductRolesQueryVariables>;
+export const ProductVariantPageDocument = new TypedDocumentString(`
+    query ProductVariantPage($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String, $offset: Int!) {
+  public {
+    model {
+      records(
+        workspaceId: $workspaceId
+        modelSlug: $modelSlug
+        filter: $filter
+        locale: $locale
+        limit: 1
+      ) {
+        items {
+          id
+          variantCount
+          available
+          variantPriceRange {
+            min
+          }
+          v0: variants(offset: 0) {
+            id
+            sku
+            price
+          }
+          v1: variants(offset: 50) {
+            id
+            sku
+            price
+          }
+          v2: variants(offset: 100) {
+            id
+            sku
+            price
+          }
+          v3: variants(offset: 150) {
+            id
+            sku
+            price
+          }
+          v4: variants(offset: 200) {
+            id
+            sku
+            price
+          }
+          v5: variants(offset: 250) {
+            id
+            sku
+            price
+          }
+          v6: variants(offset: 300) {
+            id
+            sku
+            price
+          }
+          v7: variants(offset: 350) {
+            id
+            sku
+            price
+          }
+          v8: variants(offset: 400) {
+            id
+            sku
+            price
+          }
+          v9: variants(offset: 450) {
+            id
+            sku
+            price
+          }
+          page: variants(offset: $offset) {
+            id
+            sku
+            price
+            inventory
+            tiers {
+              minQty
+              price
+            }
+            selectedOptions {
+              name
+              value
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ProductVariantPageQuery, ProductVariantPageQueryVariables>;
 export const ProductDocument = new TypedDocumentString(`
-    query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String, $variantOffset: Int) {
+    query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String) {
   public {
     model {
       records(
@@ -1053,7 +1151,7 @@ export const ProductDocument = new TypedDocumentString(`
             min
           }
           available
-          variants(offset: $variantOffset) {
+          variants {
             id
             sku
             price

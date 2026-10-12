@@ -64,6 +64,10 @@ jobs:
       - run: pnpm typegen
       - run: pnpm typecheck
 
+      - name: A product's variants are read as one state
+        working-directory: .
+        run: node --experimental-strip-types --test scripts/read-all-variants.test.mjs
+
       # The vendored operations come from the CLI, the app's reads come from the
       # runtime packages, and nothing ties their versions together - the CLI
       # carries its own nested @cmssy/core. Bump one and not the other and the

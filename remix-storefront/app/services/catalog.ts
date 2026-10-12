@@ -2,6 +2,7 @@ import { createCmssyClient, mediaAlt, mediaUrl, mediaUrls } from "@cmssy/core";
 import { cmssy } from "../../cmssy.config";
 import {
   ProductDocument,
+  ProductVariantPageDocument,
   PublicModelProductsDocument,
   PublicModelRecordsDocument,
 } from "../graphql/generated/graphql";
@@ -27,6 +28,7 @@ const client = createCmssyClient(cmssy);
 export { PRODUCT_MODEL, CATEGORY_MODEL } from "./catalog-models";
 import { PRODUCT_MODEL, CATEGORY_MODEL } from "./catalog-models";
 import { retryMode } from "../lib/cmssy/retry-mode";
+import { readAllVariants, variantStates } from "../lib/variants";
 export const PAGE_SIZE = 12;
 const API_PAGE_SIZE = 50;
 const SCAN_TTL_MS = 60_000;
@@ -369,34 +371,56 @@ export async function loadProductBySlug(
   locale?: string,
 ): Promise<Product | null> {
   const [data, shop, roles] = await Promise.all([
-    queryProduct(slug, locale, 0),
+    queryProduct(slug, locale),
     fetchShopSettings(),
     fetchProductRoles(PRODUCT_MODEL),
   ]);
   const record = data?.public?.model?.records?.items[0];
   if (!record) return null;
-  const variants = [...record.variants];
-  while (variants.length < record.variantCount) {
-    const next = await queryProduct(slug, locale, variants.length);
-    const page = next?.public?.model?.records?.items[0]?.variants ?? [];
-    if (page.length === 0) break;
-    variants.push(...page);
-  }
-  return toProduct({ ...record, variants }, shop, roles);
+  const read = await readAllVariants(record, async (offset) => {
+    const next = await client.queryScoped(
+      ProductVariantPageDocument,
+      {
+        modelSlug: PRODUCT_MODEL,
+        filter: { slug },
+        locale: locale ?? null,
+        offset,
+      },
+      { retry: retryMode() },
+    );
+    const item = next?.public?.model?.records?.items[0];
+    if (!item) return null;
+    return {
+      id: item.id,
+      variantCount: item.variantCount,
+      states: variantStates(item),
+      page: item.page,
+      head: {
+        available: item.available,
+        variantPriceRange: item.variantPriceRange,
+      },
+    };
+  });
+  if (!read) return null;
+  return toProduct(
+    {
+      ...record,
+      ...read.head,
+      variantCount: read.variants.length,
+      variants: read.variants,
+    },
+    shop,
+    roles,
+  );
 }
 
-function queryProduct(
-  slug: string,
-  locale: string | undefined,
-  variantOffset: number,
-) {
+function queryProduct(slug: string, locale: string | undefined) {
   return client.queryScoped(
     ProductDocument,
     {
       modelSlug: PRODUCT_MODEL,
       filter: { slug },
       locale: locale ?? null,
-      variantOffset,
     },
     { retry: retryMode() },
   );

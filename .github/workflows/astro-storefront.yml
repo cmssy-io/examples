@@ -62,6 +62,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
 
+      - name: A product's variants are read as one state
+        working-directory: .
+        run: node --experimental-strip-types --test scripts/read-all-variants.test.mjs
+
       - name: The CLI and the runtime SDK are the same version
         run: |
           set -euo pipefail
