@@ -34,10 +34,14 @@ export function register(
   ).then((data) => data.siteMember.register);
 }
 
-export function refreshTokens(refreshToken: string): Promise<AuthTokenResult> {
+export function refreshTokens(
+  refreshToken: string,
+  incoming?: Headers,
+): Promise<AuthTokenResult> {
   return authRequest(
     SiteMemberRefreshDocument,
     { refreshToken },
+    incoming,
   ).then((data) => data.siteMember.refresh);
 }
 

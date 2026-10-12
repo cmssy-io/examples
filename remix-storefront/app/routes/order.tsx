@@ -5,13 +5,16 @@ import { ShopErrorBoundary } from "../components/shop/shop-error";
 import { localePath } from "../lib/locale-path";
 import { shopRouteLocale } from "../lib/locale";
 import { copyFor } from "../lib/shop-copy";
+import { visitorAddress } from "../lib/cmssy/visitor-headers";
 import { fetchOrderByToken } from "../services/orders";
 import type { Route } from "./+types/order";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { locale, defaultLocale } = await shopRouteLocale(request, params);
   const token = new URL(request.url).searchParams.get("token");
-  const order = token ? await fetchOrderByToken(params.id, token) : null;
+  const order = token
+    ? await fetchOrderByToken(params.id, token, visitorAddress(request.headers))
+    : null;
   return data({ locale, defaultLocale, order }, { status: order ? 200 : 404 });
 }
 

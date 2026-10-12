@@ -3,12 +3,14 @@ import { cmssy } from "../../cmssy.config";
 import type { PublicOrder } from "../graphql/types";
 import { PublicOrderDocument } from "../graphql/generated/graphql";
 import { retryMode } from "../lib/cmssy/retry-mode";
+import { visitorHeaders } from "../lib/cmssy/visitor-headers";
 
 const client = createCmssyClient(cmssy);
 
 export async function fetchOrderByToken(
   orderId: string,
   accessToken: string,
+  visitorAddress: string | null,
 ): Promise<PublicOrder | null> {
   const workspaceId = await client.resolveWorkspaceId({ retry: retryMode() });
   try {
@@ -18,7 +20,10 @@ export async function fetchOrderByToken(
       {
         public: true,
         retry: retryMode(),
-        headers: { "x-workspace-id": workspaceId },
+        headers: {
+          ...visitorHeaders(visitorAddress),
+          "x-workspace-id": workspaceId,
+        },
       },
     );
     return data.public.order.byToken;

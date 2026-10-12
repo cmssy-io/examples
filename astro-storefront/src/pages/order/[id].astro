@@ -4,6 +4,7 @@ import { OrderReceipt, paymentLabel } from "../../components/shop/order-receipt"
 import ShopLayout from "../../layouts/shop-layout.astro";
 import { localePath } from "../../lib/locale-path";
 import { copyFor } from "../../lib/shop-copy";
+import { visitorAddress } from "../../lib/cmssy/visitor-headers";
 import { fetchOrderByToken } from "../../services/orders";
 import { shopPageState } from "../../shop/page-state";
 
@@ -16,7 +17,9 @@ const id = Astro.params.id ?? "";
 const token = Astro.url.searchParams.get("token");
 const href = (path: string) => localePath(path, locale, defaultLocale);
 
-const order = token ? await fetchOrderByToken(id, token) : null;
+const order = token
+  ? await fetchOrderByToken(id, token, visitorAddress(Astro.request.headers))
+  : null;
 if (!order) {
   Astro.response.status = 404;
 }

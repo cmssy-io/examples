@@ -8,6 +8,7 @@ import {
 
 export interface ShopRequest {
   cartToken: string;
+  visitorAddress: string | null;
   cookies: AstroCookies;
   secure: boolean;
 }
@@ -23,7 +24,7 @@ function writeCartCookie(shop: ShopRequest, value: string) {
 export function shopAuth(shop: ShopRequest): ShopAuth {
   if (!shop.cartToken) shop.cartToken = mintCartToken();
   writeCartCookie(shop, shop.cartToken);
-  return { cartToken: shop.cartToken };
+  return { cartToken: shop.cartToken, visitorAddress: shop.visitorAddress };
 }
 
 export function clearCartToken(shop: ShopRequest): void {
