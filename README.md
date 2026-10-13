@@ -1,6 +1,6 @@
 # cmssy examples
 
-Runnable example projects built with the [cmssy](https://cmssy.com) headless SDK.
+Runnable example projects built with the [cmssy](https://www.cmssy.com) headless SDK.
 
 Each directory is a **standalone app**. There is no workspace and no root manifest, so a fork
 inherits nothing:
@@ -80,4 +80,4 @@ remaining gap: a breaking SDK change is caught here once it is published, not be
 
 - `npx @cmssy/cli init` - generates this same wiring into an app you already have, if you
   want an empty starting point rather than a finished one.
-- [Documentation](https://cmssy.com/docs)
+- [Documentation](https://www.cmssy.com/docs)
