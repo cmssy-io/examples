@@ -173,7 +173,7 @@ styles/globals.css            plain base styles - cmssy does not control styling
 3. Register it in `cmssy/blocks.ts`.
 
 It then appears in the editor's block picker automatically. Full guide:
-[Building blocks](https://www.cmssy.com/docs/block-development).
+[Building blocks](https://www.cmssy.com/docs/blocks/define).
 
 ## Deploy
 
@@ -186,5 +186,5 @@ in the cmssy editor to start editing visually.
 
 - Built on the cmssy SDK: [`@cmssy/next` + `@cmssy/react`](https://github.com/cmssy-io/cmssy-sdk)
 - [cmssy docs](https://www.cmssy.com/docs)
-- [Installation](https://www.cmssy.com/docs/installation) · [Quickstart](https://www.cmssy.com/docs/quickstart)
-- [Block recipes](https://www.cmssy.com/docs/blocks) · [Theming](https://www.cmssy.com/docs/theming)
+- [Installation](https://www.cmssy.com/docs/start/installation) · [Quickstart](https://www.cmssy.com/docs/start/quickstart)
+- [Block recipes](https://www.cmssy.com/docs/blocks) · [Branding](https://www.cmssy.com/docs/editor/branding)
