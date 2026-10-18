@@ -23,6 +23,11 @@ function textOrNull(value: unknown): string | null {
   return typeof value === "string" && value ? value : null;
 }
 
+function recordOrNull(value: unknown): Record<string, unknown> | null {
+  const fields = record(value);
+  return Object.keys(fields).length > 0 ? fields : null;
+}
+
 function quantity(value: unknown): number {
   const parsed = Math.floor(Number(value));
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
@@ -55,6 +60,7 @@ async function checkout(
       customerEmail: text(body.customerEmail),
       poNumber: textOrNull(body.poNumber),
       customerNote: textOrNull(body.customerNote),
+      customFields: recordOrNull(body.customFields),
       shippingAddress: parseShippingAddress(body.shippingAddress),
     });
     clearCartToken(shop);

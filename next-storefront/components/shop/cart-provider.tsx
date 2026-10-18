@@ -112,6 +112,7 @@ export interface CheckoutInput {
   customerEmail: string;
   poNumber: string | null;
   customerNote: string | null;
+  customFields: Record<string, unknown> | null;
   shippingAddress: ShippingAddressInput | null;
 }
 

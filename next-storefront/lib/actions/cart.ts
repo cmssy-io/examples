@@ -123,6 +123,7 @@ export async function checkoutAction(input: {
   customerEmail: string;
   poNumber: string | null;
   customerNote: string | null;
+  customFields: Record<string, unknown> | null;
   shippingAddress: ShippingAddressInput | null;
 }): Promise<CheckoutResult> {
   try {
@@ -130,6 +131,7 @@ export async function checkoutAction(input: {
       customerEmail: input.customerEmail,
       poNumber: input.poNumber,
       customerNote: input.customerNote,
+      customFields: input.customFields,
       shippingAddress: parseShippingAddress(input.shippingAddress),
     });
     await clearCartToken();

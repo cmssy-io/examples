@@ -7,12 +7,22 @@ import { useCart } from "@/components/shop/cart-provider";
 import { useCmssyUser } from "@/components/shop/user-provider";
 import { formatMoney } from "@/lib/money";
 import { fill } from "@/lib/shop-copy";
+import { readOrderFieldValues } from "@/lib/order-fields";
+import type { OrderField } from "@/graphql/types";
 import { selectionLabel } from "@/lib/variants";
-import { useLocalePath, useShopCopy } from "./locale-ui";
+import { useLocalePath, useShopCopy, useShopLocale } from "./locale-ui";
+import { OrderFieldInputs } from "./order-fields";
 import styles from "./cart.module.css";
 
-export function CartView({ payOnline }: { payOnline: boolean }) {
+export function CartView({
+  payOnline,
+  orderFields,
+}: {
+  payOnline: boolean;
+  orderFields: OrderField[];
+}) {
   const localePath = useLocalePath();
+  const { locale, defaultLocale } = useShopLocale();
   const copy = useShopCopy();
   const {
     cart,
@@ -58,6 +68,7 @@ export function CartView({ payOnline }: { payOnline: boolean }) {
         customerEmail: value("customerEmail"),
         poNumber: value("poNumber") || null,
         customerNote: value("customerNote") || null,
+        customFields: readOrderFieldValues(form, orderFields),
         shippingAddress: {
           name: value("name"),
           company: value("company") || null,
@@ -262,6 +273,10 @@ export function CartView({ payOnline }: { payOnline: boolean }) {
                 className="shop-input"
               />
             </div>
+            <OrderFieldInputs
+              fields={orderFields}
+              locale={{ locale, defaultLocale }}
+            />
           </div>
         </div>
       </div>

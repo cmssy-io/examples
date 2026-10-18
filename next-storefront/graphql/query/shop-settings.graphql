@@ -9,6 +9,20 @@ query ShopSettings($workspaceSlug: String!) {
           id
           rate
         }
+        orderFields {
+          key
+          label
+          type
+          required
+          customerCanSet
+          description
+          options { value label }
+          minLength
+          maxLength
+          minValue
+          maxValue
+          pattern
+        }
       }
     }
   }

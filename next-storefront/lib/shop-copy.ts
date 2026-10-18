@@ -172,6 +172,8 @@ const en = {
   orderPlaced: "Order placed",
   order: "Order",
   note: "Note",
+  yes: "Yes",
+  no: "No",
   downloadInvoice: "Download invoice",
   keepThisLink:
     "Keep this link - it is the only way back to this order without an account.",
@@ -402,6 +404,8 @@ const no: ShopCopy = {
   orderPlaced: "Bestilling sendt",
   order: "Bestilling",
   note: "Melding",
+  yes: "Ja",
+  no: "Nei",
   downloadInvoice: "Last ned faktura",
   keepThisLink:
     "Ta vare på denne lenken - den er eneste vei tilbake til bestillingen uten konto.",

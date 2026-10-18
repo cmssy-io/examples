@@ -1,12 +1,14 @@
 import { data, Link } from "react-router";
 import styles from "../components/shop/order.module.css";
 import { OrderReceipt, paymentLabel } from "../components/shop/order-receipt";
+import { OrderCustomFields } from "../components/shop/order-fields";
 import { ShopErrorBoundary } from "../components/shop/shop-error";
 import { localePath } from "../lib/locale-path";
 import { shopRouteLocale } from "../lib/locale";
 import { copyFor } from "../lib/shop-copy";
 import { visitorAddress } from "../lib/cmssy/visitor-headers";
 import { fetchOrderByToken } from "../services/orders";
+import { fetchShopSettings } from "../services/site";
 import type { Route } from "./+types/order";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -15,7 +17,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const order = token
     ? await fetchOrderByToken(params.id, token, visitorAddress(request.headers))
     : null;
-  return data({ locale, defaultLocale, order }, { status: order ? 200 : 404 });
+  const orderFields = order ? (await fetchShopSettings()).orderFields : [];
+  return data(
+    { locale, defaultLocale, order, orderFields },
+    { status: order ? 200 : 404 },
+  );
 }
 
 export function meta({ loaderData }: Route.MetaArgs) {
@@ -31,7 +37,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 }
 
 export default function OrderPage({ loaderData }: Route.ComponentProps) {
-  const { locale, defaultLocale, order } = loaderData;
+  const { locale, defaultLocale, order, orderFields } = loaderData;
   const href = (path: string) => localePath(path, locale, defaultLocale);
   const copy = copyFor(locale);
 
@@ -86,6 +92,13 @@ export default function OrderPage({ loaderData }: Route.ComponentProps) {
       </div>
 
       <OrderReceipt order={order} copy={copy} />
+
+      <OrderCustomFields
+        values={order.customFields}
+        fields={orderFields}
+        locale={{ locale, defaultLocale }}
+        copy={copy}
+      />
 
       {order.customerNote ? (
         <div className={styles.meta}>
