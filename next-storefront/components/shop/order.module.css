@@ -151,6 +151,13 @@
   color: var(--muted-foreground);
 }
 
+.shipment {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
 .tracking {
   font-family: var(--font-mono);
   font-size: var(--text-sm);

@@ -97,6 +97,48 @@ function OrderTimeline({ order, copy }: { order: Order; copy: ShopCopy }) {
   );
 }
 
+type Shipment = Order["shipments"][number];
+type ShipmentStatus = Shipment["status"];
+
+function shipmentVariant(status: ShipmentStatus): BadgeVariant {
+  if (status === "delivered") return "success";
+  if (status === "exception" || status === "returned") return "warning";
+  if (status === "pending") return "neutral";
+  return "info";
+}
+
+function shipmentLabel(status: ShipmentStatus, copy: ShopCopy): string {
+  const labels: Record<ShipmentStatus, string> = {
+    pending: copy.shipmentPending,
+    in_transit: copy.shipmentInTransit,
+    out_for_delivery: copy.shipmentOutForDelivery,
+    delivered: copy.shipmentDelivered,
+    exception: copy.shipmentException,
+    returned: copy.shipmentReturned,
+  };
+  return labels[status];
+}
+
+function ShipmentTracking({ shipment }: { shipment: Shipment }) {
+  const text = [shipment.carrier, shipment.trackingNumber]
+    .filter(Boolean)
+    .join(" ");
+  if (!text) return null;
+  if (!shipment.trackingUrl) {
+    return <span className={styles.tracking}>{text}</span>;
+  }
+  return (
+    <a
+      className={styles.tracking}
+      href={shipment.trackingUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {text}
+    </a>
+  );
+}
+
 export function AccountOrder({
   order,
   payOnline,
@@ -110,10 +152,6 @@ export function AccountOrder({
   const copy = useShopCopy();
   const canPay =
     payOnline && order.balanceDue > 0 && order.status !== "canceled";
-
-  const tracking = order.trackingNumber
-    ? [order.trackingCarrier, order.trackingNumber].filter(Boolean).join(" ")
-    : null;
 
   return (
     <div className={styles.page}>
@@ -151,8 +189,15 @@ export function AccountOrder({
         </div>
         <div className={`shop-card ${styles.statusCard}`}>
           <div className={styles.statusLabel}>{copy.statusTracking}</div>
-          {tracking ? (
-            <div className={styles.tracking}>{tracking}</div>
+          {order.shipments.length > 0 ? (
+            order.shipments.map((shipment, index) => (
+              <div key={index} className={styles.shipment}>
+                <Badge variant={shipmentVariant(shipment.status)}>
+                  {shipmentLabel(shipment.status, copy)}
+                </Badge>
+                <ShipmentTracking shipment={shipment} />
+              </div>
+            ))
           ) : (
             <div className="shop-muted">{copy.noTrackingYet}</div>
           )}

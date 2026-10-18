@@ -20,8 +20,7 @@ query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int) {
         fulfillmentStatus
         amountPaid
         balanceDue
-        trackingNumber
-        trackingCarrier
+        shipments { carrier trackingNumber trackingUrl status updatedAt }
         invoiceNumber
         invoiceUrl
         paidAt
@@ -58,8 +57,7 @@ query MyOrder($workspaceId: ID!, $id: ID!) {
       fulfillmentStatus
       amountPaid
       balanceDue
-      trackingNumber
-      trackingCarrier
+      shipments { carrier trackingNumber trackingUrl status updatedAt }
       invoiceNumber
       invoiceUrl
       paidAt

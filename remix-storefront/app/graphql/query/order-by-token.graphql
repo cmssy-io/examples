@@ -24,8 +24,7 @@ query PublicOrder($workspaceId: ID!, $orderId: ID!, $accessToken: String!) {
         amountPaid
         balanceDue
         refundedAmount
-        trackingNumber
-        trackingCarrier
+        shipments { carrier trackingNumber trackingUrl status updatedAt }
         invoiceNumber
         invoiceUrl
         paidAt
