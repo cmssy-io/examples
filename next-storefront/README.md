@@ -135,6 +135,50 @@ its other operations against, so `services/payments.ts` carries that one mutatio
 Locally, `stripe listen --forward-to localhost:3000/api/stripe/webhook` prints the webhook secret to
 use. Test cards: `4242 4242 4242 4242`, any future date, any CVC.
 
+### Shipping a paid order with InPost or Bring
+
+cmssy holds no carrier account either. It sends `order.paid` to a workspace webhook; this app books
+the parcel with the carrier and writes the tracking number back as a shipment on the order, so the
+buyer's order page shows it.
+
+| Variable | What it is |
+| --- | --- |
+| `CMSSY_WEBHOOK_SECRET` | signing secret of a cmssy webhook at `<origin>/api/cmssy/webhook` subscribed to `order.paid` (Settings -> Webhooks) |
+| `INPOST_API_TOKEN`, `INPOST_ORGANIZATION_ID` | ShipX token and organization id, from the sandbox manager at sandbox-manager.paczkomaty.pl -> My account -> API |
+| `INPOST_SANDBOX` | `false` sends bookings to production ShipX; anything else, or unset, is the sandbox |
+| `BRING_API_UID`, `BRING_API_KEY` | your Mybring login email and an API key from Mybring -> API |
+| `BRING_TEST` | `false` books for real; unset is Bring's test mode, which books nothing and bills nothing |
+| `BRING_CUSTOMER_NUMBER` | required only with `BRING_TEST=false`; test mode uses Bring's test number `5` |
+| `BRING_SENDER_*` | the warehouse Bring collects from: `NAME`, `ADDRESS`, `POSTAL_CODE`, `CITY`, `COUNTRY`, `EMAIL`, `PHONE` (Bring requires the phone) |
+
+`CMSSY_API_TOKEN` from the Stripe section is needed too: it reads the order and records the parcel.
+A carrier without its variables is simply off, and its orders are left for a person to ship.
+
+Which carrier ships an order is decided by the shipping method the buyer chose and the destination
+country, in `SHIPPING_ROUTES` in `lib/shipping.ts`:
+
+| Shipping method id | Destination | Carrier |
+| --- | --- | --- |
+| `courier24`, `courier-express` | PL | InPost courier |
+| `bring-home` | NO | Bring home delivery (product 5600) |
+
+Anything else - pickup, pallets, a courier to another country - is left alone. Every parcel is
+booked as one box of `DEFAULT_PARCEL` (5 kg, 40 x 30 x 20 cm): the webhook carries no weights, and
+a real shop would size it from its own product data.
+
+The route reads the order back from the admin API before booking, so a redelivered webhook never
+books twice: an order whose shipment from that carrier already has a tracking number is skipped.
+InPost assigns the tracking number a few seconds after the booking; the route waits for it, and if
+it has not arrived the shipment is recorded without it and the route answers 503 with
+`Retry-After: 60`. cmssy redelivers, the route finds the shipment by the ShipX id it noted on it,
+and fills in the number instead of booking again. A carrier refusing the booking (a bad postcode, a
+street without a building number) is answered 200 with `handled: false` and logged - a retry would
+be refused the same way - while a carrier outage or a cmssy failure is a 500, and cmssy tries
+again.
+
+Recording a shipment marks the order fulfilled, the same as doing it by hand in the admin. The
+InPost sandbox reports no tracking statuses, so the parcel stays `pending` there.
+
 ## Project structure
 
 ```
@@ -147,6 +191,7 @@ app/(shop)/
   cart/ account/ order/  cart, sign-in, order history and receipts
 app/api/draft/route.ts   draft/preview mode entry (createDraftRoute)
 app/api/stripe/webhook/  verifies Stripe's signature, records the payment on the order
+app/api/cmssy/webhook/   verifies cmssy's signature, books a paid order's parcel with the carrier
 app/sitemap.ts robots.ts SEO built from the workspace's pages plus the catalogue
 blocks/                  14 blocks; each is block.ts + Component.tsx + CSS Module
 cmssy/

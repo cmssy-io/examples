@@ -100,6 +100,19 @@
           "status": 405
         },
         {
+          "path": "/api/cmssy/webhook",
+          "status": 405
+        },
+        {
+          "path": "/api/cmssy/webhook",
+          "method": "POST",
+          "headers": {
+            "content-type": "application/json"
+          },
+          "body": {},
+          "status": 503
+        },
+        {
           "path": "/api/stripe/webhook",
           "method": "POST",
           "headers": {
@@ -114,7 +127,7 @@
         }
       ],
       "$productComment": "`/p/bearing-6205-2rs` (cmssy-demo product 6a53afeedde5dde88d5dbaca) is the one demo product that carries all three of CMS-2083 at once: a PDF under `documents`, a `video`, and variants on the `size` and `pack` axes (one size, three packs - the cross-axis availability logic is not exercised here). The <video> is a tag, so `elements` names it; the documents list marks its <section> with `data-product-documents` and the variant selector its <div> with `data-variant-selector`, and `attributes` names those. The `/no/...` row pins the locale half of the product query. A product without any of the three renders none of them, which is why the assertion is on this product and not on the catalogue row; the record is live data in cmssy-demo, so a red here can mean the record changed, not the code.",
-      "$assertComment": "No `elements` on the 404: this example answers 404 correctly but streams the body client-side, so the served HTML carries neither region. astro and remix render theirs server-side and are asserted for it. The two `/api/stripe/webhook` targets prove the route is mounted: GET is 405, and a POST with no Stripe keys in the environment is 503, not 404 - CI runs without keys, so 503 is what a mounted route answers there. The wrong order token answers the not-found card, not a 500: the delivery API refuses it with a NOT_FOUND code, which the SDK surfaces as CmssyGraphqlError since 19.5.0."
+      "$assertComment": "No `elements` on the 404: this example answers 404 correctly but streams the body client-side, so the served HTML carries neither region. astro and remix render theirs server-side and are asserted for it. The two `/api/stripe/webhook` targets prove the route is mounted: GET is 405, and a POST with no Stripe keys in the environment is 503, not 404 - CI runs without keys, so 503 is what a mounted route answers there. The two `/api/cmssy/webhook` targets prove the carrier-booking route the same way: GET is 405, and a POST with no `CMSSY_WEBHOOK_SECRET` is 503, not 404. The wrong order token answers the not-found card, not a 500: the delivery API refuses it with a NOT_FOUND code, which the SDK surfaces as CmssyGraphqlError since 19.5.0."
     },
     {
       "dir": "simple-blog",

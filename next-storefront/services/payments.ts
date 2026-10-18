@@ -1,13 +1,9 @@
-import { DEFAULT_CMSSY_API_URL, createCmssyClient } from "@cmssy/core";
-import { cmssy } from "@/cmssy.config";
-import { retryMode } from "@/lib/cmssy/retry-mode";
 import Stripe from "stripe";
 import { payOnline, stripeClient } from "@/lib/stripe";
 import { copyFor } from "@/lib/shop-copy";
+import { adminRequest, errorText, isRefusal } from "@/services/admin";
 
 export const PAYMENT_PROVIDER = "stripe";
-
-const client = createCmssyClient(cmssy);
 
 export interface PaymentSessionInput {
   orderId: string;
@@ -132,61 +128,21 @@ export type RecordPaymentOutcome =
   | { recorded: RecordedPayment }
   | { refused: string };
 
-const REFUSAL_CODES = new Set(["BAD_USER_INPUT", "NOT_FOUND"]);
-
-interface GraphqlError {
-  message?: string;
-  extensions?: { code?: string };
-}
-
-function adminEndpoint(): string {
-  return process.env.CMSSY_API_URL?.trim() || DEFAULT_CMSSY_API_URL;
-}
-
 export async function recordOrderPayment(input: {
   orderId: string;
   amount: number;
   reference: string;
 }): Promise<RecordPaymentOutcome> {
-  const token = process.env.CMSSY_API_TOKEN;
-  if (!token) {
-    throw new Error(
-      "CMSSY_API_TOKEN is not set: a payment cannot be recorded on the order",
-    );
+  const { data, errors } = await adminRequest<{
+    order?: { recordPayment?: RecordedPayment };
+  }>(
+    RECORD_ORDER_PAYMENT,
+    { input: { ...input, provider: PAYMENT_PROVIDER } },
+    "record order payment",
+  );
+  if (errors.length === 0 && data?.order?.recordPayment) {
+    return { recorded: data.order.recordPayment };
   }
-  const workspaceId = await client.resolveWorkspaceId({ retry: retryMode() });
-
-  const response = await fetch(adminEndpoint(), {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${token}`,
-      "x-workspace-id": workspaceId,
-    },
-    body: JSON.stringify({
-      query: RECORD_ORDER_PAYMENT,
-      variables: { input: { ...input, provider: PAYMENT_PROVIDER } },
-    }),
-  });
-  if (!response.ok) {
-    throw new Error(`cmssy: record order payment failed (${response.status})`);
-  }
-  const json = (await response.json()) as {
-    data?: { order?: { recordPayment?: RecordedPayment } };
-    errors?: GraphqlError[];
-  };
-  const errors = json.errors ?? [];
-  if (errors.length === 0 && json.data?.order?.recordPayment) {
-    return { recorded: json.data.order.recordPayment };
-  }
-  const message = errors
-    .map((error) => error.message ?? "GraphQL error")
-    .join("; ");
-  if (
-    errors.length > 0 &&
-    errors.every((error) => REFUSAL_CODES.has(error.extensions?.code ?? ""))
-  ) {
-    return { refused: message };
-  }
-  throw new Error(`cmssy: record order payment error - ${message}`);
+  if (isRefusal(errors)) return { refused: errorText(errors) };
+  throw new Error(`cmssy: record order payment error - ${errorText(errors)}`);
 }
