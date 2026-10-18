@@ -6,6 +6,7 @@ import {
 } from "../graphql/generated/graphql";
 import type { SiteLocales } from "../lib/locale-path";
 import type { LocalizedValue } from "../lib/localized";
+import type { OrderField } from "../graphql/types";
 import { ttlCache } from "../lib/ttl-cache";
 import { client, publicRequest } from "./gateway";
 import { retryMode } from "../lib/cmssy/retry-mode";
@@ -60,6 +61,7 @@ export interface SiteTaxRates {
 export interface ShopSettings {
   tax: SiteTaxRates | null;
   lowStockThreshold: number | null;
+  orderFields: OrderField[];
 }
 
 const shopSettingsCache = ttlCache<ShopSettings>(60_000);
@@ -73,7 +75,9 @@ async function loadShopSettings(): Promise<ShopSettings> {
     workspaceSlug: cmssy.workspaceSlug,
   });
   const config = data.public?.siteConfig;
-  if (!config) return { tax: null, lowStockThreshold: null };
+  if (!config) {
+    return { tax: null, lowStockThreshold: null, orderFields: [] };
+  }
   const cart = config.publicCart ?? null;
   return {
     tax: cart
@@ -83,6 +87,7 @@ async function loadShopSettings(): Promise<ShopSettings> {
         }
       : null,
     lowStockThreshold: config.lowStockThreshold,
+    orderFields: cart?.orderFields ?? [],
   };
 }
 

@@ -14,6 +14,7 @@ mutation Checkout($input: CheckoutInput!) {
       accessToken
       poNumber
       customerNote
+      customFields
       shippingTotal
       pricesIncludeTax
       shippingMethod { id label price }

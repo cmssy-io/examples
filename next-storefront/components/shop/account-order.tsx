@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import type { Order } from "@/graphql/types";
+import type { Order, OrderField } from "@/graphql/types";
 import { OrderReceipt, paymentLabel } from "./order-receipt";
 import { PayOrderButton } from "./pay-order-button";
+import { OrderCustomFields } from "./order-fields";
 import type { BadgeVariant } from "./ui/badge";
 import { Badge } from "./ui/badge";
 import { buttonClass } from "./ui/button";
-import { useLocalePath, useShopCopy } from "./locale-ui";
+import { useLocalePath, useShopCopy, useShopLocale } from "./locale-ui";
 import type { ShopCopy } from "@/lib/shop-copy";
 import styles from "./order.module.css";
 
@@ -143,12 +144,15 @@ export function AccountOrder({
   order,
   payOnline,
   paid,
+  orderFields,
 }: {
   order: Order;
   payOnline: boolean;
   paid: boolean;
+  orderFields: OrderField[];
 }) {
   const localePath = useLocalePath();
+  const { locale, defaultLocale } = useShopLocale();
   const copy = useShopCopy();
   const canPay =
     payOnline && order.balanceDue > 0 && order.status !== "canceled";
@@ -208,6 +212,13 @@ export function AccountOrder({
         <OrderReceipt order={order} copy={copy} />
         <OrderTimeline order={order} copy={copy} />
       </div>
+
+      <OrderCustomFields
+        values={order.customFields}
+        fields={orderFields}
+        locale={{ locale, defaultLocale }}
+        copy={copy}
+      />
 
       <div className={styles.actions}>
         {canPay && !paid ? <PayOrderButton orderId={order.id} /> : null}

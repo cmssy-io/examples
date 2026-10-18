@@ -2,6 +2,7 @@ import type {
   CartQuery,
   CheckoutMutation,
   PublicOrderQuery,
+  ShopSettingsQuery,
 } from "./generated/graphql";
 
 export type Cart = NonNullable<CartQuery["cart"]["get"]>;
@@ -12,3 +13,7 @@ export type PublicOrder = NonNullable<
 >;
 
 export type CheckoutOrder = NonNullable<CheckoutMutation["cart"]["checkout"]>;
+
+export type OrderField = NonNullable<
+  NonNullable<ShopSettingsQuery["public"]["siteConfig"]>["publicCart"]
+>["orderFields"][number];

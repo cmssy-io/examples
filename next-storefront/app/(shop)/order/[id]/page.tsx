@@ -4,6 +4,8 @@ import { currentUser } from "@/lib/cmssy/session";
 import { AccountOrder } from "@/components/shop/account-order";
 import { OrderReceipt, paymentLabel } from "@/components/shop/order-receipt";
 import { PayOrderButton } from "@/components/shop/pay-order-button";
+import { OrderCustomFields } from "@/components/shop/order-fields";
+import { fetchShopSettings } from "@/services/site";
 import { payOnline } from "@/lib/stripe";
 import { localePath, shopLocale } from "@/lib/locale";
 import { copyFor } from "@/lib/shop-copy";
@@ -31,6 +33,7 @@ export default async function OrderPage({
   const { locale, defaultLocale } = await shopLocale();
   const href = (path: string) => localePath(path, locale, defaultLocale);
   const copy = copyFor(locale);
+  const { orderFields } = await fetchShopSettings();
 
   if (!token) {
     const user = await currentUser();
@@ -51,6 +54,7 @@ export default async function OrderPage({
         order={order}
         payOnline={payOnline()}
         paid={Boolean(paid)}
+        orderFields={orderFields}
       />
     );
   }
@@ -121,6 +125,13 @@ export default async function OrderPage({
       </div>
 
       <OrderReceipt order={order} copy={copy} />
+
+      <OrderCustomFields
+        values={order.customFields}
+        fields={orderFields}
+        locale={{ locale, defaultLocale }}
+        copy={copy}
+      />
 
       {order.customerNote ? (
         <div className={styles.meta}>

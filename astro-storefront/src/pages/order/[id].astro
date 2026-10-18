@@ -1,11 +1,13 @@
 ---
 import styles from "../../components/shop/order.module.css";
 import { OrderReceipt, paymentLabel } from "../../components/shop/order-receipt";
+import { OrderCustomFields } from "../../components/shop/order-fields";
 import ShopLayout from "../../layouts/shop-layout.astro";
 import { localePath } from "../../lib/locale-path";
 import { copyFor } from "../../lib/shop-copy";
 import { visitorAddress } from "../../lib/cmssy/visitor-headers";
 import { fetchOrderByToken } from "../../services/orders";
+import { fetchShopSettings } from "../../services/site";
 import { shopPageState } from "../../shop/page-state";
 
 export const prerender = false;
@@ -20,6 +22,7 @@ const href = (path: string) => localePath(path, locale, defaultLocale);
 const order = token
   ? await fetchOrderByToken(id, token, visitorAddress(Astro.request.headers))
   : null;
+const orderFields = order ? (await fetchShopSettings()).orderFields : [];
 if (!order) {
   Astro.response.status = 404;
 }
@@ -68,6 +71,13 @@ if (!order) {
       </div>
 
       <OrderReceipt order={order} copy={copy} />
+
+      <OrderCustomFields
+        values={order.customFields}
+        fields={orderFields}
+        locale={{ locale, defaultLocale }}
+        copy={copy}
+      />
 
       {order.customerNote ? (
         <div class={styles.meta}>

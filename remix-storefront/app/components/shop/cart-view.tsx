@@ -2,13 +2,17 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { formatMoney } from "../../lib/money";
 import { fill } from "../../lib/shop-copy";
+import { readOrderFieldValues } from "../../lib/order-fields";
+import type { OrderField } from "../../graphql/types";
 import { selectionLabel } from "../../lib/variants";
 import { useCart } from "./cart-provider";
 import styles from "./cart.module.css";
-import { useLocalePath, useShopCopy } from "./locale-ui";
+import { useLocalePath, useShopCopy, useShopLocale } from "./locale-ui";
+import { OrderFieldInputs } from "./order-fields";
 
-export function CartView() {
+export function CartView({ orderFields }: { orderFields: OrderField[] }) {
   const localePath = useLocalePath();
+  const { locale, defaultLocale } = useShopLocale();
   const copy = useShopCopy();
   const {
     cart,
@@ -53,6 +57,7 @@ export function CartView() {
         customerEmail: value("customerEmail"),
         poNumber: value("poNumber") || null,
         customerNote: value("customerNote") || null,
+        customFields: readOrderFieldValues(form, orderFields),
         shippingAddress: {
           name: value("name"),
           company: value("company") || null,
@@ -250,6 +255,10 @@ export function CartView() {
                 className="shop-input"
               />
             </div>
+            <OrderFieldInputs
+              fields={orderFields}
+              locale={{ locale, defaultLocale }}
+            />
           </div>
         </div>
       </div>

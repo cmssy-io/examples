@@ -21,6 +21,11 @@ const shippingAddress = z
   .nullable()
   .default(null);
 
+const customFields = z
+  .record(z.string(), z.unknown())
+  .nullable()
+  .default(null);
+
 const quantity = z.number().int().positive().default(1);
 
 function refused(err: unknown): ActionError {
@@ -86,6 +91,7 @@ const cart = {
       customerEmail: z.string(),
       poNumber: optionalText,
       customerNote: optionalText,
+      customFields,
       shippingAddress,
     }),
     handler: async (input, { locals }) => {
