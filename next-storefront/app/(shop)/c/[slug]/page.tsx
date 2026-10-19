@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense, cache } from "react";
 import {
   PAGE_SIZE,
   loadBrandFacets,
   loadProducts,
   loadStockFacets,
+  type ProductQuery,
   type StockState,
 } from "@/lib/catalog";
 import { loadCategories } from "@/lib/catalog-cached";
 import { ProductCard } from "@/components/shop/product-card";
 import { localePath, shopLocale } from "@/lib/locale";
-import { copyFor, fill } from "@/lib/shop-copy";
+import { copyFor, fill, type ShopCopy } from "@/lib/shop-copy";
 import styles from "@/components/shop/catalog.module.css";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +46,241 @@ function buildHref(
   return query ? `${base}?${query}` : base;
 }
 
+const productsFor = cache((key: string) =>
+  loadProducts(JSON.parse(key) as ProductQuery),
+);
+
+type Current = Record<string, string | undefined>;
+
+function stockLabelsFor(copy: ShopCopy): Record<StockState, string> {
+  return { in: copy.inStock, low: copy.lowStock, out: copy.backorder };
+}
+
+async function ResultCount({
+  productsKey,
+  brand,
+  copy,
+}: {
+  productsKey: string;
+  brand: string | undefined;
+  copy: ShopCopy;
+}) {
+  const { total } = await productsFor(productsKey);
+  return (
+    <>
+      {fill(total === 1 ? copy.productsCountOne : copy.productsCountMany, {
+        count: total,
+      })}
+      {brand ? ` ${fill(copy.fromBrand, { brand })}` : ""}
+    </>
+  );
+}
+
+async function RefineFacets({
+  categoryId,
+  locale,
+  base,
+  current,
+  copy,
+}: {
+  categoryId: string | undefined;
+  locale: string;
+  base: string;
+  current: Current;
+  copy: ShopCopy;
+}) {
+  const [brands, stockFacets] = await Promise.all([
+    loadBrandFacets(categoryId, locale),
+    loadStockFacets(categoryId, current.brand, locale),
+  ]);
+  const stockLabels = stockLabelsFor(copy);
+  return (
+    <>
+      {stockFacets.length > 0 ? (
+        <div className={styles.facetGroup}>
+          <span className={styles.facetTitle}>{copy.availability}</span>
+          <Link
+            href={buildHref(base, current, {
+              stock: undefined,
+              page: undefined,
+            })}
+            className={`${styles.facetLink} ${
+              !current.stock ? styles.facetLinkActive : ""
+            }`}
+          >
+            {copy.anyAvailability}
+          </Link>
+          {stockFacets.map((facet) => (
+            <Link
+              key={facet.state}
+              href={buildHref(base, current, {
+                stock: facet.state,
+                page: undefined,
+              })}
+              className={`${styles.facetLink} ${
+                current.stock === facet.state ? styles.facetLinkActive : ""
+              }`}
+            >
+              <span>{stockLabels[facet.state]}</span>
+              <span className={styles.facetCount}>{facet.count}</span>
+            </Link>
+          ))}
+        </div>
+      ) : null}
+
+      {brands.length > 0 ? (
+        <div className={styles.facetGroup}>
+          <span className={styles.facetTitle}>{copy.brand}</span>
+          <Link
+            href={buildHref(base, current, {
+              brand: undefined,
+              page: undefined,
+            })}
+            className={`${styles.facetLink} ${
+              !current.brand ? styles.facetLinkActive : ""
+            }`}
+          >
+            {copy.anyBrand}
+          </Link>
+          {brands.map((facet) => (
+            <Link
+              key={facet.brand}
+              href={buildHref(base, current, {
+                brand: facet.brand,
+                page: undefined,
+              })}
+              className={`${styles.facetLink} ${
+                current.brand === facet.brand ? styles.facetLinkActive : ""
+              }`}
+            >
+              <span>{facet.brand}</span>
+              <span className={styles.facetCount}>{facet.count}</span>
+            </Link>
+          ))}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+async function ProductResults({
+  productsKey,
+  page,
+  term,
+  categoryName,
+  base,
+  current,
+  copy,
+}: {
+  productsKey: string;
+  page: number;
+  term: string | undefined;
+  categoryName: string | null;
+  base: string;
+  current: Current;
+  copy: ShopCopy;
+}) {
+  const result = await productsFor(productsKey);
+  const lastPage = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
+  return (
+    <>
+      {result.items.length === 0 ? (
+        <div className={`shop-card ${styles.empty}`}>
+          {term ? (
+            <>
+              <h2>{copy.noProductsFound}</h2>
+              <p className="shop-muted">
+                {fill(copy.searchEmptyHint, { term })}
+              </p>
+              <Link className="shop-btn" href={base}>
+                {fill(copy.browseX, {
+                  what: categoryName
+                    ? categoryName.toLowerCase()
+                    : copy.theCatalog,
+                })}
+              </Link>
+            </>
+          ) : (
+            <>
+              <h2>{copy.noProductsMatch}</h2>
+              <p className="shop-muted">{copy.noProductsHint}</p>
+              <Link className="shop-btn" href={base}>
+                {copy.clearAllFilters}
+              </Link>
+            </>
+          )}
+        </div>
+      ) : (
+        <div className={styles.grid}>
+          {result.items.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
+
+      {lastPage > 1 ? (
+        <nav className={styles.pager} aria-label={copy.paginationAria}>
+          {page > 1 ? (
+            <Link
+              className="shop-btn"
+              href={buildHref(base, current, { page: String(page - 1) })}
+            >
+              {copy.previous}
+            </Link>
+          ) : null}
+          <span className={styles.count}>
+            {fill(copy.pageOf, { page, last: lastPage })}
+          </span>
+          {result.hasMore ? (
+            <Link
+              className="shop-btn"
+              href={buildHref(base, current, { page: String(page + 1) })}
+            >
+              {copy.next}
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
+    </>
+  );
+}
+
+function FacetsSkeleton() {
+  return (
+    <div className={styles.facetGroup}>
+      <div className="sf-skel" style={{ height: 12, width: 90 }} />
+      {Array.from({ length: 4 }).map((_, row) => (
+        <div key={row} className="sf-skel" style={{ height: 14 }} />
+      ))}
+    </div>
+  );
+}
+
+function ProductGridSkeleton() {
+  return (
+    <div className={styles.grid}>
+      {Array.from({ length: 8 }).map((_, card) => (
+        <div key={card} className={`sf-card ${styles.card}`}>
+          <div
+            className="sf-skel"
+            style={{ aspectRatio: "1.5 / 1", borderRadius: 0 }}
+          />
+          <div className={styles.cardBody}>
+            <div className="sf-skel" style={{ height: 10, width: 60 }} />
+            <div className="sf-skel" style={{ height: 16 }} />
+            <div className="sf-skel" style={{ height: 12, width: 90 }} />
+            <div
+              className="sf-skel"
+              style={{ height: 20, width: 72, marginTop: 4 }}
+            />
+            <div className="sf-skel" style={{ height: 32, marginTop: 10 }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default async function CategoryPage({
   params,
   searchParams,
@@ -64,28 +301,18 @@ export default async function CategoryPage({
 
   const stockState = toStockState(query.stock);
   const term = query.q?.trim() || undefined;
-  const [result, brands, stockFacets] = await Promise.all([
-    loadProducts({
-      categoryId: category?.id,
-      brand: query.brand,
-      search: term,
-      sort: query.sort,
-      stockState,
-      page,
-      locale,
-    }),
-    loadBrandFacets(category?.id, locale),
-    loadStockFacets(category?.id, query.brand, locale),
-  ]);
-
-  const items = result.items;
+  const productsKey = JSON.stringify({
+    categoryId: category?.id,
+    brand: query.brand,
+    search: term,
+    sort: query.sort,
+    stockState,
+    page,
+    locale,
+  } satisfies ProductQuery);
 
   const copy = copyFor(locale);
-  const stockLabels: Record<StockState, string> = {
-    in: copy.inStock,
-    low: copy.lowStock,
-    out: copy.backorder,
-  };
+  const stockLabels = stockLabelsFor(copy);
   const sortLabels: Record<(typeof SORT_VALUES)[number], string> = {
     title: copy.sortName,
     price: copy.sortPriceAsc,
@@ -100,7 +327,7 @@ export default async function CategoryPage({
     q: term,
     stock: stockState,
   };
-  const lastPage = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
+  const facetsKey = JSON.stringify([slug, query.brand, locale]);
 
   const activeFilters = [
     query.brand
@@ -166,83 +393,35 @@ export default async function CategoryPage({
             ))}
           </div>
 
-          {stockFacets.length > 0 ? (
-            <div className={styles.facetGroup}>
-              <span className={styles.facetTitle}>{copy.availability}</span>
-              <Link
-                href={buildHref(base, current, {
-                  stock: undefined,
-                  page: undefined,
-                })}
-                className={`${styles.facetLink} ${
-                  !stockState ? styles.facetLinkActive : ""
-                }`}
-              >
-                {copy.anyAvailability}
-              </Link>
-              {stockFacets.map((facet) => (
-                <Link
-                  key={facet.state}
-                  href={buildHref(base, current, {
-                    stock: facet.state,
-                    page: undefined,
-                  })}
-                  className={`${styles.facetLink} ${
-                    stockState === facet.state ? styles.facetLinkActive : ""
-                  }`}
-                >
-                  <span>{stockLabels[facet.state]}</span>
-                  <span className={styles.facetCount}>{facet.count}</span>
-                </Link>
-              ))}
-            </div>
-          ) : null}
-
-          {brands.length > 0 ? (
-            <div className={styles.facetGroup}>
-              <span className={styles.facetTitle}>{copy.brand}</span>
-              <Link
-                href={buildHref(base, current, {
-                  brand: undefined,
-                  page: undefined,
-                })}
-                className={`${styles.facetLink} ${
-                  !query.brand ? styles.facetLinkActive : ""
-                }`}
-              >
-                {copy.anyBrand}
-              </Link>
-              {brands.map((facet) => (
-                <Link
-                  key={facet.brand}
-                  href={buildHref(base, current, {
-                    brand: facet.brand,
-                    page: undefined,
-                  })}
-                  className={`${styles.facetLink} ${
-                    query.brand === facet.brand ? styles.facetLinkActive : ""
-                  }`}
-                >
-                  <span>{facet.brand}</span>
-                  <span className={styles.facetCount}>{facet.count}</span>
-                </Link>
-              ))}
-            </div>
-          ) : null}
+          <Suspense key={facetsKey} fallback={<FacetsSkeleton />}>
+            <RefineFacets
+              categoryId={category?.id}
+              locale={locale}
+              base={base}
+              current={current}
+              copy={copy}
+            />
+          </Suspense>
         </aside>
 
         <div>
           <div className={styles.toolbar}>
             <span className={styles.count}>
-              {fill(
-                result.total === 1
-                  ? copy.productsCountOne
-                  : copy.productsCountMany,
-                { count: result.total },
-              )}
-              {query.brand
-                ? ` ${fill(copy.fromBrand, { brand: query.brand })}`
-                : ""}
+              <Suspense
+                key={productsKey}
+                fallback={
+                  <span
+                    className="sf-skel"
+                    style={{ display: "inline-block", height: 14, width: 96 }}
+                  />
+                }
+              >
+                <ResultCount
+                  productsKey={productsKey}
+                  brand={query.brand}
+                  copy={copy}
+                />
+              </Suspense>
             </span>
             <div className={styles.sort}>
               <span className="shop-label" style={{ margin: 0 }}>
@@ -287,63 +466,17 @@ export default async function CategoryPage({
             </div>
           ) : null}
 
-          {items.length === 0 ? (
-            <div className={`shop-card ${styles.empty}`}>
-              {term ? (
-                <>
-                  <h2>{copy.noProductsFound}</h2>
-                  <p className="shop-muted">
-                    {fill(copy.searchEmptyHint, { term: term ?? "" })}
-                  </p>
-                  <Link className="shop-btn" href={base}>
-                    {fill(copy.browseX, {
-                      what: category
-                        ? category.name.toLowerCase()
-                        : copy.theCatalog,
-                    })}
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <h2>{copy.noProductsMatch}</h2>
-                  <p className="shop-muted">{copy.noProductsHint}</p>
-                  <Link className="shop-btn" href={base}>
-                    {copy.clearAllFilters}
-                  </Link>
-                </>
-              )}
-            </div>
-          ) : (
-            <div className={styles.grid}>
-              {items.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
-
-          {lastPage > 1 ? (
-            <nav className={styles.pager} aria-label={copy.paginationAria}>
-              {page > 1 ? (
-                <Link
-                  className="shop-btn"
-                  href={buildHref(base, current, { page: String(page - 1) })}
-                >
-                  {copy.previous}
-                </Link>
-              ) : null}
-              <span className={styles.count}>
-                {fill(copy.pageOf, { page, last: lastPage })}
-              </span>
-              {result.hasMore ? (
-                <Link
-                  className="shop-btn"
-                  href={buildHref(base, current, { page: String(page + 1) })}
-                >
-                  {copy.next}
-                </Link>
-              ) : null}
-            </nav>
-          ) : null}
+          <Suspense key={productsKey} fallback={<ProductGridSkeleton />}>
+            <ProductResults
+              productsKey={productsKey}
+              page={page}
+              term={term}
+              categoryName={category?.name ?? null}
+              base={base}
+              current={current}
+              copy={copy}
+            />
+          </Suspense>
         </div>
       </div>
     </>
