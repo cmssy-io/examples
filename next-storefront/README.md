@@ -139,11 +139,13 @@ A refund can start on either side, and each side learns of the other's:
 - **Refunded in the Stripe Dashboard.** `refund.created` and `refund.updated` reach the same Stripe
   webhook. Once the refund has `succeeded`, the route reads the order id from its PaymentIntent and
   records it with `order.refund`, the Stripe refund id as the reference - cmssy ignores a reference
-  it already holds, so both events and every retry record it once.
+  it already holds, so both events and every retry record it once. The route then tags the Stripe
+  refund `recordedIn: cmssy`: that is how a refund that fails after it settled stays counted, and
+  the update event the tag itself fires is skipped.
 - **Refunded in cmssy** (the order's Refund button, or `refund_order` over MCP). cmssy sends
   `order.refunded` or `order.partially_refunded`; `services/refunds.ts` reads the order's payments
-  and refunds on Stripe what cmssy has refunded beyond the Stripe refunds already pending or
-  settled. The refund carries `origin: cmssy` in its metadata, so the Stripe webhook that follows
+  and refunds on Stripe what cmssy has refunded beyond the Stripe refunds already pending,
+  settled or known to cmssy, reading every page of the list. The refund carries `origin: cmssy` in its metadata, so the Stripe webhook that follows
   does not record it a second time. The idempotency key names the PaymentIntent and the amount
   Stripe already held, so two refund events racing each other cannot both refund the same money:
   the second trips Stripe's idempotency check, answers 500, and on cmssy's retry finds the first

@@ -10,6 +10,8 @@ import { PAYMENT_PROVIDER } from "@/services/payments";
 
 export const CMSSY_ORIGIN = "cmssy";
 
+const PAGE_SIZE = 100;
+
 const OPEN_REFUND_STATUSES = new Set([
   "pending",
   "requires_action",
@@ -37,7 +39,12 @@ export interface RefundStripe {
     list(params: {
       payment_intent: string;
       limit: number;
-    }): Promise<{ data: RefundRow[] }>;
+      starting_after?: string;
+    }): Promise<{ data: RefundRow[]; has_more: boolean }>;
+    update(
+      id: string,
+      params: { metadata: Record<string, string> },
+    ): Promise<RefundRow>;
     create(
       params: {
         payment_intent: string;
@@ -112,6 +119,32 @@ function sameCurrency(order: string, stripe: string): boolean {
   return order.toLowerCase() === stripe.toLowerCase();
 }
 
+function countsInCmssy(refund: RefundRow): boolean {
+  return (
+    OPEN_REFUND_STATUSES.has(refund.status ?? "") ||
+    refund.metadata?.origin === CMSSY_ORIGIN ||
+    refund.metadata?.recordedIn === CMSSY_ORIGIN
+  );
+}
+
+async function refundsOf(
+  stripe: RefundStripe,
+  paymentIntent: string,
+): Promise<RefundRow[]> {
+  const all: RefundRow[] = [];
+  let startingAfter: string | undefined;
+  for (;;) {
+    const page = await stripe.refunds.list({
+      payment_intent: paymentIntent,
+      limit: PAGE_SIZE,
+      ...(startingAfter ? { starting_after: startingAfter } : {}),
+    });
+    all.push(...page.data);
+    if (!page.has_more || page.data.length === 0) return all;
+    startingAfter = page.data[page.data.length - 1].id;
+  }
+}
+
 function handOver(orderId: string, why: string): { skipped: string } {
   console.warn(`cmssy order ${orderId}: ${why} - settle the refund by hand`);
   return { skipped: why };
@@ -148,10 +181,13 @@ export async function recordStripeRefund(
     }
     return { skipped: "refund started in cmssy" };
   }
-  if (refund.status === "failed" || refund.status === "canceled") {
-    console.warn(
-      `stripe refund ${refund.id} is ${refund.status}; if cmssy recorded it, the order still counts it`,
-    );
+  if (refund.metadata.recordedIn === CMSSY_ORIGIN) {
+    if (refund.status === "failed" || refund.status === "canceled") {
+      console.warn(
+        `stripe refund ${refund.id} is ${refund.status} after cmssy recorded it; the order still counts it`,
+      );
+    }
+    return { skipped: "refund already recorded in cmssy" };
   }
   if (refund.status !== "succeeded") return { skipped: "refund not settled" };
   if (!deps.stripe || !refund.paymentIntent) {
@@ -186,6 +222,9 @@ export async function recordStripeRefund(
     "record the refund",
   );
   if (errors.length === 0 && data?.order?.refund) {
+    await deps.stripe.refunds.update(refund.id, {
+      metadata: { recordedIn: CMSSY_ORIGIN },
+    });
     return { recorded: data.order.refund };
   }
   if (isRefusal(errors)) return { refused: errorText(errors) };
@@ -233,16 +272,12 @@ export async function refundOnStripe(
 
   const held = await Promise.all(
     order.payments.map(async (payment) => {
-      const [intent, { data: refunds }] = await Promise.all([
+      const [intent, refunds] = await Promise.all([
         stripe.paymentIntents.retrieve(payment.reference),
-        stripe.refunds.list({ payment_intent: payment.reference, limit: 100 }),
+        refundsOf(stripe, payment.reference),
       ]);
       const refunded = refunds
-        .filter(
-          (r) =>
-            OPEN_REFUND_STATUSES.has(r.status ?? "") ||
-            r.metadata?.origin === CMSSY_ORIGIN,
-        )
+        .filter(countsInCmssy)
         .reduce((sum, r) => sum + r.amount, 0);
       return { payment, intent, refunded };
     }),

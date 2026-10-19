@@ -25,6 +25,7 @@ interface FakeIntent {
 function fakeStripe(
   refundsByIntent: Record<string, FakeRefund[]> = {},
   intents: Record<string, FakeIntent> = {},
+  pageSize = 100,
 ) {
   return {
     paymentIntents: {
@@ -36,11 +37,31 @@ function fakeStripe(
       })),
     },
     refunds: {
-      list: vi.fn(async ({ payment_intent }: { payment_intent: string }) => ({
-        data: (refundsByIntent[payment_intent] ?? []).map((r, i) => ({
-          id: `re_${i}`,
-          ...r,
-        })),
+      list: vi.fn(
+        async ({
+          payment_intent,
+          starting_after,
+        }: {
+          payment_intent: string;
+          starting_after?: string;
+        }) => {
+          const all = (refundsByIntent[payment_intent] ?? []).map((r, i) => ({
+            id: `re_${i}`,
+            ...r,
+          }));
+          const from = starting_after
+            ? all.findIndex((r) => r.id === starting_after) + 1
+            : 0;
+          return {
+            data: all.slice(from, from + pageSize),
+            has_more: from + pageSize < all.length,
+          };
+        },
+      ),
+      update: vi.fn(async (id: string) => ({
+        id,
+        amount: 0,
+        status: "succeeded",
       })),
       create: vi.fn(async (params: { amount: number }) => ({
         id: "re_new",
@@ -104,6 +125,9 @@ describe("recordStripeRefund", () => {
       recorded: { paymentStatus: "partially_refunded", refundedAmount: 1500 },
     });
     expect(stripe.paymentIntents.retrieve).toHaveBeenCalledWith("pi_1");
+    expect(stripe.refunds.update).toHaveBeenCalledWith("re_1", {
+      metadata: { recordedIn: "cmssy" },
+    });
     expect(d.request).toHaveBeenLastCalledWith(
       expect.stringContaining("refund(input: $input)"),
       { input: { orderId: "o1", amount: 1500, reference: "re_1" } },
@@ -121,6 +145,52 @@ describe("recordStripeRefund", () => {
 
     expect(outcome).toEqual({ skipped: "refund started in cmssy" });
     expect(d.request).not.toHaveBeenCalled();
+  });
+
+  it("leaves a refund it already recorded alone, so tagging it does not loop", async () => {
+    const stripe = fakeStripe();
+    const d = deps(stripe, []);
+
+    expect(
+      await recordStripeRefund(
+        { ...REFUND, metadata: { recordedIn: "cmssy" } },
+        d,
+      ),
+    ).toEqual({ skipped: "refund already recorded in cmssy" });
+    expect(d.request).not.toHaveBeenCalled();
+    expect(stripe.refunds.update).not.toHaveBeenCalled();
+  });
+
+  it("warns when a refund cmssy recorded fails afterwards", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const d = deps(fakeStripe(), []);
+
+    await recordStripeRefund(
+      { ...REFUND, status: "failed", metadata: { recordedIn: "cmssy" } },
+      d,
+    );
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("re_1"));
+    expect(d.request).not.toHaveBeenCalled();
+  });
+
+  it("does not tag a refund cmssy refused", async () => {
+    const stripe = fakeStripe();
+    const d = deps(stripe, [
+      EUR_ORDER,
+      {
+        errors: [
+          {
+            message: "Invalid refund amount",
+            extensions: { code: "BAD_USER_INPUT" },
+          },
+        ],
+      },
+    ]);
+
+    await recordStripeRefund(REFUND, d);
+
+    expect(stripe.refunds.update).not.toHaveBeenCalled();
   });
 
   it.each(["pending", "failed", "canceled", "requires_action"])(
@@ -230,6 +300,42 @@ describe("refundOnStripe", () => {
     expect(stripe.refunds.create).toHaveBeenCalledWith(
       expect.objectContaining({ amount: 500 }),
       { idempotencyKey: "cmssy-refund-o1-pi_1-1000" },
+    );
+  });
+
+  it("never sends again a Dashboard refund cmssy recorded that failed later", async () => {
+    const stripe = fakeStripe({
+      pi_1: [
+        { amount: 1000, status: "failed", metadata: { recordedIn: "cmssy" } },
+      ],
+    });
+    const d = deps(stripe, [orderRead(1000, [PAID])]);
+
+    expect(await refundOnStripe("o1", d)).toEqual({
+      skipped: "Stripe already holds this refund",
+    });
+    expect(stripe.refunds.create).not.toHaveBeenCalled();
+  });
+
+  it("counts the refunds on every page Stripe lists", async () => {
+    const stripe = fakeStripe(
+      {
+        pi_1: [
+          { amount: 100, status: "succeeded" },
+          { amount: 200, status: "succeeded" },
+          { amount: 300, status: "succeeded" },
+        ],
+      },
+      {},
+      2,
+    );
+    const d = deps(stripe, [orderRead(1000, [PAID])]);
+
+    expect(await refundOnStripe("o1", d)).toEqual({ refunded: 400 });
+    expect(stripe.refunds.list).toHaveBeenCalledTimes(2);
+    expect(stripe.refunds.create).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 400 }),
+      { idempotencyKey: "cmssy-refund-o1-pi_1-600" },
     );
   });
 
