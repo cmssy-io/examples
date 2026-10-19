@@ -2,17 +2,39 @@ import { CmssyWebhookError, verifyCmssyWebhook } from "@cmssy/core";
 import { NextResponse } from "next/server";
 import { ShippingProviderError } from "@/lib/shipping";
 import { adminToken } from "@/services/admin";
+import { refundOnStripe } from "@/services/refunds";
 import { shipOrder } from "@/services/shipments";
 
 export const maxDuration = 30;
 
 const PENDING_RETRY_SECONDS = 60;
 const LABEL_REQUESTED = "shipment.label_requested";
+const REFUND_EVENTS = new Set(["order.refunded", "order.partially_refunded"]);
 const HANDLED_EVENTS = new Set(["order.paid", LABEL_REQUESTED]);
 
 function requestedShipment(data: object): string | undefined {
   const shipment = (data as { shipment?: { id?: unknown } }).shipment;
   return typeof shipment?.id === "string" ? shipment.id : undefined;
+}
+
+async function refundOrder(orderId: string) {
+  try {
+    const outcome = await refundOnStripe(orderId);
+    if ("refunded" in outcome) {
+      return NextResponse.json({
+        received: true,
+        handled: true,
+        refunded: outcome.refunded,
+      });
+    }
+    if ("refused" in outcome) {
+      console.warn("cmssy webhook: Stripe refused the refund", outcome.refused);
+    }
+    return NextResponse.json({ received: true, handled: false, ...outcome });
+  } catch (error) {
+    console.error("cmssy webhook: refund not made on Stripe", error);
+    return new Response("Refund not made", { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -36,6 +58,9 @@ export async function POST(request: Request) {
     throw error;
   }
 
+  if (REFUND_EVENTS.has(event.event)) {
+    return refundOrder(event.data.order.id);
+  }
   if (!HANDLED_EVENTS.has(event.event)) {
     return NextResponse.json({ received: true, handled: false });
   }

@@ -44,7 +44,13 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <article className={`sf-card ${styles.card}`}>
-      <Link href={href} className={styles.thumbLink} tabIndex={-1} aria-hidden>
+      <Link
+        href={href}
+        prefetch={false}
+        className={styles.thumbLink}
+        tabIndex={-1}
+        aria-hidden
+      >
         <ProductImage
           src={product.image ?? product.gallery[0]}
           code={skuCode(product.sku)}
@@ -58,7 +64,9 @@ export function ProductCard({ product }: { product: Product }) {
           <span className={styles.cardBrand}>{product.brand}</span>
         ) : null}
         <h3 className={styles.title}>
-          <Link href={href}>{product.title}</Link>
+          <Link href={href} prefetch={false}>
+            {product.title}
+          </Link>
         </h3>
         <span className={styles.cardSku}>{product.sku}</span>
 
@@ -92,7 +100,11 @@ export function ProductCard({ product }: { product: Product }) {
             </div>
           </div>
           {product.hasVariants ? (
-            <Link href={href} className={buttonClass("outline", "sm")}>
+            <Link
+              href={href}
+              prefetch={false}
+              className={buttonClass("outline", "sm")}
+            >
               {copy.chooseOptions}
             </Link>
           ) : (
