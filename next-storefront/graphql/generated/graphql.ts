@@ -58,6 +58,7 @@ export type OrderFieldType =
   | 'url';
 
 export type ShipmentStatus =
+  | 'canceled'
   | 'delivered'
   | 'exception'
   | 'in_transit'

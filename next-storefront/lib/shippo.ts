@@ -3,6 +3,7 @@ import {
   type BookedShipment,
   type ShipmentRequest,
   type ShippingProvider,
+  type TrackingRequest,
 } from "@/lib/shipping";
 
 const API_URL = "https://api.goshippo.com";
@@ -72,6 +73,98 @@ interface ShippoTransaction {
   tracking_url_provider?: string | null;
   label_url?: string | null;
   messages?: ShippoMessage[];
+}
+
+export type CmssyShipmentStatus =
+  | "pending"
+  | "in_transit"
+  | "out_for_delivery"
+  | "delivered"
+  | "returned"
+  | "exception";
+
+export type ShippoEvent =
+  | {
+      kind: "tracking";
+      key: string;
+      trackingNumber: string;
+      status: CmssyShipmentStatus | null;
+      details: string | null;
+    }
+  | {
+      kind: "label";
+      key: string;
+      reference: string;
+      trackingNumber: string;
+      trackingUrl: string | null;
+      labelUrl: string | null;
+    };
+
+interface ShippoTrackingStatus {
+  status?: string;
+  status_details?: string | null;
+  substatus?: { code?: string; action_required?: boolean } | null;
+}
+
+export function shipmentStatusFromShippo(
+  tracking: ShippoTrackingStatus | null | undefined,
+): CmssyShipmentStatus | null {
+  switch (tracking?.status) {
+    case "PRE_TRANSIT":
+      return "pending";
+    case "TRANSIT":
+      if (tracking.substatus?.action_required) return "exception";
+      if (tracking.substatus?.code === "out_for_delivery") {
+        return "out_for_delivery";
+      }
+      return "in_transit";
+    case "DELIVERED":
+      return "delivered";
+    case "RETURNED":
+      return "returned";
+    case "FAILURE":
+      return "exception";
+    default:
+      return null;
+  }
+}
+
+function text(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+export function parseShippoEvent(body: unknown): ShippoEvent | null {
+  if (!body || typeof body !== "object") return null;
+  const { event, data } = body as { event?: unknown; data?: unknown };
+  if (!data || typeof data !== "object") return null;
+  const record = data as Record<string, unknown>;
+  const key = text(record.metadata);
+  const trackingNumber = text(record.tracking_number);
+  if (!key || !trackingNumber) return null;
+
+  if (event === "track_updated") {
+    const tracking = record.tracking_status as ShippoTrackingStatus | null;
+    return {
+      kind: "tracking",
+      key,
+      trackingNumber,
+      status: shipmentStatusFromShippo(tracking),
+      details: text(tracking?.status_details),
+    };
+  }
+  if (event === "transaction_created" && record.status === "SUCCESS") {
+    const reference = text(record.object_id);
+    if (!reference) return null;
+    return {
+      kind: "label",
+      key,
+      reference,
+      trackingNumber,
+      trackingUrl: text(record.tracking_url_provider),
+      labelUrl: text(record.label_url),
+    };
+  }
+  return null;
 }
 
 export function shippoFromEnv(
@@ -277,6 +370,14 @@ export function createShippo(options: ShippoOptions): ShippingProvider {
           async: false,
         }),
       );
+    },
+
+    async track(request: TrackingRequest) {
+      await call("/tracks/", {
+        carrier: request.carrier,
+        tracking_number: request.trackingNumber,
+        metadata: request.metadata,
+      });
     },
 
     async resume(reference: string) {

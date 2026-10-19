@@ -44,10 +44,17 @@ export interface BookedShipment {
   labelUrl: string | null;
 }
 
+export interface TrackingRequest {
+  carrier: string;
+  trackingNumber: string;
+  metadata: string;
+}
+
 export interface ShippingProvider {
   name: string;
   book(request: ShipmentRequest): Promise<BookedShipment>;
   resume(reference: string): Promise<BookedShipment>;
+  track(request: TrackingRequest): Promise<void>;
 }
 
 export type ProviderName = "shippo";
@@ -57,6 +64,7 @@ export interface ShippingRoute {
   countries: readonly string[];
   provider: ProviderName;
   carrier: string;
+  trackingCarrier: string;
   service: string | null;
   origin: string | null;
   parcel: Parcel;
@@ -101,6 +109,7 @@ export const SHIPPING_ROUTES: readonly ShippingRoute[] = [
     countries: ["US"],
     provider: "shippo",
     carrier: "USPS",
+    trackingCarrier: "usps",
     service: "usps_ground_advantage",
     origin: "us",
     parcel: DEFAULT_PARCEL,
@@ -110,6 +119,7 @@ export const SHIPPING_ROUTES: readonly ShippingRoute[] = [
     countries: ["US"],
     provider: "shippo",
     carrier: "USPS",
+    trackingCarrier: "usps",
     service: "usps_priority",
     origin: "us",
     parcel: DEFAULT_PARCEL,
@@ -119,6 +129,7 @@ export const SHIPPING_ROUTES: readonly ShippingRoute[] = [
     countries: INTERNATIONAL_EXPRESS,
     provider: "shippo",
     carrier: "DHL Express",
+    trackingCarrier: "dhl_express",
     service: "dhl_express_worldwide",
     origin: "us",
     parcel: DEFAULT_PARCEL,
@@ -128,6 +139,7 @@ export const SHIPPING_ROUTES: readonly ShippingRoute[] = [
     countries: ["NO", "SE", "DK", "FI"],
     provider: "shippo",
     carrier: "Deutsche Post",
+    trackingCarrier: "deutsche_post",
     service: "deutsche_post_maxibrief_plus",
     origin: "de",
     parcel: SMALL_PARCEL,
@@ -144,6 +156,17 @@ export function routeFor(
         candidate.methodId === methodId &&
         candidate.countries.includes(country.toUpperCase()),
     ) ?? null
+  );
+}
+
+export function trackingCarrierFor(
+  provider: ProviderName,
+  carrier: string | null,
+): string | null {
+  return (
+    SHIPPING_ROUTES.find(
+      (route) => route.provider === provider && route.carrier === carrier,
+    )?.trackingCarrier ?? null
   );
 }
 

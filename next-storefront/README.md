@@ -147,6 +147,7 @@ buyer's order page shows it.
 | `SHIPPO_API_TOKEN` | Shippo API token (Settings -> API). A `shippo_test_` token buys free test labels on Shippo's own carrier accounts; DHL Express needs "Activate Account" under Settings -> Carriers first |
 | `SHIPPO_ADDRESS_FROM_US`, `SHIPPO_ADDRESS_FROM_DE` | `object_id` of a Shippo address for each warehouse, created once with `POST /addresses`. A warehouse without one is off |
 | `SHIPPO_CUSTOMS_SIGNER` | the name that certifies the customs declaration on parcels leaving the EU or the US; without it those parcels are refused |
+| `SHIPPO_WEBHOOK_TOKEN` | a random string. In Shippo (Settings -> Webhooks) point `track_updated` and `transaction_created` at `<origin>/api/shippo/webhook?token=<it>`; without it the route answers 503 |
 
 `CMSSY_API_TOKEN` from the Stripe section is needed too: it reads the order and records the parcel.
 Without them shipping is simply off, and orders are left for a person to ship.
@@ -195,6 +196,26 @@ When the carrier refuses a booking, a person fixes the order (the address, usual
 
 Each bought label's PDF is recorded on the parcel as `labelUrl`; the admin shows **Print label** for it.
 
+### Following the parcel
+
+Once a label has a tracking number the app registers it with Shippo (`POST /tracks`) under the
+attempt's key, and stamps the same key on the label itself. Shippo then calls
+`/api/shippo/webhook`, authenticated by the `token` in its URL, and the app writes what it says on
+the parcel the key names:
+
+| Shippo sends | The parcel |
+| --- | --- |
+| `track_updated` `PRE_TRANSIT` | `pending` |
+| `track_updated` `TRANSIT` | `in_transit`; `out_for_delivery` for that substatus; `exception` when the carrier needs action (a bad address) |
+| `track_updated` `DELIVERED` / `RETURNED` / `FAILURE` | `delivered` / `returned` / `exception` |
+| `track_updated` `UNKNOWN` | unchanged |
+| `transaction_created` for a parcel with no tracking number | gets the label, tracking number and `pending` - the label whose booking answer was lost, so a parcel flagged *outcome unknown* recovers by itself |
+| `transaction_created` for a `canceled` attempt | a note to refund that label in Shippo - two labels were bought |
+
+The carrier's own wording lands in the parcel's history. A parcel never moves back (a late
+`TRANSIT` after `DELIVERED` is ignored), and a canceled one is left alone. cmssy sends
+`shipment.updated` for each change, so a mail to the buyer can hang off it.
+
 The claim leaves the order unfulfilled; it becomes fulfilled when the parcel gets its tracking number, so a refused label leaves it in the admin's Shipping problem queue still to pack.
 
 ## Project structure
@@ -210,6 +231,7 @@ app/(shop)/
 app/api/draft/route.ts   draft/preview mode entry (createDraftRoute)
 app/api/stripe/webhook/  verifies Stripe's signature, records the payment on the order
 app/api/cmssy/webhook/   verifies cmssy's signature, books a paid order's parcel with the carrier
+app/api/shippo/webhook/  checks the URL token, writes carrier tracking and recovered labels on the parcel
 app/sitemap.ts robots.ts SEO built from the workspace's pages plus the catalogue
 blocks/                  14 blocks; each is block.ts + Component.tsx + CSS Module
 cmssy/
