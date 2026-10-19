@@ -56,6 +56,7 @@ export interface ShippoOptions {
 }
 
 interface ShippoMessage {
+  source?: string;
   text?: string;
 }
 
@@ -104,6 +105,24 @@ function messageText(messages: ShippoMessage[] | undefined): string {
     .filter(Boolean)
     .join("; ");
 }
+
+function carrierKey(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function carrierMessages(
+  messages: ShippoMessage[] | undefined,
+  service: string,
+): ShippoMessage[] | undefined {
+  const target = carrierKey(service);
+  const own = (messages ?? []).filter((message) => {
+    const source = carrierKey(message.source ?? "");
+    return source !== "" && target.startsWith(source);
+  });
+  return own.length > 0 ? own : messages;
+}
+
+const REGION_REQUIRED = new Set(["US", "CA", "AU"]);
 
 function refuse(message: string): never {
   throw new ShippingProviderError(NAME, message, false);
@@ -195,6 +214,9 @@ export function createShippo(options: ShippoOptions): ShippingProvider {
       if (!origin) refuse(`no "${request.origin}" sender address configured`);
       const { address, parcel } = request;
       const destination = address.country.toUpperCase();
+      if (REGION_REQUIRED.has(destination) && !address.region) {
+        refuse(`an address in ${destination} needs a state or region`);
+      }
       let customs: ReturnType<typeof customsDeclaration> | undefined;
       if (needsCustoms(origin.country, destination)) {
         if (!options.customsSigner) {
@@ -238,9 +260,10 @@ export function createShippo(options: ShippoOptions): ShippingProvider {
         (candidate) => candidate.servicelevel?.token === request.service,
       );
       if (!rate) {
-        refuse(
-          `no ${request.service} rate${messageText(shipment.messages) ? `: ${messageText(shipment.messages)}` : ""}`,
+        const reason = messageText(
+          carrierMessages(shipment.messages, request.service),
         );
+        refuse(`no ${request.service} rate${reason ? `: ${reason}` : ""}`);
       }
 
       return booked(

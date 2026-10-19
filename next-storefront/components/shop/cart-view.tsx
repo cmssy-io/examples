@@ -46,13 +46,17 @@ function readAddress(form: HTMLFormElement): ShippingAddressInput {
   };
 }
 
+const REGION_REQUIRED = new Set(["US", "CA", "AU"]);
+
 function isComplete(address: ShippingAddressInput): boolean {
   return Boolean(
     address.name &&
       address.line1 &&
       address.postalCode &&
       address.city &&
-      /^[A-Z]{2}$/.test(address.country),
+      address.phone &&
+      /^[A-Z]{2}$/.test(address.country) &&
+      (address.region || !REGION_REQUIRED.has(address.country)),
   );
 }
 
@@ -87,6 +91,7 @@ export function CartView({
   const [submitting, setSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const sentAddress = useRef<string | null>(null);
+  const [country, setCountry] = useState("");
   const addressQueue = useRef<Promise<unknown>>(Promise.resolve());
 
   if (!cart || cart.items.length === 0) {
@@ -153,6 +158,7 @@ export function CartView({
     )
       return;
     if (!ADDRESS_FIELDS.has(field.name)) return;
+    if (field.name === "country") setCountry(field.value.trim().toUpperCase());
     if (event.type === "change" && field.name !== "country") return;
     const address = readAddress(event.currentTarget);
     if (!isComplete(address)) return;
@@ -335,13 +341,24 @@ export function CartView({
               <label className="shop-label" htmlFor="region">
                 {copy.region}
               </label>
-              <input id="region" name="region" className="shop-input" />
+              <input
+                id="region"
+                name="region"
+                required={REGION_REQUIRED.has(country)}
+                className="shop-input"
+              />
             </div>
             <div>
               <label className="shop-label" htmlFor="phone">
                 {copy.phone}
               </label>
-              <input id="phone" name="phone" className="shop-input" />
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                required
+                className="shop-input"
+              />
             </div>
             <div>
               <label className="shop-label" htmlFor="vatId">
