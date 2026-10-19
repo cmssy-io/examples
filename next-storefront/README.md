@@ -213,7 +213,13 @@ the parcel the key names:
 | `transaction_created` for a `canceled` attempt | a note to refund that label in Shippo - two labels were bought |
 
 The carrier's own wording lands in the parcel's history. A parcel never moves back (a late
-`TRANSIT` after `DELIVERED` is ignored), and a canceled one is left alone. cmssy sends
+`TRANSIT` after `DELIVERED` is ignored), and a canceled one is left alone. Each write carries the
+parcel's `updatedAt` as the app read it (`expectedUpdatedAt`): when two deliveries race, cmssy
+refuses the later one with `VERSION_CONFLICT`, the route answers 500, and Shippo's retry reads the
+parcel again.
+
+With a `shippo_test_` token the app registers no tracking: Shippo's test mode tracks only its own
+`shippo` test numbers and replaces their metadata, so no update could find a parcel. cmssy sends
 `shipment.updated` for each change, so a mail to the buyer can hang off it.
 
 The claim leaves the order unfulfilled; it becomes fulfilled when the parcel gets its tracking number, so a refused label leaves it in the admin's Shipping problem queue still to pack.

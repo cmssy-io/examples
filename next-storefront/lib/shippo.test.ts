@@ -84,6 +84,7 @@ const SOLD = {
 function shippo(
   responses: Array<() => Response>,
   customsSigner: string | null = "Demo Ops",
+  token = "shippo_test_t",
 ) {
   const queue = [...responses];
   const fetch = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(
@@ -94,7 +95,7 @@ function shippo(
     },
   );
   const provider = createShippo({
-    token: "shippo_test_t",
+    token,
     origins: ORIGINS,
     customsSigner,
     fetch: fetch as unknown as typeof globalThis.fetch,
@@ -447,7 +448,11 @@ describe("shippoFromEnv", () => {
 
 describe("track", () => {
   it("registers the tracking number with its metadata", async () => {
-    const { provider, fetch, body } = shippo([() => json({ carrier: "usps" })]);
+    const { provider, fetch, body } = shippo(
+      [() => json({ carrier: "usps" })],
+      null,
+      "shippo_live_t",
+    );
 
     await provider.track({
       carrier: "usps",
@@ -463,8 +468,20 @@ describe("track", () => {
     });
   });
 
+  it("registers nothing with a test token: Shippo tracks only its own test numbers there", async () => {
+    const { provider, fetch } = shippo([]);
+
+    await provider.track({ carrier: "usps", trackingNumber: "1", metadata: "k" });
+
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it("throws when Shippo refuses the registration", async () => {
-    const { provider } = shippo([() => json({ detail: "bad carrier" }, 400)]);
+    const { provider } = shippo(
+      [() => json({ detail: "bad carrier" }, 400)],
+      null,
+      "shippo_live_t",
+    );
 
     await expect(
       provider.track({ carrier: "x", trackingNumber: "1", metadata: "k" }),

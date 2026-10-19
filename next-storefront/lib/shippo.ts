@@ -8,6 +8,7 @@ import {
 
 const API_URL = "https://api.goshippo.com";
 const NAME = "Shippo";
+const TEST_TOKEN_PREFIX = "shippo_test_";
 
 const EU_COUNTRIES = new Set([
   "AT",
@@ -373,6 +374,7 @@ export function createShippo(options: ShippoOptions): ShippingProvider {
     },
 
     async track(request: TrackingRequest) {
+      if (options.token.startsWith(TEST_TOKEN_PREFIX)) return;
       await call("/tracks/", {
         carrier: request.carrier,
         tracking_number: request.trackingNumber,

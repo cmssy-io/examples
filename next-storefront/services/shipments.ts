@@ -85,6 +85,7 @@ interface ShipmentRow {
   status: string;
   trackingNumber: string | null;
   idempotencyKey: string | null;
+  updatedAt?: string;
   events: ShipmentEventRow[];
 }
 
@@ -407,6 +408,7 @@ const SHIPMENTS_FOR_TRACKING = `
           status
           trackingNumber
           idempotencyKey
+          updatedAt
           events { at note }
         }
       }
@@ -456,7 +458,12 @@ export async function applyShippoEvent(
     mutate(
       deps,
       UPDATE_SHIPMENT,
-      { orderId, shipmentId: shipment.id, ...input },
+      {
+        orderId,
+        shipmentId: shipment.id,
+        expectedUpdatedAt: shipment.updatedAt,
+        ...input,
+      },
       purpose,
     );
 
