@@ -98,8 +98,14 @@ function OrderTimeline({ order, copy }: { order: Order; copy: ShopCopy }) {
   );
 }
 
-type Shipment = Order["shipments"][number];
+type Shipment = Order["shipments"][number] & {
+  status: Exclude<Order["shipments"][number]["status"], "canceled">;
+};
 type ShipmentStatus = Shipment["status"];
+
+function isShown(shipment: Order["shipments"][number]): shipment is Shipment {
+  return shipment.status !== "canceled";
+}
 
 function shipmentVariant(status: ShipmentStatus): BadgeVariant {
   if (status === "delivered") return "success";
@@ -154,6 +160,7 @@ export function AccountOrder({
   const localePath = useLocalePath();
   const { locale, defaultLocale } = useShopLocale();
   const copy = useShopCopy();
+  const parcels = order.shipments.filter(isShown);
   const canPay =
     payOnline && order.balanceDue > 0 && order.status !== "canceled";
 
@@ -193,8 +200,8 @@ export function AccountOrder({
         </div>
         <div className={`shop-card ${styles.statusCard}`}>
           <div className={styles.statusLabel}>{copy.statusTracking}</div>
-          {order.shipments.length > 0 ? (
-            order.shipments.map((shipment, index) => (
+          {parcels.length > 0 ? (
+            parcels.map((shipment, index) => (
               <div key={index} className={styles.shipment}>
                 <Badge variant={shipmentVariant(shipment.status)}>
                   {shipmentLabel(shipment.status, copy)}
