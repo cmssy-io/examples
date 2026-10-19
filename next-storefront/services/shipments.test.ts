@@ -158,6 +158,7 @@ describe("shipOrder", () => {
 
     expect(outcome).toEqual({ shipped: { ...TRACKED, carrier: "USPS" } });
     expect(shippo.book).toHaveBeenCalledWith({
+      key: KEY,
       orderId: "o1",
       orderNumber: 42,
       email: "buyer@example.com",
@@ -497,6 +498,9 @@ describe("shipOrder", () => {
         },
       ]);
       expect(shippo.book).toHaveBeenCalledTimes(1);
+      expect(shippo.book).toHaveBeenCalledWith(
+        expect.objectContaining({ key: `${KEY}:2` }),
+      );
     });
 
     it("counts from the latest attempt", async () => {
@@ -645,6 +649,9 @@ describe("shipOrder", () => {
       shipped: { ...TRACKED, carrier: "USPS" },
     });
     expect(writes(retry, "ClaimShipment")).toEqual([]);
+    expect(shippo.book).toHaveBeenCalledWith(
+      expect.objectContaining({ key: KEY }),
+    );
     expect(writes(retry, "UpdateShipment")[0]).toMatchObject({
       shipmentId: "s1",
     });

@@ -9,6 +9,7 @@ const ORIGINS = {
 
 function request(overrides: Partial<ShipmentRequest> = {}): ShipmentRequest {
   return {
+    key: "shippo:o1:USPS",
     orderId: "o1",
     orderNumber: 42,
     email: "buyer@example.com",
@@ -163,7 +164,7 @@ describe("createShippo", () => {
     expect(body(1)).toEqual({
       rate: "rate_ground",
       label_file_type: "PDF",
-      metadata: "Order 42",
+      metadata: "shippo:o1:USPS",
       async: false,
     });
   });

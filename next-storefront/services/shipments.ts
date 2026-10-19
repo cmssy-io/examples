@@ -219,10 +219,14 @@ export async function shipOrder(
       purpose,
     );
 
-  const book = async (shipmentId: string): Promise<ShipOutcome> => {
+  const book = async (
+    shipmentId: string,
+    key: string,
+  ): Promise<ShipOutcome> => {
     let booked: BookedShipment;
     try {
       booked = await provider.book({
+        key,
         orderId: order.id,
         orderNumber: order.orderNumber,
         email: order.customerEmail,
@@ -289,7 +293,7 @@ export async function shipOrder(
     if (mine.events[0]?.note !== note) {
       return { pending: { carrier, reference: null } };
     }
-    return book(mine.id);
+    return book(mine.id, key);
   };
 
   const attempts = order.shipments
@@ -343,7 +347,7 @@ export async function shipOrder(
   }
 
   const last = claimed.events[claimed.events.length - 1];
-  if (last?.note?.startsWith(notMadeNote(carrier, ""))) return book(claimed.id);
+  if (last?.note?.startsWith(notMadeNote(carrier, ""))) return book(claimed.id, claimed.idempotencyKey!);
   if (last && deps.now() - Date.parse(last.at) < CLAIM_TIMEOUT_MS) {
     return { pending: { carrier, reference: null } };
   }

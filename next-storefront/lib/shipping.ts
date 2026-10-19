@@ -25,6 +25,7 @@ export interface ShipmentLine {
 }
 
 export interface ShipmentRequest {
+  key: string;
   orderId: string;
   orderNumber: number | null;
   email: string;

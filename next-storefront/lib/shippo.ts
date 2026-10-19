@@ -273,7 +273,7 @@ export function createShippo(options: ShippoOptions): ShippingProvider {
         await call<ShippoTransaction>("/transactions/", {
           rate: rate.object_id,
           label_file_type: "PDF",
-          metadata: reference,
+          metadata: request.key,
           async: false,
         }),
       );
