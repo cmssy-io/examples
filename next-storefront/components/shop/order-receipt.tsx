@@ -20,6 +20,11 @@ export function paymentLabel(
   return labels[order.paymentStatus ?? "unpaid"] ?? order.paymentStatus;
 }
 
+export function showsPayment(order: ReceiptOrder): boolean {
+  const progress = orderProgress(order);
+  return progress !== "paid" && progress !== "refunded";
+}
+
 export function progressLabel(order: ReceiptOrder, copy: ShopCopy): string {
   const labels: Record<CmssyOrderProgress, string> = {
     placed: copy.progressPlaced,
