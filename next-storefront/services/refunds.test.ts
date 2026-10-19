@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AdminResult } from "./admin";
 import {
   recordStripeRefund,
@@ -10,15 +10,31 @@ import {
 
 vi.mock("@/cmssy.config", () => ({ cmssy: {} }));
 
+interface FakeRefund {
+  amount: number;
+  status: string;
+  metadata?: Record<string, string>;
+}
+
+interface FakeIntent {
+  currency?: string;
+  amount_received?: number;
+  metadata?: Record<string, string>;
+}
+
 function fakeStripe(
-  refundsByIntent: Record<
-    string,
-    Array<{ amount: number; status: string }>
-  > = {},
-  metadata: Record<string, string> = { cmssyOrderId: "o1" },
+  refundsByIntent: Record<string, FakeRefund[]> = {},
+  intents: Record<string, FakeIntent> = {},
 ) {
   return {
-    paymentIntents: { retrieve: vi.fn(async () => ({ metadata })) },
+    paymentIntents: {
+      retrieve: vi.fn(async (id: string) => ({
+        currency: "eur",
+        amount_received: 5000,
+        metadata: { cmssyOrderId: "o1" },
+        ...intents[id],
+      })),
+    },
     refunds: {
       list: vi.fn(async ({ payment_intent }: { payment_intent: string }) => ({
         data: (refundsByIntent[payment_intent] ?? []).map((r, i) => ({
@@ -46,18 +62,29 @@ function deps(
   };
 }
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 const REFUND: StripeRefundEvent = {
   id: "re_1",
   amount: 1500,
+  currency: "eur",
   status: "succeeded",
   paymentIntent: "pi_1",
   metadata: {},
+};
+
+const EUR_ORDER: AdminResult<unknown> = {
+  data: { order: { get: { id: "o1", currency: "EUR" } } },
+  errors: [],
 };
 
 describe("recordStripeRefund", () => {
   it("records a settled Stripe refund on the order its payment belongs to", async () => {
     const stripe = fakeStripe();
     const d = deps(stripe, [
+      EUR_ORDER,
       {
         data: {
           order: {
@@ -77,7 +104,7 @@ describe("recordStripeRefund", () => {
       recorded: { paymentStatus: "partially_refunded", refundedAmount: 1500 },
     });
     expect(stripe.paymentIntents.retrieve).toHaveBeenCalledWith("pi_1");
-    expect(d.request).toHaveBeenCalledWith(
+    expect(d.request).toHaveBeenLastCalledWith(
       expect.stringContaining("refund(input: $input)"),
       { input: { orderId: "o1", amount: 1500, reference: "re_1" } },
       "record the refund",
@@ -99,6 +126,7 @@ describe("recordStripeRefund", () => {
   it.each(["pending", "failed", "canceled", "requires_action"])(
     "waits while the refund is %s",
     async (status) => {
+      vi.spyOn(console, "warn").mockImplementation(() => {});
       const d = deps(fakeStripe(), []);
 
       expect(await recordStripeRefund({ ...REFUND, status }, d)).toEqual({
@@ -109,7 +137,7 @@ describe("recordStripeRefund", () => {
   );
 
   it("skips a payment that is not a cmssy order", async () => {
-    const d = deps(fakeStripe({}, {}), []);
+    const d = deps(fakeStripe({}, { pi_1: { metadata: {} } }), []);
 
     expect(await recordStripeRefund(REFUND, d)).toEqual({
       skipped: "payment is not a cmssy order",
@@ -117,8 +145,20 @@ describe("recordStripeRefund", () => {
     expect(d.request).not.toHaveBeenCalled();
   });
 
+  it("hands a refund in another currency than the order's to a person", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const d = deps(fakeStripe(), [EUR_ORDER]);
+
+    expect(
+      await recordStripeRefund({ ...REFUND, currency: "pln", amount: 6450 }, d),
+    ).toEqual({ skipped: "paid in another currency" });
+    expect(d.request).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalled();
+  });
+
   it("reports what cmssy refuses", async () => {
     const d = deps(fakeStripe(), [
+      EUR_ORDER,
       {
         errors: [
           {
@@ -136,6 +176,7 @@ describe("recordStripeRefund", () => {
 
   it("throws when cmssy fails so Stripe sends the event again", async () => {
     const d = deps(fakeStripe(), [
+      EUR_ORDER,
       { errors: [{ message: "boom", extensions: { code: "CONFLICT" } }] },
     ]);
 
@@ -145,19 +186,17 @@ describe("recordStripeRefund", () => {
 
 function orderRead(
   refundedAmount: number,
-  payments: Array<{
-    amount: number;
-    provider: string | null;
-    reference: string;
-  }>,
+  payments: Array<{ provider: string | null; reference: string }>,
 ): AdminResult<unknown> {
   return {
-    data: { order: { get: { id: "o1", refundedAmount, payments } } },
+    data: {
+      order: { get: { id: "o1", currency: "EUR", refundedAmount, payments } },
+    },
     errors: [],
   };
 }
 
-const PAID = { amount: 5000, provider: "stripe", reference: "pi_1" };
+const PAID = { provider: "stripe", reference: "pi_1" };
 
 describe("refundOnStripe", () => {
   it("refunds on Stripe what cmssy refunded beyond Stripe's open refunds", async () => {
@@ -181,6 +220,19 @@ describe("refundOnStripe", () => {
     );
   });
 
+  it("never sends again a refund of its own that failed on Stripe", async () => {
+    const stripe = fakeStripe({
+      pi_1: [{ amount: 1000, status: "failed", metadata: { origin: "cmssy" } }],
+    });
+    const d = deps(stripe, [orderRead(1500, [PAID])]);
+
+    expect(await refundOnStripe("o1", d)).toEqual({ refunded: 500 });
+    expect(stripe.refunds.create).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 500 }),
+      { idempotencyKey: "cmssy-refund-o1-pi_1-1000" },
+    );
+  });
+
   it("does nothing when Stripe already holds the refund", async () => {
     const stripe = fakeStripe({
       pi_1: [{ amount: 2000, status: "succeeded" }],
@@ -194,14 +246,12 @@ describe("refundOnStripe", () => {
   });
 
   it("spreads the refund over the order's payments", async () => {
-    const stripe = fakeStripe({
-      pi_1: [{ amount: 4000, status: "succeeded" }],
-    });
+    const stripe = fakeStripe(
+      { pi_1: [{ amount: 4000, status: "succeeded" }] },
+      { pi_1: { amount_received: 4000 }, pi_2: { amount_received: 3000 } },
+    );
     const d = deps(stripe, [
-      orderRead(6000, [
-        { ...PAID, amount: 4000 },
-        { amount: 3000, provider: "stripe", reference: "pi_2" },
-      ]),
+      orderRead(6000, [PAID, { provider: "stripe", reference: "pi_2" }]),
     ]);
 
     expect(await refundOnStripe("o1", d)).toEqual({ refunded: 2000 });
@@ -212,11 +262,20 @@ describe("refundOnStripe", () => {
     );
   });
 
+  it("hands a payment in another currency than the order's to a person", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const stripe = fakeStripe({}, { pi_1: { currency: "pln" } });
+    const d = deps(stripe, [orderRead(1000, [PAID])]);
+
+    expect(await refundOnStripe("o1", d)).toEqual({
+      skipped: "paid in another currency",
+    });
+    expect(stripe.refunds.create).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+  });
+
   it.each([
-    [
-      "a payment recorded by hand",
-      { amount: 1000, provider: null, reference: "wire-1" },
-    ],
+    ["a payment recorded by hand", { provider: null, reference: "wire-1" }],
     ["a Checkout session reference", { ...PAID, reference: "cs_1" }],
   ])("leaves an order with %s alone", async (_, payment) => {
     const stripe = fakeStripe();
@@ -242,23 +301,20 @@ describe("refundOnStripe", () => {
     });
   });
 
-  it("throws when Stripe cannot be reached so cmssy sends the event again", async () => {
-    const stripe = fakeStripe();
-    stripe.refunds.create.mockRejectedValue(
+  it.each([
+    [
+      "Stripe cannot be reached",
       new Stripe.errors.StripeConnectionError({ message: "socket hang up" }),
-    );
-    const d = deps(stripe, [orderRead(1000, [PAID])]);
-
-    await expect(refundOnStripe("o1", d)).rejects.toThrow("socket hang up");
-  });
-
-  it("throws on an idempotency clash so cmssy sends the event again", async () => {
-    const stripe = fakeStripe();
-    stripe.refunds.create.mockRejectedValue(
+    ],
+    [
+      "two refunds race for one key",
       new Stripe.errors.StripeIdempotencyError({ message: "Keys reused" }),
-    );
+    ],
+  ])("throws when %s so cmssy sends the event again", async (_, error) => {
+    const stripe = fakeStripe();
+    stripe.refunds.create.mockRejectedValue(error);
     const d = deps(stripe, [orderRead(1000, [PAID])]);
 
-    await expect(refundOnStripe("o1", d)).rejects.toThrow("Keys reused");
+    await expect(refundOnStripe("o1", d)).rejects.toThrow(error.message);
   });
 });

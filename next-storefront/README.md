@@ -150,10 +150,14 @@ A refund can start on either side, and each side learns of the other's:
   refund and refunds only what is still owed.
 
 An order paid any other way than Stripe - a wire recorded by hand, say - is left alone: cmssy
-records the refund, and the money goes back however it came. A refund Stripe refuses (more than the
-charge holds) is logged and not retried; a refund that fails on Stripe after cmssy recorded it is
-logged as a warning, since only a person can decide what the buyer is owed then. Amounts move as
-they are, so the sync assumes the buyer paid in the order's currency.
+records the refund, and the money goes back however it came. So is an order the buyer paid in
+another currency than the order's (Stripe Adaptive Pricing): Stripe refunds in the currency charged,
+cmssy counts in the order's, and turning one into the other is a decision, not arithmetic - the
+route logs it for a person to settle. A refund Stripe refuses (more than the charge holds) is
+logged and not retried. A refund cmssy started that then fails on Stripe stays counted as sent, so
+the next refund event does not quietly send that money again; the failure is logged for a person.
+The same goes for a Dashboard refund that fails after it settled: cmssy keeps counting it, and the
+warning says so.
 
 Locally, `stripe listen --forward-to localhost:3000/api/stripe/webhook` prints the webhook secret to
 use. Test cards: `4242 4242 4242 4242`, any future date, any CVC.

@@ -20,11 +20,18 @@ interface RefundRow {
   id: string;
   amount: number;
   status: string | null;
+  metadata?: Record<string, string> | null;
+}
+
+interface IntentRow {
+  metadata: Record<string, string>;
+  currency: string;
+  amount_received: number;
 }
 
 export interface RefundStripe {
   paymentIntents: {
-    retrieve(id: string): Promise<{ metadata: Record<string, string> }>;
+    retrieve(id: string): Promise<IntentRow>;
   };
   refunds: {
     list(params: {
@@ -68,13 +75,25 @@ const REFUND_ORDER = `
   }
 `;
 
+const ORDER_CURRENCY = `
+  query OrderCurrency($id: ID!) {
+    order {
+      get(id: $id) {
+        id
+        currency
+      }
+    }
+  }
+`;
+
 const ORDER_FOR_REFUND = `
   query OrderForRefund($id: ID!) {
     order {
       get(id: $id) {
         id
+        currency
         refundedAmount
-        payments { amount provider reference }
+        payments { provider reference }
       }
     }
   }
@@ -83,15 +102,26 @@ const ORDER_FOR_REFUND = `
 export interface StripeRefundEvent {
   id: string;
   amount: number;
+  currency: string;
   status: string | null;
   paymentIntent: string | null;
   metadata: Record<string, string>;
+}
+
+function sameCurrency(order: string, stripe: string): boolean {
+  return order.toLowerCase() === stripe.toLowerCase();
+}
+
+function handOver(orderId: string, why: string): { skipped: string } {
+  console.warn(`cmssy order ${orderId}: ${why} - settle the refund by hand`);
+  return { skipped: why };
 }
 
 export function refundFromStripe(refund: Stripe.Refund): StripeRefundEvent {
   return {
     id: refund.id,
     amount: refund.amount,
+    currency: refund.currency,
     status: refund.status,
     paymentIntent:
       typeof refund.payment_intent === "string"
@@ -118,6 +148,11 @@ export async function recordStripeRefund(
     }
     return { skipped: "refund started in cmssy" };
   }
+  if (refund.status === "failed" || refund.status === "canceled") {
+    console.warn(
+      `stripe refund ${refund.id} is ${refund.status}; if cmssy recorded it, the order still counts it`,
+    );
+  }
   if (refund.status !== "succeeded") return { skipped: "refund not settled" };
   if (!deps.stripe || !refund.paymentIntent) {
     return { skipped: "refund is not tied to a payment" };
@@ -127,6 +162,21 @@ export async function recordStripeRefund(
   );
   const orderId = intent.metadata.cmssyOrderId;
   if (!orderId) return { skipped: "payment is not a cmssy order" };
+
+  const read = await deps.request<{
+    order?: { get?: { currency: string } | null };
+  }>(ORDER_CURRENCY, { id: orderId }, "read the order to refund");
+  if (isRefusal(read.errors)) return { refused: errorText(read.errors) };
+  if (read.errors.length) {
+    throw new Error(
+      `cmssy: read the order to refund - ${errorText(read.errors)}`,
+    );
+  }
+  const currency = read.data?.order?.get?.currency;
+  if (!currency) return { skipped: "order not found" };
+  if (!sameCurrency(currency, refund.currency)) {
+    return handOver(orderId, "paid in another currency");
+  }
 
   const { data, errors } = await deps.request<{
     order?: { refund?: { paymentStatus: string; refundedAmount: number } };
@@ -146,7 +196,6 @@ export type StripeRefundOutcome =
   { refunded: number } | { refused: string } | { skipped: string };
 
 interface OrderPayment {
-  amount: number;
   provider: string | null;
   reference: string;
 }
@@ -160,7 +209,11 @@ export async function refundOnStripe(
 
   const { data, errors } = await deps.request<{
     order?: {
-      get?: { refundedAmount: number; payments: OrderPayment[] } | null;
+      get?: {
+        currency: string;
+        refundedAmount: number;
+        payments: OrderPayment[];
+      } | null;
     };
   }>(ORDER_FOR_REFUND, { id: orderId }, "read the order to refund");
   if (isRefusal(errors)) return { skipped: errorText(errors) };
@@ -180,23 +233,30 @@ export async function refundOnStripe(
 
   const held = await Promise.all(
     order.payments.map(async (payment) => {
-      const { data: refunds } = await stripe.refunds.list({
-        payment_intent: payment.reference,
-        limit: 100,
-      });
+      const [intent, { data: refunds }] = await Promise.all([
+        stripe.paymentIntents.retrieve(payment.reference),
+        stripe.refunds.list({ payment_intent: payment.reference, limit: 100 }),
+      ]);
       const refunded = refunds
-        .filter((r) => OPEN_REFUND_STATUSES.has(r.status ?? ""))
+        .filter(
+          (r) =>
+            OPEN_REFUND_STATUSES.has(r.status ?? "") ||
+            r.metadata?.origin === CMSSY_ORIGIN,
+        )
         .reduce((sum, r) => sum + r.amount, 0);
-      return { payment, refunded };
+      return { payment, intent, refunded };
     }),
   );
+  if (held.some((h) => !sameCurrency(order.currency, h.intent.currency))) {
+    return handOver(orderId, "paid in another currency");
+  }
   let owed =
     order.refundedAmount - held.reduce((sum, h) => sum + h.refunded, 0);
   if (owed <= 0) return { skipped: "Stripe already holds this refund" };
 
   let refunded = 0;
-  for (const { payment, refunded: already } of held) {
-    const amount = Math.min(owed, payment.amount - already);
+  for (const { payment, intent, refunded: already } of held) {
+    const amount = Math.min(owed, intent.amount_received - already);
     if (amount <= 0) continue;
     try {
       await stripe.refunds.create(
@@ -210,10 +270,7 @@ export async function refundOnStripe(
         },
       );
     } catch (error) {
-      if (
-        error instanceof Stripe.errors.StripeInvalidRequestError &&
-        !(error instanceof Stripe.errors.StripeIdempotencyError)
-      ) {
+      if (error instanceof Stripe.errors.StripeInvalidRequestError) {
         return { refused: error.message };
       }
       throw error;
