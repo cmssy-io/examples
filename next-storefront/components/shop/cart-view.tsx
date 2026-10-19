@@ -49,7 +49,7 @@ function isComplete(address: ShippingAddressInput): boolean {
       address.line1 &&
       address.postalCode &&
       address.city &&
-      address.country,
+      /^[A-Z]{2}$/.test(address.country),
   );
 }
 
@@ -82,6 +82,7 @@ export function CartView({
   const [submitting, setSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const sentAddress = useRef<string | null>(null);
+  const addressQueue = useRef<Promise<unknown>>(Promise.resolve());
 
   if (!cart || cart.items.length === 0) {
     return (
@@ -149,8 +150,10 @@ export function CartView({
     const key = JSON.stringify(address);
     if (key === sentAddress.current) return;
     sentAddress.current = key;
-    void setShippingAddress(address).then((accepted) => {
-      if (!accepted) sentAddress.current = null;
+    addressQueue.current = addressQueue.current.then(async () => {
+      if (sentAddress.current !== key) return;
+      const accepted = await setShippingAddress(address);
+      if (!accepted && sentAddress.current === key) sentAddress.current = null;
     });
   }
 
