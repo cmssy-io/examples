@@ -4,12 +4,13 @@ import {
   referenceNote,
   routeFor,
   ShippingProviderError,
+  trackingCarrierFor,
   type BookedShipment,
   type ProviderName,
   type ShippingAddress,
   type ShippingProvider,
 } from "@/lib/shipping";
-import { shippoFromEnv } from "@/lib/shippo";
+import { shippoFromEnv, type ShippoEvent } from "@/lib/shippo";
 import {
   adminRequest,
   errorText,
@@ -173,6 +174,27 @@ export function claimNote(carrier: string, token: string): string {
   return `${carrier} booking claimed ${token}`;
 }
 
+async function follow(
+  provider: ShippingProvider,
+  trackingCarrier: string,
+  trackingNumber: string | null,
+  key: string,
+): Promise<void> {
+  if (!trackingNumber) return;
+  try {
+    await provider.track({
+      carrier: trackingCarrier,
+      trackingNumber,
+      metadata: key,
+    });
+  } catch (error) {
+    console.warn(
+      `${provider.name}: tracking not registered for ${trackingNumber}`,
+      error instanceof Error ? error.message : error,
+    );
+  }
+}
+
 export function notMadeNote(carrier: string, reason: string): string {
   return `${carrier} booking not made: ${reason.slice(0, NOTE_REASON_MAX)}`;
 }
@@ -267,6 +289,7 @@ export async function shipOrder(
       },
       "record the shipment",
     );
+    await follow(provider, route.trackingCarrier, booked.trackingNumber, key);
     if (!booked.trackingNumber) {
       return { pending: { carrier, reference: booked.reference } };
     }
@@ -348,6 +371,12 @@ export async function shipOrder(
       },
       "record the tracking number",
     );
+    await follow(
+      provider,
+      route.trackingCarrier,
+      resumed.trackingNumber,
+      claimed.idempotencyKey!,
+    );
     return { shipped: { ...resumed, carrier } };
   }
 
@@ -365,4 +394,123 @@ export async function shipOrder(
     "flag the unfinished booking",
   );
   return { skipped: "booking outcome unknown, flagged on the order" };
+}
+
+const SHIPMENTS_FOR_TRACKING = `
+  query ShipmentsForTracking($id: ID!) {
+    order {
+      get(id: $id) {
+        id
+        shipments {
+          id
+          carrier
+          status
+          trackingNumber
+          idempotencyKey
+          events { at note }
+        }
+      }
+    }
+  }
+`;
+
+const PROGRESS = ["pending", "in_transit", "out_for_delivery", "delivered"];
+
+export type TrackOutcome = { applied: string } | { skipped: string };
+
+export function orderIdFromKey(key: string): string | null {
+  const [provider, orderId] = key.split(":");
+  return provider === "shippo" && orderId ? orderId : null;
+}
+
+export function refundNote(reference: string): string {
+  return `Label ${reference} was bought for this canceled attempt: refund it in Shippo`;
+}
+
+function movesBack(from: string, to: string): boolean {
+  if (from === "delivered" || from === "returned") return to !== "returned";
+  const fromRank = PROGRESS.indexOf(from);
+  const toRank = PROGRESS.indexOf(to);
+  return fromRank !== -1 && toRank !== -1 && toRank < fromRank;
+}
+
+export async function applyShippoEvent(
+  event: ShippoEvent,
+  deps: ShipDeps = defaultDeps(),
+): Promise<TrackOutcome> {
+  const orderId = orderIdFromKey(event.key);
+  if (!orderId) return { skipped: "not a parcel this app booked" };
+  const { data, errors } = await deps.request<{
+    order?: { get?: { id: string; shipments: ShipmentRow[] } | null };
+  }>(SHIPMENTS_FOR_TRACKING, { id: orderId }, "read the parcel to track");
+  if (isRefusal(errors)) return { skipped: errorText(errors) };
+  if (errors.length) {
+    throw new Error(`cmssy: read the parcel to track - ${errorText(errors)}`);
+  }
+  const shipment = data?.order?.get?.shipments.find(
+    (s) => s.idempotencyKey === event.key,
+  );
+  if (!shipment) return { skipped: "no parcel holds this key" };
+  const update = (input: Record<string, unknown>, purpose: string) =>
+    mutate(
+      deps,
+      UPDATE_SHIPMENT,
+      { orderId, shipmentId: shipment.id, ...input },
+      purpose,
+    );
+
+  if (event.kind === "label") {
+    if (shipment.status === "canceled") {
+      const note = refundNote(event.reference);
+      if (shipment.events.some((e) => e.note === note)) {
+        return { skipped: "the extra label is already flagged" };
+      }
+      await update({ note }, "flag the extra label");
+      return { applied: "extra label flagged for a refund" };
+    }
+    if (shipment.trackingNumber) {
+      return { skipped: "the label is already recorded" };
+    }
+    const carrier = shipment.carrier ?? "Shippo";
+    await update(
+      {
+        trackingNumber: event.trackingNumber,
+        trackingUrl: event.trackingUrl,
+        labelUrl: event.labelUrl,
+        status: "pending",
+        note: referenceNote(carrier, event.reference),
+      },
+      "record the recovered label",
+    );
+    const provider = deps.providers.shippo;
+    const trackingCarrier = trackingCarrierFor("shippo", shipment.carrier);
+    if (provider && trackingCarrier) {
+      await follow(provider, trackingCarrier, event.trackingNumber, event.key);
+    }
+    return { applied: "label recorded" };
+  }
+
+  if (shipment.trackingNumber !== event.trackingNumber) {
+    return { skipped: "the tracking number is not this parcel's" };
+  }
+  if (!event.status) return { skipped: "the carrier status is unknown" };
+  if (shipment.status === "canceled") {
+    return { skipped: "the parcel was canceled" };
+  }
+  if (event.status === shipment.status) {
+    return { skipped: "the status is unchanged" };
+  }
+  if (movesBack(shipment.status, event.status)) {
+    return { skipped: `the parcel is already ${shipment.status}` };
+  }
+  await update(
+    {
+      status: event.status,
+      ...(event.details
+        ? { note: event.details.slice(0, NOTE_REASON_MAX) }
+        : {}),
+    },
+    "record the carrier status",
+  );
+  return { applied: event.status };
 }

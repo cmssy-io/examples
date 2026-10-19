@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { ShippingProviderError, type ShipmentRequest } from "./shipping";
-import { createShippo, needsCustoms, shippoFromEnv } from "./shippo";
+import {
+  createShippo,
+  needsCustoms,
+  parseShippoEvent,
+  shipmentStatusFromShippo,
+  shippoFromEnv,
+} from "./shippo";
 
 const ORIGINS = {
   us: { addressId: "addr_us", country: "US" },
@@ -436,5 +442,108 @@ describe("shippoFromEnv", () => {
     await expect(provider!.book(request({ origin: "de" }))).rejects.toThrow(
       'no "de" sender address configured',
     );
+  });
+});
+
+describe("track", () => {
+  it("registers the tracking number with its metadata", async () => {
+    const { provider, fetch, body } = shippo([() => json({ carrier: "usps" })]);
+
+    await provider.track({
+      carrier: "usps",
+      trackingNumber: "9334620845500002019083",
+      metadata: "shippo:o1:USPS",
+    });
+
+    expect(fetch.mock.calls[0]![0]).toBe("https://api.goshippo.com/tracks/");
+    expect(body(0)).toEqual({
+      carrier: "usps",
+      tracking_number: "9334620845500002019083",
+      metadata: "shippo:o1:USPS",
+    });
+  });
+
+  it("throws when Shippo refuses the registration", async () => {
+    const { provider } = shippo([() => json({ detail: "bad carrier" }, 400)]);
+
+    await expect(
+      provider.track({ carrier: "x", trackingNumber: "1", metadata: "k" }),
+    ).rejects.toThrow("Shippo: 400 bad carrier");
+  });
+});
+
+describe("shipmentStatusFromShippo", () => {
+  it.each([
+    [{ status: "PRE_TRANSIT" }, "pending"],
+    [{ status: "TRANSIT" }, "in_transit"],
+    [
+      { status: "TRANSIT", substatus: { code: "out_for_delivery" } },
+      "out_for_delivery",
+    ],
+    [
+      {
+        status: "TRANSIT",
+        substatus: { code: "address_issue", action_required: true },
+      },
+      "exception",
+    ],
+    [{ status: "DELIVERED" }, "delivered"],
+    [{ status: "RETURNED" }, "returned"],
+    [{ status: "FAILURE" }, "exception"],
+    [{ status: "UNKNOWN" }, null],
+    [undefined, null],
+  ])("reads %j as %s", (tracking, status) => {
+    expect(shipmentStatusFromShippo(tracking)).toBe(status);
+  });
+});
+
+describe("parseShippoEvent", () => {
+  const TRACK = {
+    event: "track_updated",
+    test: true,
+    data: {
+      carrier: "usps",
+      metadata: "shippo:o1:USPS",
+      tracking_number: "9334620845500002019083",
+      tracking_status: {
+        status: "TRANSIT",
+        status_details: "Arrived at USPS Regional Facility",
+        substatus: { code: "package_arrived", action_required: false },
+      },
+    },
+  };
+
+  it("reads a tracking update", () => {
+    expect(parseShippoEvent(TRACK)).toEqual({
+      kind: "tracking",
+      key: "shippo:o1:USPS",
+      trackingNumber: "9334620845500002019083",
+      status: "in_transit",
+      details: "Arrived at USPS Regional Facility",
+    });
+  });
+
+  it("reads a label Shippo sold", () => {
+    expect(
+      parseShippoEvent({ event: "transaction_created", data: { ...SOLD, metadata: "shippo:o1:USPS:2" } }),
+    ).toEqual({
+      kind: "label",
+      key: "shippo:o1:USPS:2",
+      reference: "tx1",
+      trackingNumber: SOLD.tracking_number,
+      trackingUrl: SOLD.tracking_url_provider,
+      labelUrl: SOLD.label_url,
+    });
+  });
+
+  it.each([
+    ["a failed purchase", { event: "transaction_created", data: { ...SOLD, status: "ERROR", metadata: "k" } }],
+    ["no metadata", { ...TRACK, data: { ...TRACK.data, metadata: "" } }],
+    ["no tracking number", { ...TRACK, data: { ...TRACK.data, tracking_number: null } }],
+    ["another event", { ...TRACK, event: "batch_created" }],
+    ["no data", { event: "track_updated" }],
+    ["not an object", "track_updated"],
+  ])("ignores %s", (_, body) => {
+    expect(parseShippoEvent(body)).toBeNull();
   });
 });
