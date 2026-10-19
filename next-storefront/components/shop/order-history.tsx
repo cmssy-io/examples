@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Order } from "@/graphql/types";
 import { formatMoney } from "@/lib/money";
-import { paymentLabel } from "./order-receipt";
+import { paymentLabel, progressLabel, showsPayment } from "./order-receipt";
 import { useLocalePath, useShopCopy } from "./locale-ui";
 import styles from "./order.module.css";
 
@@ -38,7 +38,10 @@ export function OrderHistory({
                   <span className="shop-muted"> - PO {order.poNumber}</span>
                 ) : null}
                 <div className={styles.status}>
-                  {order.status} · {paymentLabel(order, copy, payOnline)}
+                  {progressLabel(order, copy)}
+                  {showsPayment(order)
+                    ? ` · ${paymentLabel(order, copy, payOnline)}`
+                    : null}
                 </div>
               </div>
               <span>{formatMoney(order.total, order.currency)}</span>

@@ -47,6 +47,13 @@ export type FormFieldType =
   | 'textarea'
   | 'url';
 
+export type OrderDeliveryStatus =
+  | 'delivered'
+  | 'exception'
+  | 'in_transit'
+  | 'none'
+  | 'partially_delivered';
+
 export type OrderFieldType =
   | 'boolean'
   | 'date'
@@ -57,13 +64,22 @@ export type OrderFieldType =
   | 'text'
   | 'url';
 
+export type OrderState =
+  | 'canceled'
+  | 'closed'
+  | 'open';
+
 export type ShipmentStatus =
+  | 'canceled'
   | 'delivered'
   | 'exception'
   | 'in_transit'
+  | 'label_purchased'
   | 'out_for_delivery'
   | 'pending'
-  | 'returned';
+  /** Accepted as input and stored as returned_to_sender, never returned. Removed in CMS-2102. */
+  | 'returned'
+  | 'returned_to_sender';
 
 /** Postal address for the order, frozen on the order at checkout (CMS-913). */
 export type ShippingAddressInput = {
@@ -200,7 +216,7 @@ export type CheckoutMutationVariables = Exact<{
 }>;
 
 
-export type CheckoutMutation = { cart: { checkout: { id: string, orderNumber: number | null, status: string, subtotal: number, discount: number, tax: number, total: number, currency: string, customerEmail: string, accessToken: string | null, poNumber: string | null, customerNote: string | null, customFields: unknown, shippingTotal: number, pricesIncludeTax: boolean, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, items: Array<{ name: string, sku: string | null, quantity: number, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, taxRate: number, taxAmount: number }> } } };
+export type CheckoutMutation = { cart: { checkout: { id: string, orderNumber: number | null, state: OrderState, subtotal: number, discount: number, tax: number, total: number, currency: string, customerEmail: string, accessToken: string | null, poNumber: string | null, customerNote: string | null, customFields: unknown, shippingTotal: number, pricesIncludeTax: boolean, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, items: Array<{ name: string, sku: string | null, quantity: number, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, taxRate: number, taxAmount: number }> } } };
 
 export type ClearCartMutationVariables = Exact<{
   workspaceId: string | number;
@@ -267,7 +283,7 @@ export type PublicOrderQueryVariables = Exact<{
 }>;
 
 
-export type PublicOrderQuery = { public: { order: { byToken: { id: string, orderNumber: number | null, status: string, paymentStatus: string, fulfillmentStatus: string, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, poNumber: string | null, customerNote: string | null, customFields: unknown, shippingTotal: number, amountPaid: number, balanceDue: number, refundedAmount: number, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, createdAt: string, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, shipments: Array<{ carrier: string | null, trackingNumber: string | null, trackingUrl: string | null, status: ShipmentStatus, updatedAt: string }>, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null, taxRate: number, taxAmount: number }> } } } };
+export type PublicOrderQuery = { public: { order: { byToken: { id: string, orderNumber: number | null, state: OrderState, paymentStatus: string, fulfillmentStatus: string, deliveryStatus: OrderDeliveryStatus, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, poNumber: string | null, customerNote: string | null, customFields: unknown, shippingTotal: number, amountPaid: number, balanceDue: number, refundedAmount: number, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, createdAt: string, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, shipments: Array<{ carrier: string | null, trackingNumber: string | null, trackingUrl: string | null, status: ShipmentStatus, updatedAt: string }>, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null, taxRate: number, taxAmount: number }> } } } };
 
 export type PublicPagesByTypeQueryVariables = Exact<{
   workspaceId: string;
@@ -699,7 +715,7 @@ export const CheckoutDocument = new TypedDocumentString(`
     checkout(input: $input) {
       id
       orderNumber
-      status
+      state
       subtotal
       discount
       appliedDiscount {
@@ -1185,9 +1201,10 @@ export const PublicOrderDocument = new TypedDocumentString(`
       byToken(workspaceId: $workspaceId, orderId: $orderId, accessToken: $accessToken) {
         id
         orderNumber
-        status
+        state
         paymentStatus
         fulfillmentStatus
+        deliveryStatus
         subtotal
         discount
         appliedDiscount {

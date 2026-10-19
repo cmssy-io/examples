@@ -198,6 +198,7 @@ describe("shipOrder", () => {
         trackingNumber: TRACKED.trackingNumber,
         trackingUrl: TRACKED.trackingUrl,
         labelUrl: TRACKED.labelUrl,
+        status: "label_purchased",
         note: "USPS shipment 9001",
       },
     ]);
@@ -370,6 +371,7 @@ describe("shipOrder", () => {
         trackingNumber: TRACKED.trackingNumber,
         trackingUrl: TRACKED.trackingUrl,
         labelUrl: TRACKED.labelUrl,
+        status: "label_purchased",
       },
     ]);
   });
@@ -798,6 +800,12 @@ describe("tracking the parcel after the label", () => {
     await shipOrder("o1", d);
 
     expect(shippo.track).not.toHaveBeenCalled();
+    expect(
+      writes(d, "UpdateShipment").map(
+        (input) => (input as { status?: string }).status,
+      ),
+      "A label with no tracking number yet is not a bought label: the parcel stays pending.",
+    ).toEqual([undefined]);
   });
 });
 
@@ -862,6 +870,7 @@ describe("applyShippoEvent", () => {
 
   it.each([
     ["in_transit", "pending"],
+    ["in_transit", "label_purchased"],
     ["out_for_delivery", "in_transit"],
     ["delivered", "in_transit"],
     ["delivered", "exception"],
@@ -874,7 +883,8 @@ describe("applyShippoEvent", () => {
   });
 
   it.each([
-    ["delivered", "returned"],
+    ["delivered", "returned_to_sender"],
+    ["label_purchased", "in_transit"],
     ["in_transit", "exception"],
     ["exception", "in_transit"],
     ["pending", "delivered"],
@@ -943,7 +953,7 @@ describe("applyShippoEvent", () => {
         trackingNumber: TRACKING,
         trackingUrl: TRACKED.trackingUrl,
         labelUrl: TRACKED.labelUrl,
-        status: "pending",
+        status: "label_purchased",
         note: "USPS shipment tx9",
       },
     ]);

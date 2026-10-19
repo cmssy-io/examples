@@ -1,6 +1,11 @@
 import { data, Link } from "react-router";
 import styles from "../components/shop/order.module.css";
-import { OrderReceipt, paymentLabel } from "../components/shop/order-receipt";
+import {
+  OrderReceipt,
+  paymentLabel,
+  progressLabel,
+  showsPayment,
+} from "../components/shop/order-receipt";
 import { OrderCustomFields } from "../components/shop/order-fields";
 import { ShopErrorBoundary } from "../components/shop/shop-error";
 import { localePath } from "../lib/locale-path";
@@ -88,7 +93,12 @@ export default function OrderPage({ loaderData }: Route.ComponentProps) {
           {copy.confirmationSentTo}{" "}
           <span className={styles.strong}>{order.customerEmail}</span>
         </p>
-        <span className={styles.badge}>{paymentLabel(order, copy)}</span>
+        <div className={styles.badges}>
+          <span className={styles.badge}>{progressLabel(order, copy)}</span>
+          {showsPayment(order) ? (
+            <span className={styles.badge}>{paymentLabel(order, copy)}</span>
+          ) : null}
+        </div>
       </div>
 
       <OrderReceipt order={order} copy={copy} />

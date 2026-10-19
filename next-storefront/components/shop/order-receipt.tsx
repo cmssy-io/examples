@@ -1,3 +1,4 @@
+import { orderProgress, type CmssyOrderProgress } from "@cmssy/core";
 import type { Order, PublicOrder } from "@/graphql/types";
 import { formatMoney } from "@/lib/money";
 import type { ShopCopy } from "@/lib/shop-copy";
@@ -16,7 +17,25 @@ export function paymentLabel(
     paid: copy.paid,
     refunded: copy.refunded,
   };
-  return labels[order.paymentStatus ?? "unpaid"] ?? order.status;
+  return labels[order.paymentStatus ?? "unpaid"] ?? order.paymentStatus;
+}
+
+export function showsPayment(order: ReceiptOrder): boolean {
+  const progress = orderProgress(order);
+  return progress !== "paid" && progress !== "refunded";
+}
+
+export function progressLabel(order: ReceiptOrder, copy: ShopCopy): string {
+  const labels: Record<CmssyOrderProgress, string> = {
+    placed: copy.progressPlaced,
+    paid: copy.progressPaid,
+    shipped: copy.progressShipped,
+    out_for_delivery: copy.progressOutForDelivery,
+    delivered: copy.progressDelivered,
+    refunded: copy.progressRefunded,
+    canceled: copy.progressCanceled,
+  };
+  return labels[orderProgress(order)];
 }
 
 export function OrderReceipt({

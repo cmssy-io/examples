@@ -1,6 +1,11 @@
 ---
 import styles from "../../components/shop/order.module.css";
-import { OrderReceipt, paymentLabel } from "../../components/shop/order-receipt";
+import {
+  OrderReceipt,
+  paymentLabel,
+  progressLabel,
+  showsPayment,
+} from "../../components/shop/order-receipt";
 import { OrderCustomFields } from "../../components/shop/order-fields";
 import ShopLayout from "../../layouts/shop-layout.astro";
 import { localePath } from "../../lib/locale-path";
@@ -67,7 +72,12 @@ if (!order) {
           {copy.confirmationSentTo}{" "}
           <span class={styles.strong}>{order.customerEmail}</span>
         </p>
-        <span class={styles.badge}>{paymentLabel(order, copy)}</span>
+        <div class={styles.badges}>
+          <span class={styles.badge}>{progressLabel(order, copy)}</span>
+          {showsPayment(order) ? (
+            <span class={styles.badge}>{paymentLabel(order, copy)}</span>
+          ) : null}
+        </div>
       </div>
 
       <OrderReceipt order={order} copy={copy} />
