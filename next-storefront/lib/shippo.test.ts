@@ -271,6 +271,17 @@ describe("createShippo", () => {
       'no "pl" sender address configured',
     ],
     [
+      "a US address without a state",
+      request({
+        address: {
+          ...request().address,
+          region: null,
+        },
+      }),
+      "Demo Ops",
+      "an address in US needs a state or region",
+    ],
+    [
       "a route without a service",
       request({ service: null }),
       "Demo Ops",
@@ -310,6 +321,36 @@ describe("createShippo", () => {
         "Shippo: no usps_ground_advantage rate: Address could not be validated",
     });
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("names only the routed carrier's reason when it offers no rate", async () => {
+    const { provider } = shippo([
+      () =>
+        json({
+          rates: [],
+          messages: [
+            {
+              source: "shippo_dpd_de_account",
+              text: "Carrier account shippo_dpd_de_account doesn't support one or more shipment options",
+            },
+            {
+              source: "DHLExpress",
+              text: "DHL Express requires a phone number for the consignee address.",
+            },
+            { source: "UPS", text: "Shipment origin is out of service area" },
+          ],
+        }),
+    ]);
+
+    await expect(
+      provider.book(
+        request({ address: NORWAY, service: "dhl_express_worldwide" }),
+      ),
+    ).rejects.toMatchObject({
+      retryable: false,
+      message:
+        "Shippo: no dhl_express_worldwide rate: DHL Express requires a phone number for the consignee address.",
+    });
   });
 
   it("refuses a label the carrier rejected, with the carrier's reason", async () => {

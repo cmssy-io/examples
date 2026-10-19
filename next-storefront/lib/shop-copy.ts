@@ -125,6 +125,8 @@ const en = {
   country: "Country",
   countryIso: "Country (ISO-2)",
   selectCountry: "Select a country",
+  addressIncomplete:
+    "Fill in the name, street, postal code, city, country and phone, and the state or region for the US, Canada or Australia.",
   region: "State / region",
   phone: "Phone",
   vatId: "VAT ID",
@@ -360,6 +362,8 @@ const no: ShopCopy = {
   country: "Land",
   countryIso: "Land (ISO-2)",
   selectCountry: "Velg land",
+  addressIncomplete:
+    "Fyll ut navn, gate, postnummer, sted, land og telefon, og delstat eller region for USA, Canada eller Australia.",
   region: "Delstat / region",
   phone: "Telefon",
   vatId: "MVA-nummer",

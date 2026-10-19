@@ -191,7 +191,7 @@ service) marks the parcel `exception` with the reason and is answered 200 with `
 retry would be refused the same way. A carrier outage is noted on the parcel and answered 500, and
 cmssy tries again. A parcel of that carrier recorded by hand, without the key, is left alone.
 
-Recording a shipment marks the order fulfilled, the same as doing it by hand in the admin.
+The claim leaves the order unfulfilled; it becomes fulfilled when the parcel gets its tracking number, so a refused label leaves it in the admin's Shipping problem queue still to pack.
 
 ## Project structure
 
