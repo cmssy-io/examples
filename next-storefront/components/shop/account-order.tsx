@@ -5,6 +5,7 @@ import type { Order, OrderField } from "@/graphql/types";
 import { OrderReceipt, paymentLabel } from "./order-receipt";
 import { PayOrderButton } from "./pay-order-button";
 import { OrderCustomFields } from "./order-fields";
+import { OrderReturns } from "./order-returns";
 import type { BadgeVariant } from "./ui/badge";
 import { Badge } from "./ui/badge";
 import { buttonClass } from "./ui/button";
@@ -100,12 +101,12 @@ function OrderTimeline({ order, copy }: { order: Order; copy: ShopCopy }) {
 }
 
 type Shipment = Order["shipments"][number] & {
-  status: Exclude<Order["shipments"][number]["status"], "canceled" | "returned">;
+  status: Exclude<Order["shipments"][number]["status"], "canceled">;
 };
 type ShipmentStatus = Shipment["status"];
 
 function isShown(shipment: Order["shipments"][number]): shipment is Shipment {
-  return shipment.status !== "canceled" && shipment.status !== "returned";
+  return shipment.status !== "canceled";
 }
 
 function shipmentVariant(status: ShipmentStatus): BadgeVariant {
@@ -223,6 +224,8 @@ export function AccountOrder({
         <OrderReceipt order={order} copy={copy} />
         <OrderTimeline order={order} copy={copy} />
       </div>
+
+      <OrderReturns order={order} />
 
       <OrderCustomFields
         values={order.customFields}

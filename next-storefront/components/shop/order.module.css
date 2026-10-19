@@ -426,3 +426,39 @@
     grid-template-columns: 1fr 48px 90px;
   }
 }
+
+.returns {
+  margin-top: 20px;
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+
+.returnCard {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.returnLines {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+  font-size: var(--text-sm);
+}
+
+.returnForm {
+  display: grid;
+  gap: 8px;
+}
+
+.returnLine {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}

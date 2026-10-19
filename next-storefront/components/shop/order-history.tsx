@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { Order } from "@/graphql/types";
+import type { MyOrders } from "@/graphql/types";
 import { formatMoney } from "@/lib/money";
 import { paymentLabel, progressLabel, showsPayment } from "./order-receipt";
 import { useLocalePath, useShopCopy } from "./locale-ui";
@@ -11,7 +11,7 @@ export function OrderHistory({
   orders,
   payOnline,
 }: {
-  orders: Order[];
+  orders: MyOrders["items"];
   payOnline: boolean;
 }) {
   const localePath = useLocalePath();

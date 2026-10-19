@@ -61,7 +61,8 @@ query MyOrder($workspaceId: ID!, $id: ID!) {
       deliveryStatus
       amountPaid
       balanceDue
-      shipments { carrier trackingNumber trackingUrl status updatedAt }
+      shipments { carrier trackingNumber trackingUrl status updatedAt deliveredAt items { itemId quantity } }
+      returns { id number status requestedAt receivedAt completedAt refundedAmount carrier trackingNumber lines { itemId quantity reason receivedQuantity } }
       invoiceNumber
       invoiceUrl
       paidAt
@@ -75,7 +76,7 @@ query MyOrder($workspaceId: ID!, $id: ID!) {
       shippingTotal
       shippingMethod { id label price }
       shippingAddress { name company line1 line2 postalCode city region country phone vatId }
-      items { name price listPrice tierMinQty currency quantity sku }
+      items { id name price listPrice tierMinQty currency quantity sku }
     }
   }
 }

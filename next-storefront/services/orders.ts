@@ -8,6 +8,8 @@ import {
   MyOrderDocument,
   MyOrdersDocument,
   PublicOrderDocument,
+  RequestReturnDocument,
+  type ReturnLineInput,
 } from "@/graphql/generated/graphql";
 
 const EMPTY_ORDERS: MyOrders = { total: 0, hasMore: false, items: [] };
@@ -61,4 +63,35 @@ export async function fetchOrderByToken(
     }
     throw error;
   }
+}
+
+export interface ReturnRequest {
+  orderId: string;
+  accessToken?: string;
+  lines: ReturnLineInput[];
+  note?: string;
+}
+
+export async function requestReturn(request: ReturnRequest): Promise<void> {
+  const variables = (workspaceId: string) => ({
+    workspaceId,
+    orderId: request.orderId,
+    accessToken: request.accessToken ?? null,
+    lines: request.lines,
+    note: request.note || null,
+  });
+  if (!request.accessToken) {
+    const data = await memberRequest(RequestReturnDocument, variables);
+    if (!data) throw new Error("Sign in to return items from this order");
+    return;
+  }
+  const workspaceId = await client.resolveWorkspaceId({ retry: retryMode() });
+  await client.query(RequestReturnDocument, variables(workspaceId), {
+    public: true,
+    retry: retryMode(),
+    headers: {
+      ...(await visitorHeaders()),
+      "x-workspace-id": workspaceId,
+    },
+  });
 }

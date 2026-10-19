@@ -26,14 +26,15 @@ query PublicOrder($workspaceId: ID!, $orderId: ID!, $accessToken: String!) {
         amountPaid
         balanceDue
         refundedAmount
-        shipments { carrier trackingNumber trackingUrl status updatedAt }
+        shipments { carrier trackingNumber trackingUrl status updatedAt deliveredAt items { itemId quantity } }
+        returns { id number status requestedAt receivedAt completedAt refundedAmount carrier trackingNumber lines { itemId quantity reason receivedQuantity } }
         invoiceNumber
         invoiceUrl
         paidAt
         fulfilledAt
         deliveredAt
         createdAt
-        items { name price listPrice tierMinQty currency quantity sku taxRate taxAmount }
+        items { id name price listPrice tierMinQty currency quantity sku taxRate taxAmount }
       }
     }
   }

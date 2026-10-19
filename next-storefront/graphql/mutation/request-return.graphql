@@ -1,0 +1,21 @@
+mutation RequestReturn(
+  $workspaceId: ID!
+  $orderId: ID!
+  $accessToken: String
+  $lines: [ReturnLineInput!]!
+  $note: String
+) {
+  public {
+    order {
+      requestReturn(
+        workspaceId: $workspaceId
+        orderId: $orderId
+        accessToken: $accessToken
+        lines: $lines
+        note: $note
+      ) {
+        id
+      }
+    }
+  }
+}

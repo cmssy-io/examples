@@ -1,10 +1,10 @@
 import { orderProgress, type CmssyOrderProgress } from "@cmssy/core";
-import type { Order, PublicOrder } from "@/graphql/types";
+import type { MyOrders, Order, PublicOrder } from "@/graphql/types";
 import { formatMoney } from "@/lib/money";
 import type { ShopCopy } from "@/lib/shop-copy";
 import styles from "./order.module.css";
 
-type ReceiptOrder = Order | PublicOrder;
+type ReceiptOrder = Order | PublicOrder | MyOrders["items"][number];
 
 export function paymentLabel(
   order: ReceiptOrder,
