@@ -109,6 +109,11 @@ export function CartView({
 
   async function handleCheckout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const shippingAddress = readAddress(event.currentTarget);
+    if (!isComplete(shippingAddress)) {
+      setCheckoutError(copy.addressIncomplete);
+      return;
+    }
     setCheckoutError(null);
     setSubmitting(true);
 
@@ -121,7 +126,7 @@ export function CartView({
         poNumber: value("poNumber") || null,
         customerNote: value("customerNote") || null,
         customFields: readOrderFieldValues(form, orderFields),
-        shippingAddress: readAddress(event.currentTarget),
+        shippingAddress,
       });
 
       const token = order.accessToken;
