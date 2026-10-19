@@ -174,15 +174,25 @@ A parcel leaving the EU or the US carries a customs declaration built from the o
 the parcel weight spread over the units. The shipment is recorded under the real carrier - USPS,
 DHL Express, Deutsche Post - with the Shippo transaction id in its note.
 
-The route reads the order back from the admin API before booking, so a redelivered webhook never
-books twice: an order whose shipment from that carrier already has a tracking number is skipped.
-InPost assigns the tracking number a few seconds after the booking; the route waits for it, and if
-it has not arrived the shipment is recorded without it and the route answers 503 with
-`Retry-After: 60`. cmssy redelivers, the route finds the shipment by the ShipX id (or Shippo
-transaction id) it noted on it, and fills in the number instead of booking again. A carrier refusing the booking (a bad postcode, a
-street without a building number) is answered 200 with `handled: false` and logged - a retry would
-be refused the same way - while a carrier outage or a cmssy failure is a 500, and cmssy tries
-again.
+No label is bought before the parcel is claimed. The route reads the order back from the admin API
+and calls `createShipment` with an `idempotencyKey` (`<provider>:<order id>:<carrier>`) and a note
+carrying a random claim token. cmssy keeps at most one shipment per key, so of two deliveries of the
+same webhook only one finds its own token on the parcel and books; the other answers 503 with
+`Retry-After: 60`. A redelivery then finds the claimed parcel and acts on it:
+
+| The claimed parcel | What the route does |
+| --- | --- |
+| has a tracking number | nothing - already shipped |
+| notes a ShipX id or Shippo transaction id | asks the carrier for the tracking number and fills it in (InPost assigns it a few seconds after the booking) |
+| notes that the carrier did not make the booking (it answered 5xx or 429) | books again on the same parcel |
+| is still a bare claim younger than two minutes | 503 - another delivery is booking it |
+| is a bare claim older than that | marks it `exception` for a person: the booking may or may not exist at the carrier, and buying again could pay for two labels |
+| is `exception` | nothing - it waits for a person |
+
+A carrier refusing the booking (a bad postcode, a street without a building number, no rate for the
+service) marks the parcel `exception` with the reason and is answered 200 with `handled: false` - a
+retry would be refused the same way. A carrier outage is noted on the parcel and answered 500, and
+cmssy tries again. A parcel of that carrier recorded by hand, without the key, is left alone.
 
 Recording a shipment marks the order fulfilled, the same as doing it by hand in the admin. The
 InPost sandbox reports no tracking statuses, so the parcel stays `pending` there.

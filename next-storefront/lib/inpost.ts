@@ -131,7 +131,9 @@ export function createInpost(options: InpostOptions): ShippingProvider {
               phone: address.phone ?? "",
               address: {
                 street: street.street,
-                building_number: street.buildingNumber,
+                building_number: address.line2
+                  ? `${street.buildingNumber}, ${address.line2}`
+                  : street.buildingNumber,
                 city: address.city,
                 post_code: address.postalCode,
                 country_code: address.country.toUpperCase(),

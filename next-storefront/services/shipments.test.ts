@@ -1,9 +1,23 @@
 import { describe, expect, it, vi } from "vitest";
-import type { BookedShipment, ShippingProvider } from "@/lib/shipping";
+import {
+  ShippingProviderError,
+  type BookedShipment,
+  type ShippingProvider,
+} from "@/lib/shipping";
 import type { AdminResult } from "./admin";
-import { shipOrder, type ShipDeps } from "./shipments";
+import {
+  CLAIM_TIMEOUT_MS,
+  claimNote,
+  notMadeNote,
+  shipOrder,
+  type ShipDeps,
+} from "./shipments";
 
 vi.mock("@/cmssy.config", () => ({ cmssy: {} }));
+
+const NOW = Date.parse("2026-10-19T08:00:00Z");
+const TOKEN = "t-1";
+const KEY = "inpost:o1:InPost";
 
 const ADDRESS = {
   name: "Jan Kowalski",
@@ -32,41 +46,98 @@ function order(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function claimed(
+  events: Array<{ at?: string; note: string | null }>,
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    id: "s1",
+    carrier: "InPost",
+    status: "pending",
+    trackingNumber: null,
+    idempotencyKey: KEY,
+    events: events.map((e) => ({
+      at: e.at ?? new Date(NOW).toISOString(),
+      ...e,
+    })),
+    ...overrides,
+  };
+}
+
 function fakeProvider(
   name: string,
-  booked: BookedShipment,
-  resumed: BookedShipment = booked,
+  booked: BookedShipment | Error,
+  resumed?: BookedShipment,
 ): ShippingProvider & {
   book: ReturnType<typeof vi.fn>;
   resume: ReturnType<typeof vi.fn>;
 } {
   return {
     name,
-    book: vi.fn(async () => booked),
-    resume: vi.fn(async () => resumed),
+    book: vi.fn(async () => {
+      if (booked instanceof Error) throw booked;
+      return booked;
+    }),
+    resume: vi.fn(async () => resumed ?? (booked as BookedShipment)),
   };
 }
 
 function deps(
   current: unknown,
   providers: ShipDeps["providers"],
-  mutationErrors: AdminResult<unknown>["errors"] = [],
+  options: {
+    claimNoteOnServer?: string;
+    mutationErrors?: AdminResult<unknown>["errors"];
+  } = {},
 ) {
   const request = vi.fn<
     (
       query: string,
       variables: Record<string, unknown>,
     ) => Promise<AdminResult<unknown>>
-  >(async (query) =>
-    query.includes("OrderForShipping")
-      ? { data: { order: { get: current } }, errors: [] }
-      : { data: {}, errors: mutationErrors },
-  );
+  >(async (query, variables) => {
+    if (query.includes("OrderForShipping")) {
+      return { data: { order: { get: current } }, errors: [] };
+    }
+    if (query.includes("ClaimShipment")) {
+      const input = variables.input as { idempotencyKey: string; note: string };
+      return {
+        data: {
+          order: {
+            createShipment: {
+              shipments: [
+                {
+                  id: "s1",
+                  idempotencyKey: input.idempotencyKey,
+                  events: [
+                    {
+                      at: new Date(NOW).toISOString(),
+                      note: options.claimNoteOnServer ?? input.note,
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        errors: [],
+      };
+    }
+    return { data: {}, errors: options.mutationErrors ?? [] };
+  });
   return {
     request: request as unknown as ShipDeps["request"],
     providers,
+    now: () => NOW,
+    claimToken: () => TOKEN,
     calls: request,
   };
+}
+
+function writes(d: ReturnType<typeof deps>, name: string) {
+  return d.calls.mock.calls
+    .filter(([query]) => query.includes(name))
+    .map(([, variables]) => variables.input);
 }
 
 const TRACKED: BookedShipment = {
@@ -77,7 +148,7 @@ const TRACKED: BookedShipment = {
 };
 
 describe("shipOrder", () => {
-  it("books the carrier the method routes to and records the parcel on the order", async () => {
+  it("claims the parcel, then books it and records the label on that parcel", async () => {
     const inpost = fakeProvider("InPost", TRACKED);
     const shippo = fakeProvider("Shippo", TRACKED);
     const d = deps(order(), { inpost, shippo });
@@ -99,17 +170,41 @@ describe("shipOrder", () => {
         { name: "Oak desk", sku: "DESK-1", quantity: 2, unitPrice: 24900 },
       ],
     });
-    const [query, variables] = d.calls.mock.calls[1]!;
-    expect(query).toContain("createShipment");
-    expect(variables).toEqual({
-      input: {
+    expect(
+      d.calls.mock.calls.map(([q]) => q.match(/(query|mutation) (\w+)/)![2]),
+    ).toEqual(["OrderForShipping", "ClaimShipment", "UpdateShipment"]);
+    expect(writes(d, "ClaimShipment")).toEqual([
+      {
         orderId: "o1",
         carrier: "InPost",
+        idempotencyKey: KEY,
+        note: claimNote("InPost", TOKEN),
+      },
+    ]);
+    expect(writes(d, "UpdateShipment")).toEqual([
+      {
+        orderId: "o1",
+        shipmentId: "s1",
         trackingNumber: TRACKED.trackingNumber,
         trackingUrl: TRACKED.trackingUrl,
         note: "InPost shipment 9001",
       },
+    ]);
+  });
+
+  it("books nothing when another delivery's claim won", async () => {
+    const inpost = fakeProvider("InPost", TRACKED);
+    const d = deps(
+      order(),
+      { inpost },
+      { claimNoteOnServer: claimNote("InPost", "other") },
+    );
+
+    expect(await shipOrder("o1", d)).toEqual({
+      pending: { carrier: "InPost", reference: null },
     });
+    expect(inpost.book).not.toHaveBeenCalled();
+    expect(writes(d, "UpdateShipment")).toEqual([]);
   });
 
   it.each([
@@ -158,40 +253,15 @@ describe("shipOrder", () => {
           parcel: expect.objectContaining({ weightKg }),
         }),
       );
-      expect(d.calls.mock.calls[1]![1]).toMatchObject({
-        input: { carrier, note: `${carrier} shipment tx1` },
+      expect(writes(d, "ClaimShipment")[0]).toMatchObject({
+        carrier,
+        idempotencyKey: `shippo:o1:${carrier}`,
+      });
+      expect(writes(d, "UpdateShipment")[0]).toMatchObject({
+        note: `${carrier} shipment tx1`,
       });
     },
   );
-
-  it("finds a resumable Shippo parcel under the carrier it was recorded as, not under Shippo", async () => {
-    const shippo = fakeProvider("Shippo", TRACKED, {
-      reference: "tx1",
-      trackingNumber: "8503175446",
-      trackingUrl: null,
-    });
-    const d = deps(
-      order({
-        shippingMethod: { id: "dhl-express" },
-        shippingAddress: { ...ADDRESS, country: "NO" },
-        shipments: [
-          {
-            id: "s1",
-            carrier: "DHL Express",
-            trackingNumber: null,
-            events: [{ note: "DHL Express shipment tx1" }],
-          },
-        ],
-      }),
-      { shippo },
-    );
-
-    expect(await shipOrder("o1", d)).toMatchObject({
-      shipped: { carrier: "DHL Express" },
-    });
-    expect(shippo.book).not.toHaveBeenCalled();
-    expect(shippo.resume).toHaveBeenCalledWith("tx1");
-  });
 
   it.each([
     [
@@ -231,20 +301,16 @@ describe("shipOrder", () => {
     });
   });
 
-  it("does not book twice when the parcel already has a tracking number", async () => {
+  it("does not book twice when the claimed parcel already has a tracking number", async () => {
     const inpost = fakeProvider("InPost", TRACKED);
     const d = deps(
-      order({
-        shipments: [
-          { id: "s1", carrier: "InPost", trackingNumber: "X", events: [] },
-        ],
-      }),
+      order({ shipments: [claimed([{ note: "x" }], { trackingNumber: "X" })] }),
       { inpost },
     );
 
     expect(await shipOrder("o1", d)).toEqual({ skipped: "already shipped" });
     expect(inpost.book).not.toHaveBeenCalled();
-    expect(inpost.resume).not.toHaveBeenCalled();
+    expect(d.calls).toHaveBeenCalledTimes(1);
   });
 
   it("does not touch a parcel a person recorded by hand", async () => {
@@ -252,12 +318,9 @@ describe("shipOrder", () => {
     const d = deps(
       order({
         shipments: [
-          {
-            id: "s1",
-            carrier: "InPost",
-            trackingNumber: null,
-            events: [{ note: "dropped at the locker" }],
-          },
+          claimed([{ note: "dropped at the locker" }], {
+            idempotencyKey: null,
+          }),
         ],
       }),
       { inpost },
@@ -267,6 +330,7 @@ describe("shipOrder", () => {
       skipped: "shipment recorded by hand",
     });
     expect(inpost.book).not.toHaveBeenCalled();
+    expect(d.calls).toHaveBeenCalledTimes(1);
   });
 
   it("resumes a booked parcel instead of booking a second one, and fills in its tracking", async () => {
@@ -274,32 +338,28 @@ describe("shipOrder", () => {
     const d = deps(
       order({
         shipments: [
-          {
-            id: "s1",
-            carrier: "InPost",
-            trackingNumber: null,
-            events: [{ note: "InPost shipment 9001" }],
-          },
+          claimed([
+            { note: claimNote("InPost", "old") },
+            { note: "InPost shipment 9001" },
+          ]),
         ],
       }),
       { inpost },
     );
 
-    const outcome = await shipOrder("o1", d);
-
-    expect(outcome).toEqual({ shipped: { ...TRACKED, carrier: "InPost" } });
+    expect(await shipOrder("o1", d)).toEqual({
+      shipped: { ...TRACKED, carrier: "InPost" },
+    });
     expect(inpost.book).not.toHaveBeenCalled();
     expect(inpost.resume).toHaveBeenCalledWith("9001");
-    const [query, variables] = d.calls.mock.calls[1]!;
-    expect(query).toContain("updateShipment");
-    expect(variables).toEqual({
-      input: {
+    expect(writes(d, "UpdateShipment")).toEqual([
+      {
         orderId: "o1",
         shipmentId: "s1",
         trackingNumber: TRACKED.trackingNumber,
         trackingUrl: TRACKED.trackingUrl,
       },
-    });
+    ]);
   });
 
   it("records a parcel still waiting for its number and reports it pending", async () => {
@@ -313,8 +373,9 @@ describe("shipOrder", () => {
     expect(await shipOrder("o1", d)).toEqual({
       pending: { carrier: "InPost", reference: "9001" },
     });
-    expect(d.calls.mock.calls[1]![1]).toMatchObject({
-      input: { note: "InPost shipment 9001", trackingNumber: null },
+    expect(writes(d, "UpdateShipment")[0]).toMatchObject({
+      note: "InPost shipment 9001",
+      trackingNumber: null,
     });
   });
 
@@ -325,16 +386,7 @@ describe("shipOrder", () => {
       trackingUrl: null,
     });
     const d = deps(
-      order({
-        shipments: [
-          {
-            id: "s1",
-            carrier: "InPost",
-            trackingNumber: null,
-            events: [{ note: "InPost shipment 9001" }],
-          },
-        ],
-      }),
+      order({ shipments: [claimed([{ note: "InPost shipment 9001" }])] }),
       { inpost },
     );
 
@@ -344,11 +396,128 @@ describe("shipOrder", () => {
     expect(d.calls).toHaveBeenCalledTimes(1);
   });
 
+  it("waits for a fresh claim another delivery is still booking", async () => {
+    const inpost = fakeProvider("InPost", TRACKED);
+    const d = deps(
+      order({
+        shipments: [
+          claimed([
+            {
+              at: new Date(NOW - CLAIM_TIMEOUT_MS + 1000).toISOString(),
+              note: claimNote("InPost", "other"),
+            },
+          ]),
+        ],
+      }),
+      { inpost },
+    );
+
+    expect(await shipOrder("o1", d)).toEqual({
+      pending: { carrier: "InPost", reference: null },
+    });
+    expect(inpost.book).not.toHaveBeenCalled();
+    expect(d.calls).toHaveBeenCalledTimes(1);
+  });
+
+  it("flags a claim that never finished for a person instead of booking again", async () => {
+    const inpost = fakeProvider("InPost", TRACKED);
+    const d = deps(
+      order({
+        shipments: [
+          claimed([
+            {
+              at: new Date(NOW - CLAIM_TIMEOUT_MS - 1000).toISOString(),
+              note: claimNote("InPost", "other"),
+            },
+          ]),
+        ],
+      }),
+      { inpost },
+    );
+
+    expect(await shipOrder("o1", d)).toEqual({
+      skipped: "booking outcome unknown, flagged on the order",
+    });
+    expect(inpost.book).not.toHaveBeenCalled();
+    expect(writes(d, "UpdateShipment")).toEqual([
+      expect.objectContaining({ shipmentId: "s1", status: "exception" }),
+    ]);
+  });
+
+  it("leaves a parcel already flagged for a person alone", async () => {
+    const inpost = fakeProvider("InPost", TRACKED);
+    const d = deps(
+      order({
+        shipments: [claimed([{ note: "refused" }], { status: "exception" })],
+      }),
+      { inpost },
+    );
+
+    expect(await shipOrder("o1", d)).toEqual({
+      skipped: "the booking needs a person: see the shipment on the order",
+    });
+    expect(inpost.book).not.toHaveBeenCalled();
+    expect(d.calls).toHaveBeenCalledTimes(1);
+  });
+
+  it("marks the claim as an exception when the carrier refuses, then rethrows", async () => {
+    const refusal = new ShippingProviderError("InPost", "bad postcode", false);
+    const inpost = fakeProvider("InPost", refusal);
+    const d = deps(order(), { inpost });
+
+    await expect(shipOrder("o1", d)).rejects.toBe(refusal);
+    expect(writes(d, "UpdateShipment")).toEqual([
+      {
+        orderId: "o1",
+        shipmentId: "s1",
+        status: "exception",
+        note: "InPost booking refused: InPost: bad postcode",
+      },
+    ]);
+  });
+
+  it("notes a booking the carrier did not make, so the redelivery books it on the same claim", async () => {
+    const outage = new ShippingProviderError("InPost", "503 down", true);
+    const first = deps(order(), { inpost: fakeProvider("InPost", outage) });
+
+    await expect(shipOrder("o1", first)).rejects.toBe(outage);
+    const note = (writes(first, "UpdateShipment")[0] as { note: string }).note;
+    expect(note).toBe(notMadeNote("InPost", "InPost: 503 down"));
+
+    const inpost = fakeProvider("InPost", TRACKED);
+    const retry = deps(
+      order({
+        shipments: [claimed([{ note: claimNote("InPost", TOKEN) }, { note }])],
+      }),
+      { inpost },
+    );
+
+    expect(await shipOrder("o1", retry)).toEqual({
+      shipped: { ...TRACKED, carrier: "InPost" },
+    });
+    expect(writes(retry, "ClaimShipment")).toEqual([]);
+    expect(writes(retry, "UpdateShipment")[0]).toMatchObject({
+      shipmentId: "s1",
+    });
+  });
+
+  it("leaves the claim untouched when the booking failed in a way nobody can read", async () => {
+    const lost = new TypeError("fetch failed");
+    const d = deps(order(), { inpost: fakeProvider("InPost", lost) });
+
+    await expect(shipOrder("o1", d)).rejects.toBe(lost);
+    expect(writes(d, "UpdateShipment")).toEqual([]);
+  });
+
   it("throws when cmssy refuses to record the parcel, so the delivery is retried", async () => {
     const inpost = fakeProvider("InPost", TRACKED);
-    const d = deps(order(), { inpost }, [
-      { message: "boom", extensions: { code: "INTERNAL" } },
-    ]);
+    const d = deps(
+      order(),
+      { inpost },
+      {
+        mutationErrors: [{ message: "boom", extensions: { code: "INTERNAL" } }],
+      },
+    );
 
     await expect(shipOrder("o1", d)).rejects.toThrow(
       "record the shipment - boom",
@@ -358,6 +527,8 @@ describe("shipOrder", () => {
   it("skips an order cmssy cannot find", async () => {
     const d = {
       providers: {},
+      now: () => NOW,
+      claimToken: () => TOKEN,
       request: (async () => ({
         errors: [
           { message: "Order not found", extensions: { code: "NOT_FOUND" } },

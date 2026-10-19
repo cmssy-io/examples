@@ -93,6 +93,21 @@ describe("InPost", () => {
     );
   });
 
+  it("keeps the second address line with the building number", async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(json(201, { id: 1, status: "confirmed", tracking_number: "T1" }));
+    const inpost = createInpost({ token: "tok", organizationId: "77", sandbox: true, fetch: fetchImpl });
+
+    await inpost.book({ ...REQUEST, address: { ...REQUEST.address, line2: "m. 4" } });
+
+    const body = JSON.parse(String(fetchImpl.mock.calls[0]![1]?.body));
+    expect(body.receiver.address).toMatchObject({
+      street: "ul. Przemysłowa",
+      building_number: "12, m. 4",
+    });
+  });
+
   it("talks to production only when told to", async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
