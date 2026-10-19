@@ -803,9 +803,11 @@ describe("tracking the parcel after the label", () => {
 
 describe("applyShippoEvent", () => {
   const TRACKING = TRACKED.trackingNumber!;
+  const READ_AT = "2026-10-19T10:58:57.987Z";
   const tracked = (overrides: Record<string, unknown> = {}) =>
     claimed([{ note: "USPS shipment 9001" }], {
       trackingNumber: TRACKING,
+      updatedAt: READ_AT,
       ...overrides,
     });
   const status = (
@@ -840,10 +842,15 @@ describe("applyShippoEvent", () => {
       {
         orderId: "o1",
         shipmentId: "s1",
+        expectedUpdatedAt: READ_AT,
         status: "in_transit",
         note: "Arrived at USPS facility",
       },
     ]);
+    expect(
+      d.calls.mock.calls[0]![0],
+      "The read must fetch the parcel's updatedAt, or every write goes out without a precondition.",
+    ).toMatch(/shipments \{[^}]*\bupdatedAt\b/);
   });
 
   it("writes nothing when the status did not change", async () => {
@@ -922,13 +929,17 @@ describe("applyShippoEvent", () => {
       [{ note: claimNote("USPS", TOKEN) }, { note: "USPS booking outcome unknown" }],
       { status: "exception" },
     );
-    const { d, shippo, outcome } = run([unknown], label());
+    const { d, shippo, outcome } = run(
+      [{ ...unknown, updatedAt: READ_AT }],
+      label(),
+    );
 
     expect(await outcome).toEqual({ applied: "label recorded" });
     expect(writes(d, "UpdateShipment")).toEqual([
       {
         orderId: "o1",
         shipmentId: "s1",
+        expectedUpdatedAt: READ_AT,
         trackingNumber: TRACKING,
         trackingUrl: TRACKED.trackingUrl,
         labelUrl: TRACKED.labelUrl,
@@ -984,5 +995,42 @@ describe("applyShippoEvent", () => {
     ["shippo:", null],
   ])("reads the order of %s as %s", (key, orderId) => {
     expect(orderIdFromKey(key)).toBe(orderId);
+  });
+});
+
+describe("a parcel that changed between the read and the write", () => {
+  it("throws on cmssy's VERSION_CONFLICT so the webhook answers 500 and Shippo sends it again", async () => {
+    const d = deps(
+      order({
+        shipments: [
+          claimed([{ note: "USPS shipment 9001" }], {
+            trackingNumber: TRACKED.trackingNumber,
+            updatedAt: "2026-10-19T10:58:57.987Z",
+          }),
+        ],
+      }),
+      { shippo: fakeProvider("USPS", TRACKED) },
+      {
+        mutationErrors: [
+          {
+            message: "Shipment changed since it was read",
+            extensions: { code: "VERSION_CONFLICT" },
+          },
+        ],
+      },
+    );
+
+    await expect(
+      applyShippoEvent(
+        {
+          kind: "tracking",
+          key: KEY,
+          trackingNumber: TRACKED.trackingNumber!,
+          status: "delivered",
+          details: null,
+        },
+        d,
+      ),
+    ).rejects.toThrow("Shipment changed since it was read");
   });
 });
