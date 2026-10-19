@@ -25,6 +25,7 @@ export interface ShipmentLine {
 }
 
 export interface ShipmentRequest {
+  key: string;
   orderId: string;
   orderNumber: number | null;
   email: string;
@@ -40,6 +41,7 @@ export interface BookedShipment {
   reference: string;
   trackingNumber: string | null;
   trackingUrl: string | null;
+  labelUrl: string | null;
 }
 
 export interface ShippingProvider {

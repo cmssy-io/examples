@@ -70,6 +70,7 @@ interface ShippoTransaction {
   status: string;
   tracking_number?: string | null;
   tracking_url_provider?: string | null;
+  label_url?: string | null;
   messages?: ShippoMessage[];
 }
 
@@ -194,12 +195,14 @@ export function createShippo(options: ShippoOptions): ShippingProvider {
         reference: transaction.object_id,
         trackingNumber: null,
         trackingUrl: null,
+        labelUrl: null,
       };
     }
     return {
       reference: transaction.object_id,
       trackingNumber: transaction.tracking_number || null,
       trackingUrl: transaction.tracking_url_provider || null,
+      labelUrl: transaction.label_url || null,
     };
   }
 
@@ -270,7 +273,7 @@ export function createShippo(options: ShippoOptions): ShippingProvider {
         await call<ShippoTransaction>("/transactions/", {
           rate: rate.object_id,
           label_file_type: "PDF",
-          metadata: reference,
+          metadata: request.key,
           async: false,
         }),
       );

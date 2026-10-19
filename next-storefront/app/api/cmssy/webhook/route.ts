@@ -7,6 +7,13 @@ import { shipOrder } from "@/services/shipments";
 export const maxDuration = 30;
 
 const PENDING_RETRY_SECONDS = 60;
+const LABEL_REQUESTED = "shipment.label_requested";
+const HANDLED_EVENTS = new Set(["order.paid", LABEL_REQUESTED]);
+
+function requestedShipment(data: object): string | undefined {
+  const shipment = (data as { shipment?: { id?: unknown } }).shipment;
+  return typeof shipment?.id === "string" ? shipment.id : undefined;
+}
 
 export async function POST(request: Request) {
   const secret = process.env.CMSSY_WEBHOOK_SECRET;
@@ -29,12 +36,15 @@ export async function POST(request: Request) {
     throw error;
   }
 
-  if (event.event !== "order.paid") {
+  if (!HANDLED_EVENTS.has(event.event)) {
     return NextResponse.json({ received: true, handled: false });
   }
 
   try {
-    const outcome = await shipOrder(event.data.order.id);
+    const outcome = await shipOrder(event.data.order.id, undefined, {
+      retryOf:
+        event.event === LABEL_REQUESTED ? requestedShipment(event.data) : undefined,
+    });
     if ("pending" in outcome) {
       return NextResponse.json(
         { received: true, handled: false, pending: outcome.pending },
