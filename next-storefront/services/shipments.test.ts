@@ -858,6 +858,7 @@ describe("applyShippoEvent", () => {
     ["out_for_delivery", "in_transit"],
     ["delivered", "in_transit"],
     ["delivered", "exception"],
+    ["exception", "pending"],
   ] as const)("does not move a %s parcel back to %s", async (from, to) => {
     const { d, outcome } = run([tracked({ status: from })], status(to));
 

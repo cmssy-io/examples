@@ -429,6 +429,7 @@ export function refundNote(reference: string): string {
 
 function movesBack(from: string, to: string): boolean {
   if (from === "delivered" || from === "returned") return to !== "returned";
+  if (to === "pending") return true;
   const fromRank = PROGRESS.indexOf(from);
   const toRank = PROGRESS.indexOf(to);
   return fromRank !== -1 && toRank !== -1 && toRank < fromRank;
