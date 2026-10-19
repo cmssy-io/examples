@@ -11,6 +11,7 @@ import {
   ProductBySkuDocument,
   RemoveCartItemDocument,
   RemoveDiscountDocument,
+  SetShippingAddressDocument,
   SetShippingMethodDocument,
   UpdateCartItemDocument,
 } from "@/graphql/generated/graphql";
@@ -90,6 +91,15 @@ export function setShippingMethod(
     SetShippingMethodDocument,
     (workspaceId) => ({ workspaceId, shippingMethodId }),
   ).then((data) => data.cart.setShippingMethod);
+}
+
+export function setShippingAddress(
+  shippingAddress: ShippingAddressInput | null,
+): Promise<Cart> {
+  return cartRequest(
+    SetShippingAddressDocument,
+    (workspaceId) => ({ workspaceId, shippingAddress }),
+  ).then((data) => data.cart.setShippingAddress);
 }
 
 export function mergeCart(): Promise<Cart> {

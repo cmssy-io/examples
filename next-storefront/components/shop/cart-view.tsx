@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/components/shop/cart-provider";
@@ -8,11 +8,50 @@ import { useCmssyUser } from "@/components/shop/user-provider";
 import { formatMoney } from "@/lib/money";
 import { fill } from "@/lib/shop-copy";
 import { readOrderFieldValues } from "@/lib/order-fields";
+import type { ShippingAddressInput } from "@/graphql/generated/graphql";
 import type { OrderField } from "@/graphql/types";
 import { selectionLabel } from "@/lib/variants";
 import { useLocalePath, useShopCopy, useShopLocale } from "./locale-ui";
 import { OrderFieldInputs } from "./order-fields";
 import styles from "./cart.module.css";
+
+const ADDRESS_FIELDS = new Set([
+  "name",
+  "company",
+  "line1",
+  "line2",
+  "postalCode",
+  "city",
+  "country",
+  "phone",
+  "vatId",
+]);
+
+function readAddress(form: HTMLFormElement): ShippingAddressInput {
+  const data = new FormData(form);
+  const value = (key: string) => String(data.get(key) ?? "").trim();
+  return {
+    name: value("name"),
+    company: value("company") || null,
+    line1: value("line1"),
+    line2: value("line2") || null,
+    postalCode: value("postalCode"),
+    city: value("city"),
+    country: value("country").toUpperCase(),
+    phone: value("phone") || null,
+    vatId: value("vatId") || null,
+  };
+}
+
+function isComplete(address: ShippingAddressInput): boolean {
+  return Boolean(
+    address.name &&
+      address.line1 &&
+      address.postalCode &&
+      address.city &&
+      address.country,
+  );
+}
 
 export function CartView({
   payOnline,
@@ -33,6 +72,7 @@ export function CartView({
     applyDiscount,
     removeDiscount,
     setShippingMethod,
+    setShippingAddress,
     checkout,
   } = useCart();
   const { user } = useCmssyUser();
@@ -41,6 +81,7 @@ export function CartView({
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const sentAddress = useRef<string | null>(null);
 
   if (!cart || cart.items.length === 0) {
     return (
@@ -69,17 +110,7 @@ export function CartView({
         poNumber: value("poNumber") || null,
         customerNote: value("customerNote") || null,
         customFields: readOrderFieldValues(form, orderFields),
-        shippingAddress: {
-          name: value("name"),
-          company: value("company") || null,
-          line1: value("line1"),
-          line2: value("line2") || null,
-          postalCode: value("postalCode"),
-          city: value("city"),
-          country: value("country").toUpperCase(),
-          phone: value("phone") || null,
-          vatId: value("vatId") || null,
-        },
+        shippingAddress: readAddress(event.currentTarget),
       });
 
       const token = order.accessToken;
@@ -104,8 +135,32 @@ export function CartView({
     }
   }
 
+  function syncAddress(
+    event:
+      | React.FocusEvent<HTMLFormElement>
+      | React.ChangeEvent<HTMLFormElement>,
+  ) {
+    const field = event.target;
+    if (!(field instanceof HTMLInputElement)) return;
+    if (!ADDRESS_FIELDS.has(field.name)) return;
+    if (event.type === "change" && field.name !== "country") return;
+    const address = readAddress(event.currentTarget);
+    if (!isComplete(address)) return;
+    const key = JSON.stringify(address);
+    if (key === sentAddress.current) return;
+    sentAddress.current = key;
+    void setShippingAddress(address).then((accepted) => {
+      if (!accepted) sentAddress.current = null;
+    });
+  }
+
   return (
-    <form className={styles.layout} onSubmit={handleCheckout}>
+    <form
+      className={styles.layout}
+      onSubmit={handleCheckout}
+      onBlur={syncAddress}
+      onChange={syncAddress}
+    >
       <div>
         <div className={`shop-card ${styles.lines}`}>
           {cart.items.map((item) => {
