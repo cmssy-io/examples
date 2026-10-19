@@ -395,7 +395,7 @@ export type ShopSettingsQueryVariables = Exact<{
 }>;
 
 
-export type ShopSettingsQuery = { public: { siteConfig: { id: string, lowStockThreshold: number, publicCart: { defaultTaxRateId: string | null, taxRates: Array<{ id: string, rate: number }>, orderFields: Array<{ key: string, label: unknown, type: OrderFieldType, required: boolean, customerCanSet: boolean, description: unknown, minLength: number | null, maxLength: number | null, minValue: number | null, maxValue: number | null, pattern: string | null, options: Array<{ value: string, label: unknown }> }> } | null } | null } };
+export type ShopSettingsQuery = { public: { siteConfig: { id: string, lowStockThreshold: number, publicCart: { defaultTaxRateId: string | null, taxRates: Array<{ id: string, rate: number }>, shippingMethods: Array<{ enabled: boolean, countries: Array<string> }>, orderFields: Array<{ key: string, label: unknown, type: OrderFieldType, required: boolean, customerCanSet: boolean, description: unknown, minLength: number | null, maxLength: number | null, minValue: number | null, maxValue: number | null, pattern: string | null, options: Array<{ value: string, label: unknown }> }> } | null } | null } };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -1875,6 +1875,10 @@ export const ShopSettingsDocument = new TypedDocumentString(`
         taxRates {
           id
           rate
+        }
+        shippingMethods {
+          enabled
+          countries
         }
         orderFields {
           key

@@ -10,6 +10,7 @@ import { fill } from "@/lib/shop-copy";
 import { readOrderFieldValues } from "@/lib/order-fields";
 import type { ShippingAddressInput } from "@/graphql/generated/graphql";
 import type { OrderField } from "@/graphql/types";
+import type { CountryOption } from "@/lib/shipping-countries";
 import { selectionLabel } from "@/lib/variants";
 import { useLocalePath, useShopCopy, useShopLocale } from "./locale-ui";
 import { OrderFieldInputs } from "./order-fields";
@@ -23,6 +24,7 @@ const ADDRESS_FIELDS = new Set([
   "postalCode",
   "city",
   "country",
+  "region",
   "phone",
   "vatId",
 ]);
@@ -38,6 +40,7 @@ function readAddress(form: HTMLFormElement): ShippingAddressInput {
     postalCode: value("postalCode"),
     city: value("city"),
     country: value("country").toUpperCase(),
+    region: value("region") || null,
     phone: value("phone") || null,
     vatId: value("vatId") || null,
   };
@@ -56,9 +59,11 @@ function isComplete(address: ShippingAddressInput): boolean {
 export function CartView({
   payOnline,
   orderFields,
+  countries,
 }: {
   payOnline: boolean;
   orderFields: OrderField[];
+  countries: CountryOption[] | null;
 }) {
   const localePath = useLocalePath();
   const { locale, defaultLocale } = useShopLocale();
@@ -142,7 +147,11 @@ export function CartView({
       | React.ChangeEvent<HTMLFormElement>,
   ) {
     const field = event.target;
-    if (!(field instanceof HTMLInputElement)) return;
+    if (
+      !(field instanceof HTMLInputElement) &&
+      !(field instanceof HTMLSelectElement)
+    )
+      return;
     if (!ADDRESS_FIELDS.has(field.name)) return;
     if (event.type === "change" && field.name !== "country") return;
     const address = readAddress(event.currentTarget);
@@ -249,6 +258,38 @@ export function CartView({
                 defaultValue={user?.email ?? ""}
               />
             </div>
+            <div className={styles.formFull}>
+              <label className="shop-label" htmlFor="country">
+                {countries ? copy.country : copy.countryIso}
+              </label>
+              {countries ? (
+                <select
+                  id="country"
+                  name="country"
+                  required
+                  defaultValue=""
+                  className="shop-input"
+                >
+                  <option value="" disabled>
+                    {copy.selectCountry}
+                  </option>
+                  {countries.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  id="country"
+                  name="country"
+                  required
+                  maxLength={2}
+                  placeholder="DE"
+                  className="shop-input"
+                />
+              )}
+            </div>
             <div>
               <label className="shop-label" htmlFor="name">
                 {copy.contactName}
@@ -291,17 +332,10 @@ export function CartView({
               <input id="city" name="city" required className="shop-input" />
             </div>
             <div>
-              <label className="shop-label" htmlFor="country">
-                {copy.countryIso}
+              <label className="shop-label" htmlFor="region">
+                {copy.region}
               </label>
-              <input
-                id="country"
-                name="country"
-                required
-                maxLength={2}
-                placeholder="DE"
-                className="shop-input"
-              />
+              <input id="region" name="region" className="shop-input" />
             </div>
             <div>
               <label className="shop-label" htmlFor="phone">

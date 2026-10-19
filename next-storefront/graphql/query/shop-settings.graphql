@@ -9,6 +9,10 @@ query ShopSettings($workspaceSlug: String!) {
           id
           rate
         }
+        shippingMethods {
+          enabled
+          countries
+        }
         orderFields {
           key
           label
