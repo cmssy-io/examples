@@ -52,22 +52,28 @@ function deps(
   providers: ShipDeps["providers"],
   mutationErrors: AdminResult<unknown>["errors"] = [],
 ) {
-  const request = vi.fn(
-    async (
+  const request = vi.fn<
+    (
       query: string,
-      _variables: Record<string, unknown>,
-    ): Promise<AdminResult<unknown>> =>
-      query.includes("OrderForShipping")
-        ? { data: { order: { get: current } }, errors: [] }
-        : { data: {}, errors: mutationErrors },
+      variables: Record<string, unknown>,
+    ) => Promise<AdminResult<unknown>>
+  >(async (query) =>
+    query.includes("OrderForShipping")
+      ? { data: { order: { get: current } }, errors: [] }
+      : { data: {}, errors: mutationErrors },
   );
-  return { request: request as unknown as ShipDeps["request"], providers, calls: request };
+  return {
+    request: request as unknown as ShipDeps["request"],
+    providers,
+    calls: request,
+  };
 }
 
 const TRACKED: BookedShipment = {
   reference: "9001",
   trackingNumber: "520000011395200025754311",
-  trackingUrl: "https://inpost.pl/sledzenie-przesylek?number=520000011395200025754311",
+  trackingUrl:
+    "https://inpost.pl/sledzenie-przesylek?number=520000011395200025754311",
 };
 
 describe("shipOrder", () => {
@@ -89,7 +95,9 @@ describe("shipOrder", () => {
       service: null,
       origin: null,
       currency: "EUR",
-      lines: [{ name: "Oak desk", sku: "DESK-1", quantity: 2, unitPrice: 24900 }],
+      lines: [
+        { name: "Oak desk", sku: "DESK-1", quantity: 2, unitPrice: 24900 },
+      ],
     });
     const [query, variables] = d.calls.mock.calls[1]!;
     expect(query).toContain("createShipment");
@@ -106,13 +114,24 @@ describe("shipOrder", () => {
 
   it.each([
     ["dhl-express", "NO", "DHL Express", "dhl_express_worldwide", "us", 5],
-    ["nordic-letter", "SE", "Deutsche Post", "deutsche_post_maxibrief_plus", "de", 1.5],
+    [
+      "nordic-letter",
+      "SE",
+      "Deutsche Post",
+      "deutsche_post_maxibrief_plus",
+      "de",
+      1.5,
+    ],
     ["us-ground", "US", "USPS", "usps_ground_advantage", "us", 5],
   ])(
     "books %s to %s through Shippo and records it under %s",
     async (method, country, carrier, service, origin, weightKg) => {
       const inpost = fakeProvider("InPost", TRACKED);
-      const shippo = fakeProvider("Shippo", { reference: "tx1", trackingNumber: "8503175446", trackingUrl: null });
+      const shippo = fakeProvider("Shippo", {
+        reference: "tx1",
+        trackingNumber: "8503175446",
+        trackingUrl: null,
+      });
       const d = deps(
         order({
           shippingMethod: { id: method },
@@ -124,11 +143,20 @@ describe("shipOrder", () => {
       const outcome = await shipOrder("o1", d);
 
       expect(outcome).toEqual({
-        shipped: { reference: "tx1", trackingNumber: "8503175446", trackingUrl: null, carrier },
+        shipped: {
+          reference: "tx1",
+          trackingNumber: "8503175446",
+          trackingUrl: null,
+          carrier,
+        },
       });
       expect(inpost.book).not.toHaveBeenCalled();
       expect(shippo.book).toHaveBeenCalledWith(
-        expect.objectContaining({ service, origin, parcel: expect.objectContaining({ weightKg }) }),
+        expect.objectContaining({
+          service,
+          origin,
+          parcel: expect.objectContaining({ weightKg }),
+        }),
       );
       expect(d.calls.mock.calls[1]![1]).toMatchObject({
         input: { carrier, note: `${carrier} shipment tx1` },
@@ -137,28 +165,55 @@ describe("shipOrder", () => {
   );
 
   it("finds a resumable Shippo parcel under the carrier it was recorded as, not under Shippo", async () => {
-    const shippo = fakeProvider("Shippo", TRACKED, { reference: "tx1", trackingNumber: "8503175446", trackingUrl: null });
+    const shippo = fakeProvider("Shippo", TRACKED, {
+      reference: "tx1",
+      trackingNumber: "8503175446",
+      trackingUrl: null,
+    });
     const d = deps(
       order({
         shippingMethod: { id: "dhl-express" },
         shippingAddress: { ...ADDRESS, country: "NO" },
         shipments: [
-          { id: "s1", carrier: "DHL Express", trackingNumber: null, events: [{ note: "DHL Express shipment tx1" }] },
+          {
+            id: "s1",
+            carrier: "DHL Express",
+            trackingNumber: null,
+            events: [{ note: "DHL Express shipment tx1" }],
+          },
         ],
       }),
       { shippo },
     );
 
-    expect(await shipOrder("o1", d)).toMatchObject({ shipped: { carrier: "DHL Express" } });
+    expect(await shipOrder("o1", d)).toMatchObject({
+      shipped: { carrier: "DHL Express" },
+    });
     expect(shippo.book).not.toHaveBeenCalled();
     expect(shippo.resume).toHaveBeenCalledWith("tx1");
   });
 
   it.each([
-    ["an unpaid order", order({ paymentStatus: "unpaid" }), "order is not paid"],
-    ["an order without an address", order({ shippingAddress: null }), "order has no shipping method or address"],
-    ["a pallet", order({ shippingMethod: { id: "pallet" } }), "no provider for this shipping method"],
-    ["a courier abroad", order({ shippingAddress: { ...ADDRESS, country: "DE" } }), "no provider for this shipping method"],
+    [
+      "an unpaid order",
+      order({ paymentStatus: "unpaid" }),
+      "order is not paid",
+    ],
+    [
+      "an order without an address",
+      order({ shippingAddress: null }),
+      "order has no shipping method or address",
+    ],
+    [
+      "a pallet",
+      order({ shippingMethod: { id: "pallet" } }),
+      "no provider for this shipping method",
+    ],
+    [
+      "a courier abroad",
+      order({ shippingAddress: { ...ADDRESS, country: "DE" } }),
+      "no provider for this shipping method",
+    ],
   ])("leaves %s alone", async (_label, current, skipped) => {
     const inpost = fakeProvider("InPost", TRACKED);
     const d = deps(current, { inpost });
@@ -171,14 +226,18 @@ describe("shipOrder", () => {
   it("says so when the routed carrier has no credentials", async () => {
     const d = deps(order(), { inpost: null });
 
-    expect(await shipOrder("o1", d)).toEqual({ skipped: "inpost is not configured" });
+    expect(await shipOrder("o1", d)).toEqual({
+      skipped: "inpost is not configured",
+    });
   });
 
   it("does not book twice when the parcel already has a tracking number", async () => {
     const inpost = fakeProvider("InPost", TRACKED);
     const d = deps(
       order({
-        shipments: [{ id: "s1", carrier: "InPost", trackingNumber: "X", events: [] }],
+        shipments: [
+          { id: "s1", carrier: "InPost", trackingNumber: "X", events: [] },
+        ],
       }),
       { inpost },
     );
@@ -193,13 +252,20 @@ describe("shipOrder", () => {
     const d = deps(
       order({
         shipments: [
-          { id: "s1", carrier: "InPost", trackingNumber: null, events: [{ note: "dropped at the locker" }] },
+          {
+            id: "s1",
+            carrier: "InPost",
+            trackingNumber: null,
+            events: [{ note: "dropped at the locker" }],
+          },
         ],
       }),
       { inpost },
     );
 
-    expect(await shipOrder("o1", d)).toEqual({ skipped: "shipment recorded by hand" });
+    expect(await shipOrder("o1", d)).toEqual({
+      skipped: "shipment recorded by hand",
+    });
     expect(inpost.book).not.toHaveBeenCalled();
   });
 
@@ -208,7 +274,12 @@ describe("shipOrder", () => {
     const d = deps(
       order({
         shipments: [
-          { id: "s1", carrier: "InPost", trackingNumber: null, events: [{ note: "InPost shipment 9001" }] },
+          {
+            id: "s1",
+            carrier: "InPost",
+            trackingNumber: null,
+            events: [{ note: "InPost shipment 9001" }],
+          },
         ],
       }),
       { inpost },
@@ -232,7 +303,11 @@ describe("shipOrder", () => {
   });
 
   it("records a parcel still waiting for its number and reports it pending", async () => {
-    const inpost = fakeProvider("InPost", { reference: "9001", trackingNumber: null, trackingUrl: null });
+    const inpost = fakeProvider("InPost", {
+      reference: "9001",
+      trackingNumber: null,
+      trackingUrl: null,
+    });
     const d = deps(order(), { inpost });
 
     expect(await shipOrder("o1", d)).toEqual({
@@ -244,32 +319,49 @@ describe("shipOrder", () => {
   });
 
   it("reports pending again while the resumed parcel has no number, writing nothing", async () => {
-    const inpost = fakeProvider("InPost", TRACKED, { reference: "9001", trackingNumber: null, trackingUrl: null });
+    const inpost = fakeProvider("InPost", TRACKED, {
+      reference: "9001",
+      trackingNumber: null,
+      trackingUrl: null,
+    });
     const d = deps(
       order({
         shipments: [
-          { id: "s1", carrier: "InPost", trackingNumber: null, events: [{ note: "InPost shipment 9001" }] },
+          {
+            id: "s1",
+            carrier: "InPost",
+            trackingNumber: null,
+            events: [{ note: "InPost shipment 9001" }],
+          },
         ],
       }),
       { inpost },
     );
 
-    expect(await shipOrder("o1", d)).toEqual({ pending: { carrier: "InPost", reference: "9001" } });
+    expect(await shipOrder("o1", d)).toEqual({
+      pending: { carrier: "InPost", reference: "9001" },
+    });
     expect(d.calls).toHaveBeenCalledTimes(1);
   });
 
   it("throws when cmssy refuses to record the parcel, so the delivery is retried", async () => {
     const inpost = fakeProvider("InPost", TRACKED);
-    const d = deps(order(), { inpost }, [{ message: "boom", extensions: { code: "INTERNAL" } }]);
+    const d = deps(order(), { inpost }, [
+      { message: "boom", extensions: { code: "INTERNAL" } },
+    ]);
 
-    await expect(shipOrder("o1", d)).rejects.toThrow("record the shipment - boom");
+    await expect(shipOrder("o1", d)).rejects.toThrow(
+      "record the shipment - boom",
+    );
   });
 
   it("skips an order cmssy cannot find", async () => {
     const d = {
       providers: {},
       request: (async () => ({
-        errors: [{ message: "Order not found", extensions: { code: "NOT_FOUND" } }],
+        errors: [
+          { message: "Order not found", extensions: { code: "NOT_FOUND" } },
+        ],
       })) as unknown as ShipDeps["request"],
     };
 

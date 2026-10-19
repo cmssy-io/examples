@@ -78,11 +78,13 @@ function shippo(
   customsSigner: string | null = "Demo Ops",
 ) {
   const queue = [...responses];
-  const fetch = vi.fn(async (_url: string, _init?: RequestInit) => {
-    const next = queue.shift();
-    if (!next) throw new Error("unexpected request");
-    return next();
-  });
+  const fetch = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(
+    async () => {
+      const next = queue.shift();
+      if (!next) throw new Error("unexpected request");
+      return next();
+    },
+  );
   const provider = createShippo({
     token: "shippo_test_t",
     origins: ORIGINS,
@@ -90,7 +92,10 @@ function shippo(
     fetch: fetch as unknown as typeof globalThis.fetch,
   });
   const body = (call: number) =>
-    JSON.parse(String(fetch.mock.calls[call]![1]!.body)) as Record<string, unknown>;
+    JSON.parse(String(fetch.mock.calls[call]![1]!.body)) as Record<
+      string,
+      unknown
+    >;
   return { provider, fetch, body };
 }
 
@@ -327,7 +332,12 @@ describe("createShippo", () => {
   it("returns a queued label as pending and resumes it by its transaction id", async () => {
     const { provider, fetch } = shippo([
       () => json(RATES),
-      () => json({ object_id: "tx1", status: "QUEUED", tracking_number: "PROVISIONAL" }),
+      () =>
+        json({
+          object_id: "tx1",
+          status: "QUEUED",
+          tracking_number: "PROVISIONAL",
+        }),
       () => json(SOLD),
     ]);
 
