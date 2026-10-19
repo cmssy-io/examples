@@ -135,6 +135,64 @@ its other operations against, so `services/payments.ts` carries that one mutatio
 Locally, `stripe listen --forward-to localhost:3000/api/stripe/webhook` prints the webhook secret to
 use. Test cards: `4242 4242 4242 4242`, any future date, any CVC.
 
+### Shipping a paid order with Shippo
+
+cmssy holds no carrier account either. It sends `order.paid` to a workspace webhook; this app books
+the parcel with the carrier and writes the tracking number back as a shipment on the order, so the
+buyer's order page shows it.
+
+| Variable | What it is |
+| --- | --- |
+| `CMSSY_WEBHOOK_SECRET` | signing secret of a cmssy webhook at `<origin>/api/cmssy/webhook` subscribed to `order.paid` (Settings -> Webhooks) |
+| `SHIPPO_API_TOKEN` | Shippo API token (Settings -> API). A `shippo_test_` token buys free test labels on Shippo's own carrier accounts; DHL Express needs "Activate Account" under Settings -> Carriers first |
+| `SHIPPO_ADDRESS_FROM_US`, `SHIPPO_ADDRESS_FROM_DE` | `object_id` of a Shippo address for each warehouse, created once with `POST /addresses`. A warehouse without one is off |
+| `SHIPPO_CUSTOMS_SIGNER` | the name that certifies the customs declaration on parcels leaving the EU or the US; without it those parcels are refused |
+
+`CMSSY_API_TOKEN` from the Stripe section is needed too: it reads the order and records the parcel.
+Without them shipping is simply off, and orders are left for a person to ship.
+
+Which carrier ships an order is decided by the shipping method the buyer chose and the destination
+country, in `SHIPPING_ROUTES` in `lib/shipping.ts`:
+
+| Shipping method id | Destination | Carrier |
+| --- | --- | --- |
+| `us-ground`, `us-priority` | US | USPS Ground Advantage, Priority Mail, from the US warehouse |
+| `dhl-express` | Nordics, UK, much of the EU | DHL Express Worldwide, from the US warehouse |
+| `nordic-letter` | NO, SE, DK, FI | Deutsche Post Maxibrief Plus, from the German warehouse |
+
+Anything else - pickup, pallets, a courier to another country - is left alone. A parcel is booked as
+one box of the route's size: `DEFAULT_PARCEL` (5 kg, 40 x 30 x 20 cm), or `SMALL_PARCEL` (1.5 kg,
+30 x 20 x 10 cm) for the letter service. The webhook carries no weights, and a real shop would size
+it from its own product data.
+
+Shippo picks no carrier on its own here: the route names the service level, the app asks Shippo for
+rates and buys exactly that one, and an order the service cannot take (no rate offered) is refused.
+A parcel leaving the EU or the US carries a customs declaration built from the order lines, with
+the parcel weight spread over the units. The shipment is recorded under the real carrier - USPS,
+DHL Express, Deutsche Post - with the Shippo transaction id in its note.
+
+No label is bought before the parcel is claimed. The route reads the order back from the admin API
+and calls `createShipment` with an `idempotencyKey` (`<provider>:<order id>:<carrier>`) and a note
+carrying a random claim token. cmssy keeps at most one shipment per key, so of two deliveries of the
+same webhook only one finds its own token on the parcel and books; the other answers 503 with
+`Retry-After: 60`. A redelivery then finds the claimed parcel and acts on it:
+
+| The claimed parcel | What the route does |
+| --- | --- |
+| has a tracking number | nothing - already shipped |
+| notes a Shippo transaction id | asks Shippo for the tracking number and fills it in (a label Shippo queued gets it a few seconds later) |
+| notes that the carrier did not make the booking (it answered 5xx or 429) | books again on the same parcel |
+| is still a bare claim younger than two minutes | 503 - another delivery is booking it |
+| is a bare claim older than that | marks it `exception` for a person: the booking may or may not exist at the carrier, and buying again could pay for two labels |
+| is `exception` | nothing - it waits for a person |
+
+A carrier refusing the booking (a bad postcode, a street without a building number, no rate for the
+service) marks the parcel `exception` with the reason and is answered 200 with `handled: false` - a
+retry would be refused the same way. A carrier outage is noted on the parcel and answered 500, and
+cmssy tries again. A parcel of that carrier recorded by hand, without the key, is left alone.
+
+Recording a shipment marks the order fulfilled, the same as doing it by hand in the admin.
+
 ## Project structure
 
 ```
@@ -147,6 +205,7 @@ app/(shop)/
   cart/ account/ order/  cart, sign-in, order history and receipts
 app/api/draft/route.ts   draft/preview mode entry (createDraftRoute)
 app/api/stripe/webhook/  verifies Stripe's signature, records the payment on the order
+app/api/cmssy/webhook/   verifies cmssy's signature, books a paid order's parcel with the carrier
 app/sitemap.ts robots.ts SEO built from the workspace's pages plus the catalogue
 blocks/                  14 blocks; each is block.ts + Component.tsx + CSS Module
 cmssy/

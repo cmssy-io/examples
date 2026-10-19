@@ -23,7 +23,7 @@ workspace id and a token of your own.
 | Example | Framework | What it shows |
 | --- | --- | --- |
 | [simple-blog](./simple-blog) | Next.js | Blog listing with a server `loader`, rich text, model records bound via `fields.relation` |
-| [next-storefront](./next-storefront) | Next.js | The full shop: products, categories, cart, checkout, member accounts, order history, quick order and card payment as Server Actions |
+| [next-storefront](./next-storefront) | Next.js | The full shop: products, categories, cart, checkout, member accounts, order history, quick order and card payment as Server Actions, carrier booking (USPS, DHL Express or Deutsche Post through Shippo) from a cmssy webhook |
 | [astro-storefront](./astro-storefront) | Astro | The framework integration: the same content site, catalogue and guest cart on Astro - server-rendered pages with islands only where the cart needs a browser, Astro Actions, nanostores across islands |
 | [remix-storefront](./remix-storefront) | React Router 8 | The framework integration on React Router (Remix): resource routes, middleware-held request context, locale prefix routing |
 | [vite-spa](./vite-spa) | React + Vite | No adapter package, no server, no proxy: the browser talks to the delivery API directly, so the block registry and `fields` work without a framework adapter |
@@ -46,12 +46,12 @@ footer link's target, the category a navigation entry points at, the page a blog
 cmssy stores them once instead of once per locale and folds them back in before delivery - the
 components read them unchanged.
 
-Measured 2026-10-10: four of the five examples register the whole block set -
+Measured 2026-10-10 (`assertRender` counts 2026-10-19): four of the five examples register the whole block set -
 `next-storefront`, `astro-storefront` and `remix-storefront` 14 `defineBlock` calls each, and
 `vite-spa` 13. `simple-blog` registers 2, which is its entire surface: a `/blog` listing and
 a post. Every example carries `assertRender` targets in `examples.json` and none is marked
-`buildOnly`, so all five are asserted in CI - `next-storefront` 6, `astro-storefront` 18,
-`remix-storefront` 20, `vite-spa` 1 and `simple-blog` 6 targets.
+`buildOnly`, so all five are asserted in CI - `next-storefront` 15, `astro-storefront` 22,
+`remix-storefront` 24, `vite-spa` 1 and `simple-blog` 6 targets.
 
 ## Why this repo exists
 
