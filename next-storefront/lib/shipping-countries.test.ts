@@ -49,7 +49,9 @@ describe("countryOptions", () => {
   });
 
   it("falls back to the code for a locale it cannot name in", () => {
-    expect(countryOptions(["PL"], "not a locale!")).toEqual([
+    expect(countryOptions(["PL", "DE", "NO"], "not a locale!")).toEqual([
+      { code: "DE", name: "DE" },
+      { code: "NO", name: "NO" },
       { code: "PL", name: "PL" },
     ]);
   });

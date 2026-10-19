@@ -30,7 +30,8 @@ export function countryOptions(
   } catch {
     names = null;
   }
+  const collation = names ? locale : undefined;
   return codes
     .map((code) => ({ code, name: names?.of(code) ?? code }))
-    .sort((a, b) => a.name.localeCompare(b.name, locale));
+    .sort((a, b) => a.name.localeCompare(b.name, collation));
 }
