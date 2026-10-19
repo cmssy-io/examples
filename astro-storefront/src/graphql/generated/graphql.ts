@@ -77,8 +77,6 @@ export type ShipmentStatus =
   | 'label_purchased'
   | 'out_for_delivery'
   | 'pending'
-  /** Accepted as input and stored as returned_to_sender, never returned. Removed in CMS-2102. */
-  | 'returned'
   | 'returned_to_sender';
 
 /** Postal address for the order, frozen on the order at checkout (CMS-913). */
