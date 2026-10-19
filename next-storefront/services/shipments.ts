@@ -137,6 +137,10 @@ const defaultDeps = (): ShipDeps => ({
   claimToken: () => randomUUID(),
 });
 
+export interface ShipOptions {
+  retry?: boolean;
+}
+
 async function mutate(
   deps: ShipDeps,
   query: string,
@@ -152,8 +156,17 @@ export function shipmentKey(
   provider: ProviderName,
   orderId: string,
   carrier: string,
+  attempt = 1,
 ): string {
-  return `${provider}:${orderId}:${carrier}`;
+  const key = `${provider}:${orderId}:${carrier}`;
+  return attempt === 1 ? key : `${key}:${attempt}`;
+}
+
+export function attemptOf(key: string | null, base: string): number | null {
+  if (key === base) return 1;
+  if (!key?.startsWith(`${base}:`)) return null;
+  const attempt = Number(key.slice(base.length + 1));
+  return Number.isInteger(attempt) && attempt > 1 ? attempt : null;
 }
 
 export function claimNote(carrier: string, token: string): string {
@@ -167,6 +180,7 @@ export function notMadeNote(carrier: string, reason: string): string {
 export async function shipOrder(
   orderId: string,
   deps: ShipDeps = defaultDeps(),
+  options: ShipOptions = {},
 ): Promise<ShipOutcome> {
   const { data, errors } = await deps.request<{
     order?: { get?: ShippingOrder | null };
@@ -190,7 +204,7 @@ export async function shipOrder(
   const provider = deps.providers[route.provider];
   if (!provider) return { skipped: `${route.provider} is not configured` };
   const { carrier } = route;
-  const key = shipmentKey(route.provider, order.id, carrier);
+  const base = shipmentKey(route.provider, order.id, carrier);
   const address = order.shippingAddress;
 
   const update = (
@@ -244,6 +258,7 @@ export async function shipOrder(
       {
         trackingNumber: booked.trackingNumber,
         trackingUrl: booked.trackingUrl,
+        labelUrl: booked.labelUrl,
         note: referenceNote(carrier, booked.reference),
       },
       "record the shipment",
@@ -254,11 +269,7 @@ export async function shipOrder(
     return { shipped: { ...booked, carrier } };
   };
 
-  const claimed = order.shipments.find((s) => s.idempotencyKey === key);
-  if (!claimed) {
-    if (order.shipments.some((s) => s.carrier === carrier)) {
-      return { skipped: "shipment recorded by hand" };
-    }
+  const claim = async (key: string): Promise<ShipOutcome> => {
     const note = claimNote(carrier, deps.claimToken());
     const res = await deps.request<{
       order?: { createShipment?: { shipments: ShipmentRow[] } };
@@ -279,12 +290,38 @@ export async function shipOrder(
       return { pending: { carrier, reference: null } };
     }
     return book(mine.id);
+  };
+
+  const attempts = order.shipments
+    .map((shipment) => ({
+      shipment,
+      attempt: attemptOf(shipment.idempotencyKey, base),
+    }))
+    .filter(
+      (entry): entry is { shipment: ShipmentRow; attempt: number } =>
+        entry.attempt !== null,
+    )
+    .sort((a, b) => a.attempt - b.attempt);
+  const latest = attempts[attempts.length - 1];
+
+  if (!latest) {
+    if (order.shipments.some((s) => s.carrier === carrier)) {
+      return { skipped: "shipment recorded by hand" };
+    }
+    return claim(base);
   }
 
+  const claimed = latest.shipment;
   if (claimed.trackingNumber) return { skipped: "already shipped" };
-  if (claimed.status === "exception") {
+  if (claimed.status === "exception" || claimed.status === "canceled") {
+    if (options.retry) {
+      return claim(shipmentKey(route.provider, order.id, carrier, latest.attempt + 1));
+    }
     return {
-      skipped: "the booking needs a person: see the shipment on the order",
+      skipped:
+        claimed.status === "canceled"
+          ? "the last booking was canceled"
+          : "the booking needs a person: see the shipment on the order",
     };
   }
   const reference = claimed.events
@@ -298,6 +335,7 @@ export async function shipOrder(
       {
         trackingNumber: resumed.trackingNumber,
         trackingUrl: resumed.trackingUrl,
+        labelUrl: resumed.labelUrl,
       },
       "record the tracking number",
     );

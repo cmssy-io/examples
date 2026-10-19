@@ -40,6 +40,7 @@ export interface BookedShipment {
   reference: string;
   trackingNumber: string | null;
   trackingUrl: string | null;
+  labelUrl: string | null;
 }
 
 export interface ShippingProvider {

@@ -71,6 +71,7 @@ const SOLD = {
   tracking_number: "9334620845500002019083",
   tracking_url_provider:
     "https://tools.usps.com/go/TrackConfirmAction_input?origTrackNum=9334620845500002019083",
+  label_url: "https://deliver.goshippo.com/tx1.pdf",
 };
 
 function shippo(
@@ -125,6 +126,7 @@ describe("createShippo", () => {
       reference: "tx1",
       trackingNumber: SOLD.tracking_number,
       trackingUrl: SOLD.tracking_url_provider,
+      labelUrl: SOLD.label_url,
     });
     expect(fetch.mock.calls[0]![0]).toBe("https://api.goshippo.com/shipments/");
     expect(fetch.mock.calls[0]![1]!.headers).toMatchObject({
@@ -386,10 +388,12 @@ describe("createShippo", () => {
       reference: "tx1",
       trackingNumber: null,
       trackingUrl: null,
+      labelUrl: null,
     });
     expect(await provider.resume("tx1")).toMatchObject({
       reference: "tx1",
       trackingNumber: SOLD.tracking_number,
+      labelUrl: SOLD.label_url,
     });
     expect(fetch.mock.calls[2]![0]).toBe(
       "https://api.goshippo.com/transactions/tx1",

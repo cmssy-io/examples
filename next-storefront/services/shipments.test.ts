@@ -6,6 +6,7 @@ import {
 } from "@/lib/shipping";
 import type { AdminResult } from "./admin";
 import {
+  attemptOf,
   CLAIM_TIMEOUT_MS,
   claimNote,
   notMadeNote,
@@ -145,6 +146,7 @@ const TRACKED: BookedShipment = {
   trackingNumber: "9405500106025018341219",
   trackingUrl:
     "https://tools.usps.com/go/TrackConfirmAction?tLabels=9405500106025018341219",
+  labelUrl: "https://deliver.goshippo.com/9001.pdf",
 };
 
 describe("shipOrder", () => {
@@ -185,6 +187,7 @@ describe("shipOrder", () => {
         shipmentId: "s1",
         trackingNumber: TRACKED.trackingNumber,
         trackingUrl: TRACKED.trackingUrl,
+        labelUrl: TRACKED.labelUrl,
         note: "USPS shipment 9001",
       },
     ]);
@@ -223,6 +226,7 @@ describe("shipOrder", () => {
         reference: "tx1",
         trackingNumber: "8503175446",
         trackingUrl: null,
+        labelUrl: null,
       });
       const d = deps(
         order({
@@ -239,6 +243,7 @@ describe("shipOrder", () => {
           reference: "tx1",
           trackingNumber: "8503175446",
           trackingUrl: null,
+          labelUrl: null,
           carrier,
         },
       });
@@ -354,6 +359,7 @@ describe("shipOrder", () => {
         shipmentId: "s1",
         trackingNumber: TRACKED.trackingNumber,
         trackingUrl: TRACKED.trackingUrl,
+        labelUrl: TRACKED.labelUrl,
       },
     ]);
   });
@@ -363,6 +369,7 @@ describe("shipOrder", () => {
       reference: "9001",
       trackingNumber: null,
       trackingUrl: null,
+      labelUrl: null,
     });
     const d = deps(order(), { shippo });
 
@@ -380,6 +387,7 @@ describe("shipOrder", () => {
       reference: "9001",
       trackingNumber: null,
       trackingUrl: null,
+      labelUrl: null,
     });
     const d = deps(
       order({ shipments: [claimed([{ note: "USPS shipment 9001" }])] }),
@@ -438,6 +446,151 @@ describe("shipOrder", () => {
     expect(writes(d, "UpdateShipment")).toEqual([
       expect.objectContaining({ shipmentId: "s1", status: "exception" }),
     ]);
+  });
+
+  describe("when a person asks for the label again", () => {
+    const refused = (overrides: Record<string, unknown> = {}) =>
+      claimed([{ note: "USPS booking refused: no state" }], {
+        status: "exception",
+        ...overrides,
+      });
+
+    it("claims the next attempt after the admin canceled the failed one", async () => {
+      const shippo = fakeProvider("USPS", TRACKED);
+      const d = deps(order({ shipments: [refused({ status: "canceled" })] }), {
+        shippo,
+      });
+
+      expect(await shipOrder("o1", d, { retry: true })).toEqual({
+        shipped: { ...TRACKED, carrier: "USPS" },
+      });
+      expect(writes(d, "ClaimShipment")[0]).toMatchObject({
+        idempotencyKey: `${KEY}:2`,
+      });
+    });
+
+    it("starts nothing for a canceled booking unless asked to", async () => {
+      const shippo = fakeProvider("USPS", TRACKED);
+      const d = deps(order({ shipments: [refused({ status: "canceled" })] }), {
+        shippo,
+      });
+
+      expect(await shipOrder("o1", d)).toEqual({
+        skipped: "the last booking was canceled",
+      });
+      expect(writes(d, "ClaimShipment")).toEqual([]);
+    });
+
+    it("claims the next attempt under a new key and books it", async () => {
+      const shippo = fakeProvider("USPS", TRACKED);
+      const d = deps(order({ shipments: [refused()] }), { shippo });
+
+      const outcome = await shipOrder("o1", d, { retry: true });
+
+      expect(outcome).toEqual({ shipped: { ...TRACKED, carrier: "USPS" } });
+      expect(writes(d, "ClaimShipment")).toEqual([
+        {
+          orderId: "o1",
+          carrier: "USPS",
+          idempotencyKey: `${KEY}:2`,
+          note: claimNote("USPS", TOKEN),
+        },
+      ]);
+      expect(shippo.book).toHaveBeenCalledTimes(1);
+    });
+
+    it("counts from the latest attempt", async () => {
+      const shippo = fakeProvider("USPS", TRACKED);
+      const d = deps(
+        order({
+          shipments: [
+            refused({ id: "s3", idempotencyKey: `${KEY}:3` }),
+            refused(),
+            refused({ id: "s2", idempotencyKey: `${KEY}:2` }),
+          ],
+        }),
+        { shippo },
+      );
+
+      await shipOrder("o1", d, { retry: true });
+
+      expect(writes(d, "ClaimShipment")[0]).toMatchObject({
+        idempotencyKey: `${KEY}:4`,
+      });
+    });
+
+    it("books nothing when another delivery already claimed the next attempt", async () => {
+      const shippo = fakeProvider("USPS", TRACKED);
+      const d = deps(
+        order({ shipments: [refused()] }),
+        { shippo },
+        { claimNoteOnServer: claimNote("USPS", "other") },
+      );
+
+      expect(await shipOrder("o1", d, { retry: true })).toEqual({
+        pending: { carrier: "USPS", reference: null },
+      });
+      expect(shippo.book).not.toHaveBeenCalled();
+    });
+
+    it("leaves a shipped latest attempt alone", async () => {
+      const shippo = fakeProvider("USPS", TRACKED);
+      const d = deps(
+        order({
+          shipments: [
+            refused(),
+            claimed([{ note: "USPS shipment 9001" }], {
+              id: "s2",
+              idempotencyKey: `${KEY}:2`,
+              trackingNumber: "T1",
+            }),
+          ],
+        }),
+        { shippo },
+      );
+
+      expect(await shipOrder("o1", d, { retry: true })).toEqual({
+        skipped: "already shipped",
+      });
+      expect(writes(d, "ClaimShipment")).toEqual([]);
+    });
+
+    it("does not start a new attempt while the latest one is still booking", async () => {
+      const shippo = fakeProvider("USPS", TRACKED);
+      const d = deps(
+        order({
+          shipments: [
+            refused(),
+            claimed([{ note: claimNote("USPS", "other") }], {
+              id: "s2",
+              idempotencyKey: `${KEY}:2`,
+            }),
+          ],
+        }),
+        { shippo },
+      );
+
+      expect(await shipOrder("o1", d, { retry: true })).toEqual({
+        pending: { carrier: "USPS", reference: null },
+      });
+      expect(writes(d, "ClaimShipment")).toEqual([]);
+    });
+  });
+
+  describe("attemptOf", () => {
+    it.each([
+      [KEY, 1],
+      [`${KEY}:2`, 2],
+      [`${KEY}:12`, 12],
+      [`${KEY}:1`, null],
+      [`${KEY}:0`, null],
+      [`${KEY}:x`, null],
+      [`${KEY}x`, null],
+      ["shippo:o2:USPS", null],
+      [null, null],
+    ])("reads %s as attempt %s", (key, attempt) => {
+      expect(attemptOf(key, KEY)).toBe(attempt);
+    });
   });
 
   it("leaves a parcel already flagged for a person alone", async () => {

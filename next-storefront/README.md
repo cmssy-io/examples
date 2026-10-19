@@ -143,7 +143,7 @@ buyer's order page shows it.
 
 | Variable | What it is |
 | --- | --- |
-| `CMSSY_WEBHOOK_SECRET` | signing secret of a cmssy webhook at `<origin>/api/cmssy/webhook` subscribed to `order.paid` (Settings -> Webhooks) |
+| `CMSSY_WEBHOOK_SECRET` | signing secret of a cmssy webhook at `<origin>/api/cmssy/webhook` subscribed to `order.paid` and `shipment.label_requested` (Settings -> Webhooks) |
 | `SHIPPO_API_TOKEN` | Shippo API token (Settings -> API). A `shippo_test_` token buys free test labels on Shippo's own carrier accounts; DHL Express needs "Activate Account" under Settings -> Carriers first |
 | `SHIPPO_ADDRESS_FROM_US`, `SHIPPO_ADDRESS_FROM_DE` | `object_id` of a Shippo address for each warehouse, created once with `POST /addresses`. A warehouse without one is off |
 | `SHIPPO_CUSTOMS_SIGNER` | the name that certifies the customs declaration on parcels leaving the EU or the US; without it those parcels are refused |
@@ -184,12 +184,16 @@ same webhook only one finds its own token on the parcel and books; the other ans
 | notes that the carrier did not make the booking (it answered 5xx or 429) | books again on the same parcel |
 | is still a bare claim younger than two minutes | 503 - another delivery is booking it |
 | is a bare claim older than that | marks it `exception` for a person: the booking may or may not exist at the carrier, and buying again could pay for two labels |
-| is `exception` | nothing - it waits for a person |
+| is `exception` | nothing - it waits for a person (see below) |
 
 A carrier refusing the booking (a bad postcode, a street without a building number, no rate for the
 service) marks the parcel `exception` with the reason and is answered 200 with `handled: false` - a
 retry would be refused the same way. A carrier outage is noted on the parcel and answered 500, and
 cmssy tries again. A parcel of that carrier recorded by hand, without the key, is left alone.
+
+When the carrier refuses a booking, a person fixes the order (the address, usually) and presses **Retry label purchase** on the parcel in the admin. cmssy sends `shipment.label_requested`; the app claims the next attempt under the key with `:2`, `:3`... appended and books it. cmssy marks the refused parcel `canceled`; it stays on the order as its record. Only one delivery wins each attempt's key, so a double press or a redelivery buys one label.
+
+Each bought label's PDF is recorded on the parcel as `labelUrl`; the admin shows **Print label** for it.
 
 The claim leaves the order unfulfilled; it becomes fulfilled when the parcel gets its tracking number, so a refused label leaves it in the admin's Shipping problem queue still to pack.
 
