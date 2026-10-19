@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { inpostFromEnv } from "@/lib/inpost";
 import {
   referenceFromNote,
   referenceNote,
@@ -116,7 +115,6 @@ export type ProviderRegistry = Partial<
 
 export function providersFromEnv(): ProviderRegistry {
   return {
-    inpost: inpostFromEnv(),
     shippo: shippoFromEnv(),
   };
 }

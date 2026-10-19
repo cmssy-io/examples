@@ -135,7 +135,7 @@ its other operations against, so `services/payments.ts` carries that one mutatio
 Locally, `stripe listen --forward-to localhost:3000/api/stripe/webhook` prints the webhook secret to
 use. Test cards: `4242 4242 4242 4242`, any future date, any CVC.
 
-### Shipping a paid order with InPost or Shippo
+### Shipping a paid order with Shippo
 
 cmssy holds no carrier account either. It sends `order.paid` to a workspace webhook; this app books
 the parcel with the carrier and writes the tracking number back as a shipment on the order, so the
@@ -144,21 +144,18 @@ buyer's order page shows it.
 | Variable | What it is |
 | --- | --- |
 | `CMSSY_WEBHOOK_SECRET` | signing secret of a cmssy webhook at `<origin>/api/cmssy/webhook` subscribed to `order.paid` (Settings -> Webhooks) |
-| `INPOST_API_TOKEN`, `INPOST_ORGANIZATION_ID` | ShipX token and organization id, from the sandbox manager at sandbox-manager.paczkomaty.pl -> My account -> API |
-| `INPOST_SANDBOX` | `false` sends bookings to production ShipX; anything else, or unset, is the sandbox |
 | `SHIPPO_API_TOKEN` | Shippo API token (Settings -> API). A `shippo_test_` token buys free test labels on Shippo's own carrier accounts; DHL Express needs "Activate Account" under Settings -> Carriers first |
 | `SHIPPO_ADDRESS_FROM_US`, `SHIPPO_ADDRESS_FROM_DE` | `object_id` of a Shippo address for each warehouse, created once with `POST /addresses`. A warehouse without one is off |
 | `SHIPPO_CUSTOMS_SIGNER` | the name that certifies the customs declaration on parcels leaving the EU or the US; without it those parcels are refused |
 
 `CMSSY_API_TOKEN` from the Stripe section is needed too: it reads the order and records the parcel.
-A carrier without its variables is simply off, and its orders are left for a person to ship.
+Without them shipping is simply off, and orders are left for a person to ship.
 
 Which carrier ships an order is decided by the shipping method the buyer chose and the destination
 country, in `SHIPPING_ROUTES` in `lib/shipping.ts`:
 
 | Shipping method id | Destination | Carrier |
 | --- | --- | --- |
-| `courier24`, `courier-express` | PL | InPost courier |
 | `us-ground`, `us-priority` | US | USPS Ground Advantage, Priority Mail, from the US warehouse |
 | `dhl-express` | Nordics, UK, much of the EU | DHL Express Worldwide, from the US warehouse |
 | `nordic-letter` | NO, SE, DK, FI | Deutsche Post Maxibrief Plus, from the German warehouse |
@@ -183,7 +180,7 @@ same webhook only one finds its own token on the parcel and books; the other ans
 | The claimed parcel | What the route does |
 | --- | --- |
 | has a tracking number | nothing - already shipped |
-| notes a ShipX id or Shippo transaction id | asks the carrier for the tracking number and fills it in (InPost assigns it a few seconds after the booking) |
+| notes a Shippo transaction id | asks Shippo for the tracking number and fills it in (a label Shippo queued gets it a few seconds later) |
 | notes that the carrier did not make the booking (it answered 5xx or 429) | books again on the same parcel |
 | is still a bare claim younger than two minutes | 503 - another delivery is booking it |
 | is a bare claim older than that | marks it `exception` for a person: the booking may or may not exist at the carrier, and buying again could pay for two labels |
@@ -194,8 +191,7 @@ service) marks the parcel `exception` with the reason and is answered 200 with `
 retry would be refused the same way. A carrier outage is noted on the parcel and answered 500, and
 cmssy tries again. A parcel of that carrier recorded by hand, without the key, is left alone.
 
-Recording a shipment marks the order fulfilled, the same as doing it by hand in the admin. The
-InPost sandbox reports no tracking statuses, so the parcel stays `pending` there.
+Recording a shipment marks the order fulfilled, the same as doing it by hand in the admin.
 
 ## Project structure
 

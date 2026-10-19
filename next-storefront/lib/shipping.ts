@@ -48,7 +48,7 @@ export interface ShippingProvider {
   resume(reference: string): Promise<BookedShipment>;
 }
 
-export type ProviderName = "inpost" | "shippo";
+export type ProviderName = "shippo";
 
 export interface ShippingRoute {
   methodId: string;
@@ -94,24 +94,6 @@ const INTERNATIONAL_EXPRESS = [
 ] as const;
 
 export const SHIPPING_ROUTES: readonly ShippingRoute[] = [
-  {
-    methodId: "courier24",
-    countries: ["PL"],
-    provider: "inpost",
-    carrier: "InPost",
-    service: null,
-    origin: null,
-    parcel: DEFAULT_PARCEL,
-  },
-  {
-    methodId: "courier-express",
-    countries: ["PL"],
-    provider: "inpost",
-    carrier: "InPost",
-    service: null,
-    origin: null,
-    parcel: DEFAULT_PARCEL,
-  },
   {
     methodId: "us-ground",
     countries: ["US"],
@@ -185,19 +167,4 @@ export class ShippingProviderError extends Error {
     super(`${carrier}: ${message}`);
     this.name = "ShippingProviderError";
   }
-}
-
-export function splitStreet(line: string): {
-  street: string;
-  buildingNumber: string;
-} | null {
-  const match = /^(.*\S)\s+(\d+[\p{L}\d/-]*)$/u.exec(line.trim());
-  if (!match) return null;
-  return { street: match[1], buildingNumber: match[2] };
-}
-
-export function splitName(name: string): { first: string; last: string } {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length < 2) return { first: parts[0] ?? "", last: parts[0] ?? "" };
-  return { first: parts.slice(0, -1).join(" "), last: parts[parts.length - 1] };
 }
