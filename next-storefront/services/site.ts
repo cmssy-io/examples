@@ -9,6 +9,7 @@ import { ttlCache } from "@/lib/ttl-cache";
 import type { SiteLocales } from "@/lib/locale-path";
 import type { LocalizedValue } from "@/lib/localized";
 import type { OrderField } from "@/graphql/types";
+import { shippingCountries } from "@/lib/shipping-countries";
 
 export interface SiteConfig {
   /** Translatable, and this cache holds no locale - resolve it at the caller. */
@@ -72,6 +73,7 @@ export interface ShopSettings {
   tax: SiteTaxRates | null;
   lowStockThreshold: number | null;
   orderFields: OrderField[];
+  shippingCountries: string[] | null;
 }
 
 const shopSettingsCache = ttlCache<ShopSettings>(60_000);
@@ -86,7 +88,12 @@ async function loadShopSettings(): Promise<ShopSettings> {
   });
   const config = data.public?.siteConfig;
   if (!config) {
-    return { tax: null, lowStockThreshold: null, orderFields: [] };
+    return {
+      tax: null,
+      lowStockThreshold: null,
+      orderFields: [],
+      shippingCountries: null,
+    };
   }
   const cart = config.publicCart ?? null;
   return {
@@ -98,6 +105,7 @@ async function loadShopSettings(): Promise<ShopSettings> {
       : null,
     lowStockThreshold: config.lowStockThreshold,
     orderFields: cart?.orderFields ?? [],
+    shippingCountries: cart ? shippingCountries(cart.shippingMethods) : null,
   };
 }
 
