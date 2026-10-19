@@ -20,7 +20,7 @@
     "types": "cmssy types --out graphql/models.ts"
   },
   "dependencies": {
-    "@cmssy/core": "^19.6.0",
+    "@cmssy/core": "^19.7.0",
     "@cmssy/next": "^19.6.0",
     "@cmssy/react": "^19.6.0",
     "@graphql-typed-document-node/core": "3.2.0",

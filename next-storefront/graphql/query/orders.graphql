@@ -5,7 +5,7 @@ query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int) {
       hasMore
       items {
         id
-        status
+        state
         subtotal
         discount
         appliedDiscount { code type value amount }
@@ -18,6 +18,7 @@ query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int) {
         refundedAmount
         paymentStatus
         fulfillmentStatus
+        deliveryStatus
         amountPaid
         balanceDue
         shipments { carrier trackingNumber trackingUrl status updatedAt }
@@ -25,6 +26,7 @@ query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int) {
         invoiceUrl
         paidAt
         fulfilledAt
+        deliveredAt
         createdAt
         orderNumber
         poNumber
@@ -43,7 +45,7 @@ query MyOrder($workspaceId: ID!, $id: ID!) {
   account {
     order(workspaceId: $workspaceId, id: $id) {
       id
-      status
+      state
       subtotal
       discount
       appliedDiscount { code type value amount }
@@ -56,6 +58,7 @@ query MyOrder($workspaceId: ID!, $id: ID!) {
       refundedAmount
       paymentStatus
       fulfillmentStatus
+      deliveryStatus
       amountPaid
       balanceDue
       shipments { carrier trackingNumber trackingUrl status updatedAt }
@@ -63,6 +66,7 @@ query MyOrder($workspaceId: ID!, $id: ID!) {
       invoiceUrl
       paidAt
       fulfilledAt
+      deliveredAt
       createdAt
       orderNumber
       poNumber

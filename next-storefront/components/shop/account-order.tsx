@@ -18,20 +18,16 @@ function paymentVariant(status: string | undefined): BadgeVariant {
   return "warning";
 }
 
-function fulfilmentVariant(status: string | undefined): BadgeVariant {
-  if (status === "fulfilled" || status === "shipped") return "success";
-  if (status === "processing" || status === "picking") return "info";
+function fulfilmentVariant(status: string): BadgeVariant {
+  if (status === "fulfilled") return "success";
+  if (status === "partially_fulfilled") return "info";
   return "neutral";
 }
 
-function fulfilmentLabel(status: string | undefined, copy: ShopCopy): string {
-  const labels: Record<string, string> = {
-    fulfilled: copy.fulfilmentFulfilled,
-    shipped: copy.fulfilmentFulfilled,
-    processing: copy.fulfilmentProcessing,
-    picking: copy.fulfilmentProcessing,
-  };
-  return labels[status ?? ""] ?? copy.fulfilmentUnfulfilled;
+function fulfilmentLabel(status: string, copy: ShopCopy): string {
+  if (status === "fulfilled") return copy.fulfilmentFulfilled;
+  if (status === "partially_fulfilled") return copy.fulfilmentPartial;
+  return copy.fulfilmentUnfulfilled;
 }
 
 function formatDate(iso: string | null | undefined): string | null {
@@ -59,6 +55,11 @@ function OrderTimeline({ order, copy }: { order: Order; copy: ShopCopy }) {
       label: copy.timelineDispatched,
       at: order.fulfilledAt,
       done: Boolean(order.fulfilledAt),
+    },
+    {
+      label: copy.timelineDelivered,
+      at: order.deliveredAt,
+      done: Boolean(order.deliveredAt),
     },
   ];
 
@@ -99,29 +100,32 @@ function OrderTimeline({ order, copy }: { order: Order; copy: ShopCopy }) {
 }
 
 type Shipment = Order["shipments"][number] & {
-  status: Exclude<Order["shipments"][number]["status"], "canceled">;
+  status: Exclude<Order["shipments"][number]["status"], "canceled" | "returned">;
 };
 type ShipmentStatus = Shipment["status"];
 
 function isShown(shipment: Order["shipments"][number]): shipment is Shipment {
-  return shipment.status !== "canceled";
+  return shipment.status !== "canceled" && shipment.status !== "returned";
 }
 
 function shipmentVariant(status: ShipmentStatus): BadgeVariant {
   if (status === "delivered") return "success";
-  if (status === "exception" || status === "returned") return "warning";
-  if (status === "pending") return "neutral";
+  if (status === "exception" || status === "returned_to_sender") {
+    return "warning";
+  }
+  if (status === "pending" || status === "label_purchased") return "neutral";
   return "info";
 }
 
 function shipmentLabel(status: ShipmentStatus, copy: ShopCopy): string {
   const labels: Record<ShipmentStatus, string> = {
     pending: copy.shipmentPending,
+    label_purchased: copy.shipmentLabelPurchased,
     in_transit: copy.shipmentInTransit,
     out_for_delivery: copy.shipmentOutForDelivery,
     delivered: copy.shipmentDelivered,
     exception: copy.shipmentException,
-    returned: copy.shipmentReturned,
+    returned_to_sender: copy.shipmentReturned,
   };
   return labels[status];
 }
@@ -162,7 +166,7 @@ export function AccountOrder({
   const copy = useShopCopy();
   const parcels = order.shipments.filter(isShown);
   const canPay =
-    payOnline && order.balanceDue > 0 && order.status !== "canceled";
+    payOnline && order.balanceDue > 0 && order.state !== "canceled";
 
   return (
     <div className={styles.page}>

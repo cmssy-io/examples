@@ -491,7 +491,7 @@ describe("track", () => {
 
 describe("shipmentStatusFromShippo", () => {
   it.each([
-    [{ status: "PRE_TRANSIT" }, "pending"],
+    [{ status: "PRE_TRANSIT" }, "label_purchased"],
     [{ status: "TRANSIT" }, "in_transit"],
     [
       { status: "TRANSIT", substatus: { code: "out_for_delivery" } },
@@ -505,7 +505,7 @@ describe("shipmentStatusFromShippo", () => {
       "exception",
     ],
     [{ status: "DELIVERED" }, "delivered"],
-    [{ status: "RETURNED" }, "returned"],
+    [{ status: "RETURNED" }, "returned_to_sender"],
     [{ status: "FAILURE" }, "exception"],
     [{ status: "UNKNOWN" }, null],
     [undefined, null],

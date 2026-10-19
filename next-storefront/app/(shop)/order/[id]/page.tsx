@@ -145,7 +145,7 @@ export default async function OrderPage({
       <div className={styles.actions}>
         {payOnline() &&
         order.balanceDue > 0 &&
-        order.status !== "canceled" &&
+        order.state !== "canceled" &&
         !paid ? (
           <PayOrderButton orderId={order.id} token={token} />
         ) : null}

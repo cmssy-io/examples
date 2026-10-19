@@ -172,7 +172,7 @@ async function payExistingOrder(
   order: {
     id: string;
     orderNumber?: number | null;
-    status: string;
+    state: string;
     currency: string;
     customerEmail: string;
     balanceDue: number;
@@ -182,7 +182,7 @@ async function payExistingOrder(
   const { locale } = await shopLocale();
   const copy = copyFor(locale);
   if (!order) return { error: copy.orderNotFound };
-  if (order.status === "canceled") return { error: copy.orderCanceled };
+  if (order.state === "canceled") return { error: copy.orderCanceled };
   if (order.balanceDue <= 0) return { error: copy.orderAlreadyPaid };
   const url = await paymentUrlFor({
     id: order.id,

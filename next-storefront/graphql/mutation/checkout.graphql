@@ -3,7 +3,7 @@ mutation Checkout($input: CheckoutInput!) {
     checkout(input: $input) {
       id
       orderNumber
-      status
+      state
       subtotal
       discount
       appliedDiscount { code type value amount }

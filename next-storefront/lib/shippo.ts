@@ -78,10 +78,11 @@ interface ShippoTransaction {
 
 export type CmssyShipmentStatus =
   | "pending"
+  | "label_purchased"
   | "in_transit"
   | "out_for_delivery"
   | "delivered"
-  | "returned"
+  | "returned_to_sender"
   | "exception";
 
 export type ShippoEvent =
@@ -112,7 +113,7 @@ export function shipmentStatusFromShippo(
 ): CmssyShipmentStatus | null {
   switch (tracking?.status) {
     case "PRE_TRANSIT":
-      return "pending";
+      return "label_purchased";
     case "TRANSIT":
       if (tracking.substatus?.action_required) return "exception";
       if (tracking.substatus?.code === "out_for_delivery") {
@@ -122,7 +123,7 @@ export function shipmentStatusFromShippo(
     case "DELIVERED":
       return "delivered";
     case "RETURNED":
-      return "returned";
+      return "returned_to_sender";
     case "FAILURE":
       return "exception";
     default:

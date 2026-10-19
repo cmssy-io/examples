@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@cmssy/core':
-        specifier: ^19.6.0
-        version: 19.6.0
+        specifier: ^19.7.0
+        version: 19.7.0
       '@cmssy/next':
         specifier: ^19.6.0
         version: 19.6.0(@cmssy/react@19.6.0(react@19.2.8))(next@16.3.1(@babel/core@7.29.7)(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -173,6 +173,9 @@ packages:
   '@cmssy/core@19.6.0':
     resolution: {integrity: sha512-lkD8DUpHQVTJMp7eM9GY35Zr866C6JErHVPA+qns+esDOHOq5zTY7JzSJuIhof3SAL0Ttou5fQ4Xq7y4eyXdng==}
 
+  '@cmssy/core@19.7.0':
+    resolution: {integrity: sha512-mCHKvoeLPMRW/dg0R/8RroVVlQFrJ1yTG8qOXmp0vU4OXG4ksUEzSLVKWVe5SRxs+bV0nzh89BtQ1jI7s1hfDg==}
+
   '@cmssy/eslint-plugin@19.6.0':
     resolution: {integrity: sha512-xm6nW8hMcyxeCdxiVkWM2AEhJ6OM46lEvNQ0QMOzWsVUggNTYqEyd+JcYhvNvPeTOZPAIvDtrS+v7VFh8+vLkA==}
     peerDependencies:
@@ -193,6 +196,9 @@ packages:
 
   '@cmssy/types@0.60.0':
     resolution: {integrity: sha512-sNvmsm09H+LwZ2cTHkmsQINkRTF8PjYFc0sfwStz8L0IZwz7uLWK39N47WrgX/JlSYdXD1sak0GZ3+txv//9eQ==}
+
+  '@cmssy/types@0.61.0':
+    resolution: {integrity: sha512-wL5Io1jToiEbc+492gXGCOvBeiEWbBs82dTt8miErFXpjPeayWHce0hr3wAqRm4paSWnvgZys9tDmJsZaWwGzg==}
 
   '@emnapi/core@1.10.0':
     resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
@@ -3492,6 +3498,11 @@ snapshots:
       '@cmssy/types': 0.60.0
       jose: 6.2.9
 
+  '@cmssy/core@19.7.0':
+    dependencies:
+      '@cmssy/types': 0.61.0
+      jose: 6.2.9
+
   '@cmssy/eslint-plugin@19.6.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/parser': 8.63.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
@@ -3517,6 +3528,8 @@ snapshots:
       react: 19.2.8
 
   '@cmssy/types@0.60.0': {}
+
+  '@cmssy/types@0.61.0': {}
 
   '@emnapi/core@1.10.0':
     dependencies:

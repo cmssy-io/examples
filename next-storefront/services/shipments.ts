@@ -286,6 +286,7 @@ export async function shipOrder(
         trackingNumber: booked.trackingNumber,
         trackingUrl: booked.trackingUrl,
         labelUrl: booked.labelUrl,
+        ...(booked.trackingNumber ? { status: "label_purchased" } : {}),
         note: referenceNote(carrier, booked.reference),
       },
       "record the shipment",
@@ -369,6 +370,7 @@ export async function shipOrder(
         trackingNumber: resumed.trackingNumber,
         trackingUrl: resumed.trackingUrl,
         labelUrl: resumed.labelUrl,
+        status: "label_purchased",
       },
       "record the tracking number",
     );
@@ -416,7 +418,13 @@ const SHIPMENTS_FOR_TRACKING = `
   }
 `;
 
-const PROGRESS = ["pending", "in_transit", "out_for_delivery", "delivered"];
+const PROGRESS = [
+  "pending",
+  "label_purchased",
+  "in_transit",
+  "out_for_delivery",
+  "delivered",
+];
 
 export type TrackOutcome = { applied: string } | { skipped: string };
 
@@ -430,7 +438,9 @@ export function refundNote(reference: string): string {
 }
 
 function movesBack(from: string, to: string): boolean {
-  if (from === "delivered" || from === "returned") return to !== "returned";
+  if (from === "delivered" || from === "returned_to_sender") {
+    return to !== "returned_to_sender";
+  }
   if (to === "pending") return true;
   const fromRank = PROGRESS.indexOf(from);
   const toRank = PROGRESS.indexOf(to);
@@ -485,7 +495,7 @@ export async function applyShippoEvent(
         trackingNumber: event.trackingNumber,
         trackingUrl: event.trackingUrl,
         labelUrl: event.labelUrl,
-        status: "pending",
+        status: "label_purchased",
         note: referenceNote(carrier, event.reference),
       },
       "record the recovered label",
