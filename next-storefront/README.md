@@ -145,8 +145,8 @@ A refund can start on either side, and each side learns of the other's:
 - **Refunded in cmssy** (the order's Refund button, or `refund_order` over MCP). cmssy sends
   `order.refunded` or `order.partially_refunded`; `services/refunds.ts` reads the order's payments
   and refunds on Stripe what cmssy has refunded beyond the Stripe refunds already pending,
-  settled or known to cmssy, reading every page of the list. The refund carries `origin: cmssy` in its metadata, so the Stripe webhook that follows
-  does not record it a second time. The idempotency key names the PaymentIntent and the amount
+  settled or known to cmssy, reading every page of the list. The refund carries `origin: cmssy`
+  in its metadata, so the Stripe webhook that follows does not record it a second time. The idempotency key names the PaymentIntent and the amount
   Stripe already held, so two refund events racing each other cannot both refund the same money:
   the second trips Stripe's idempotency check, answers 500, and on cmssy's retry finds the first
   refund and refunds only what is still owed.
