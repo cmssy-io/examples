@@ -105,7 +105,7 @@ export function createInpost(options: InpostOptions): ShippingProvider {
   }
 
   return {
-    carrier: CARRIER,
+    name: CARRIER,
 
     async book(request: ShipmentRequest) {
       const { address, parcel } = request;

@@ -1,7 +1,5 @@
-import { bringFromEnv } from "@/lib/bring";
 import { inpostFromEnv } from "@/lib/inpost";
 import {
-  DEFAULT_PARCEL,
   referenceFromNote,
   referenceNote,
   routeFor,
@@ -10,7 +8,7 @@ import {
   type ShippingAddress,
   type ShippingProvider,
 } from "@/lib/shipping";
-import { siteUrl } from "@/lib/site-url";
+import { shippoFromEnv } from "@/lib/shippo";
 import {
   adminRequest,
   errorText,
@@ -26,6 +24,8 @@ const ORDER_FOR_SHIPPING = `
         orderNumber
         customerEmail
         paymentStatus
+        currency
+        items { name sku quantity price }
         shippingMethod { id }
         shippingAddress {
           name
@@ -34,6 +34,7 @@ const ORDER_FOR_SHIPPING = `
           line2
           postalCode
           city
+          region
           country
           phone
         }
@@ -69,6 +70,13 @@ interface ShippingOrder {
   orderNumber: number | null;
   customerEmail: string;
   paymentStatus: string;
+  currency: string;
+  items: Array<{
+    name: string;
+    sku: string | null;
+    quantity: number;
+    price: number;
+  }>;
   shippingMethod: { id: string } | null;
   shippingAddress: ShippingAddress | null;
   shipments: Array<{
@@ -91,7 +99,7 @@ export type ProviderRegistry = Partial<
 export function providersFromEnv(): ProviderRegistry {
   return {
     inpost: inpostFromEnv(),
-    bring: bringFromEnv(process.env, siteUrl()),
+    shippo: shippoFromEnv(),
   };
 }
 
@@ -138,24 +146,28 @@ export async function shipOrder(
     return { skipped: "order has no shipping method or address" };
   }
 
-  const name = routeFor(order.shippingMethod.id, order.shippingAddress.country);
-  if (!name) return { skipped: "no provider for this shipping method" };
-  const provider = deps.providers[name];
-  if (!provider) return { skipped: `${name} is not configured` };
+  const route = routeFor(
+    order.shippingMethod.id,
+    order.shippingAddress.country,
+  );
+  if (!route) return { skipped: "no provider for this shipping method" };
+  const provider = deps.providers[route.provider];
+  if (!provider) return { skipped: `${route.provider} is not configured` };
+  const { carrier } = route;
 
   const existing = order.shipments.find(
-    (shipment) => shipment.carrier === provider.carrier,
+    (shipment) => shipment.carrier === carrier,
   );
   if (existing?.trackingNumber) return { skipped: "already shipped" };
 
   if (existing) {
     const reference = existing.events
-      .map((event) => referenceFromNote(provider.carrier, event.note))
+      .map((event) => referenceFromNote(carrier, event.note))
       .find(Boolean);
     if (!reference) return { skipped: "shipment recorded by hand" };
     const resumed = await provider.resume(reference);
     if (!resumed.trackingNumber) {
-      return { pending: { carrier: provider.carrier, reference } };
+      return { pending: { carrier, reference } };
     }
     await mutate(
       deps,
@@ -168,7 +180,7 @@ export async function shipOrder(
       },
       "record the tracking number",
     );
-    return { shipped: { ...resumed, carrier: provider.carrier } };
+    return { shipped: { ...resumed, carrier } };
   }
 
   const booked = await provider.book({
@@ -176,24 +188,31 @@ export async function shipOrder(
     orderNumber: order.orderNumber,
     email: order.customerEmail,
     address: order.shippingAddress,
-    parcel: DEFAULT_PARCEL,
+    parcel: route.parcel,
+    service: route.service,
+    origin: route.origin,
+    currency: order.currency,
+    lines: order.items.map((item) => ({
+      name: item.name,
+      sku: item.sku,
+      quantity: item.quantity,
+      unitPrice: item.price,
+    })),
   });
   await mutate(
     deps,
     CREATE_SHIPMENT,
     {
       orderId: order.id,
-      carrier: provider.carrier,
+      carrier,
       trackingNumber: booked.trackingNumber,
       trackingUrl: booked.trackingUrl,
-      note: referenceNote(provider.carrier, booked.reference),
+      note: referenceNote(carrier, booked.reference),
     },
     "record the shipment",
   );
   if (!booked.trackingNumber) {
-    return {
-      pending: { carrier: provider.carrier, reference: booked.reference },
-    };
+    return { pending: { carrier, reference: booked.reference } };
   }
-  return { shipped: { ...booked, carrier: provider.carrier } };
+  return { shipped: { ...booked, carrier } };
 }

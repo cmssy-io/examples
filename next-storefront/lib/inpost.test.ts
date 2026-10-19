@@ -13,10 +13,15 @@ const REQUEST: ShipmentRequest = {
     line2: null,
     postalCode: "00-001",
     city: "Warszawa",
+    region: null,
     country: "pl",
     phone: "500600700",
   },
   parcel: { weightKg: 5, lengthCm: 40, widthCm: 30, heightCm: 20 },
+  service: null,
+  origin: null,
+  currency: "PLN",
+  lines: [],
 };
 
 function json(status: number, body: unknown): Response {

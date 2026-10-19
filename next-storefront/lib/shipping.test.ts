@@ -9,16 +9,22 @@ import {
 
 describe("routeFor", () => {
   it.each([
-    ["courier24", "PL", "inpost"],
-    ["courier-express", "pl", "inpost"],
-    ["bring-home", "NO", "bring"],
-  ])("sends %s to %s via the carrier that serves it", (method, country, provider) => {
-    expect(routeFor(method, country)).toBe(provider);
+    ["courier24", "PL", "inpost", "InPost"],
+    ["courier-express", "pl", "inpost", "InPost"],
+    ["us-ground", "US", "shippo", "USPS"],
+    ["us-priority", "us", "shippo", "USPS"],
+    ["dhl-express", "NO", "shippo", "DHL Express"],
+    ["dhl-express", "DE", "shippo", "DHL Express"],
+    ["nordic-letter", "FI", "shippo", "Deutsche Post"],
+  ])("sends %s to %s via %s as %s", (method, country, provider, carrier) => {
+    expect(routeFor(method, country)).toMatchObject({ provider, carrier });
   });
 
   it.each([
     ["courier24", "DE"],
-    ["bring-home", "SE"],
+    ["nordic-letter", "DE"],
+    ["us-ground", "CA"],
+    ["dhl-express", "US"],
     ["pallet", "PL"],
     ["pickup", "PL"],
   ])("leaves %s to %s for a person to ship", (method, country) => {
@@ -61,7 +67,7 @@ describe("the shipment note", () => {
   });
 
   it("ignores a note another carrier or a person wrote", () => {
-    expect(referenceFromNote("InPost", referenceNote("Bring", "70"))).toBeNull();
+    expect(referenceFromNote("InPost", referenceNote("DHL Express", "70"))).toBeNull();
     expect(referenceFromNote("InPost", "left at the gate")).toBeNull();
     expect(referenceFromNote("InPost", null)).toBeNull();
   });

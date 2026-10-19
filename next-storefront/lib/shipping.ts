@@ -5,6 +5,7 @@ export interface ShippingAddress {
   line2: string | null;
   postalCode: string;
   city: string;
+  region: string | null;
   country: string;
   phone: string | null;
 }
@@ -16,12 +17,23 @@ export interface Parcel {
   heightCm: number;
 }
 
+export interface ShipmentLine {
+  name: string;
+  sku: string | null;
+  quantity: number;
+  unitPrice: number;
+}
+
 export interface ShipmentRequest {
   orderId: string;
   orderNumber: number | null;
   email: string;
   address: ShippingAddress;
   parcel: Parcel;
+  service: string | null;
+  origin: string | null;
+  currency: string;
+  lines: ShipmentLine[];
 }
 
 export interface BookedShipment {
@@ -31,22 +43,22 @@ export interface BookedShipment {
 }
 
 export interface ShippingProvider {
-  carrier: string;
+  name: string;
   book(request: ShipmentRequest): Promise<BookedShipment>;
   resume(reference: string): Promise<BookedShipment>;
 }
 
-export type ProviderName = "inpost" | "bring";
+export type ProviderName = "inpost" | "shippo";
 
-export const SHIPPING_ROUTES: ReadonlyArray<{
+export interface ShippingRoute {
   methodId: string;
   countries: readonly string[];
   provider: ProviderName;
-}> = [
-  { methodId: "courier24", countries: ["PL"], provider: "inpost" },
-  { methodId: "courier-express", countries: ["PL"], provider: "inpost" },
-  { methodId: "bring-home", countries: ["NO"], provider: "bring" },
-];
+  carrier: string;
+  service: string | null;
+  origin: string | null;
+  parcel: Parcel;
+}
 
 export const DEFAULT_PARCEL: Parcel = {
   weightKg: 5,
@@ -55,16 +67,100 @@ export const DEFAULT_PARCEL: Parcel = {
   heightCm: 20,
 };
 
+export const SMALL_PARCEL: Parcel = {
+  weightKg: 1.5,
+  lengthCm: 30,
+  widthCm: 20,
+  heightCm: 10,
+};
+
+const INTERNATIONAL_EXPRESS = [
+  "NO",
+  "SE",
+  "DK",
+  "FI",
+  "IS",
+  "DE",
+  "FR",
+  "GB",
+  "NL",
+  "BE",
+  "AT",
+  "CH",
+  "IE",
+  "ES",
+  "IT",
+  "PL",
+] as const;
+
+export const SHIPPING_ROUTES: readonly ShippingRoute[] = [
+  {
+    methodId: "courier24",
+    countries: ["PL"],
+    provider: "inpost",
+    carrier: "InPost",
+    service: null,
+    origin: null,
+    parcel: DEFAULT_PARCEL,
+  },
+  {
+    methodId: "courier-express",
+    countries: ["PL"],
+    provider: "inpost",
+    carrier: "InPost",
+    service: null,
+    origin: null,
+    parcel: DEFAULT_PARCEL,
+  },
+  {
+    methodId: "us-ground",
+    countries: ["US"],
+    provider: "shippo",
+    carrier: "USPS",
+    service: "usps_ground_advantage",
+    origin: "us",
+    parcel: DEFAULT_PARCEL,
+  },
+  {
+    methodId: "us-priority",
+    countries: ["US"],
+    provider: "shippo",
+    carrier: "USPS",
+    service: "usps_priority",
+    origin: "us",
+    parcel: DEFAULT_PARCEL,
+  },
+  {
+    methodId: "dhl-express",
+    countries: INTERNATIONAL_EXPRESS,
+    provider: "shippo",
+    carrier: "DHL Express",
+    service: "dhl_express_worldwide",
+    origin: "us",
+    parcel: DEFAULT_PARCEL,
+  },
+  {
+    methodId: "nordic-letter",
+    countries: ["NO", "SE", "DK", "FI"],
+    provider: "shippo",
+    carrier: "Deutsche Post",
+    service: "deutsche_post_maxibrief_plus",
+    origin: "de",
+    parcel: SMALL_PARCEL,
+  },
+];
+
 export function routeFor(
   methodId: string,
   country: string,
-): ProviderName | null {
-  const route = SHIPPING_ROUTES.find(
-    (candidate) =>
-      candidate.methodId === methodId &&
-      candidate.countries.includes(country.toUpperCase()),
+): ShippingRoute | null {
+  return (
+    SHIPPING_ROUTES.find(
+      (candidate) =>
+        candidate.methodId === methodId &&
+        candidate.countries.includes(country.toUpperCase()),
+    ) ?? null
   );
-  return route?.provider ?? null;
 }
 
 export function referenceNote(carrier: string, reference: string): string {

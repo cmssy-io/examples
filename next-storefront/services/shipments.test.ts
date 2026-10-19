@@ -12,6 +12,7 @@ const ADDRESS = {
   line2: null,
   postalCode: "00-001",
   city: "Warszawa",
+  region: null,
   country: "PL",
   phone: "500600700",
 };
@@ -22,6 +23,8 @@ function order(overrides: Record<string, unknown> = {}) {
     orderNumber: 42,
     customerEmail: "buyer@example.com",
     paymentStatus: "paid",
+    currency: "EUR",
+    items: [{ name: "Oak desk", sku: "DESK-1", quantity: 2, price: 24900 }],
     shippingMethod: { id: "courier24" },
     shippingAddress: ADDRESS,
     shipments: [],
@@ -30,7 +33,7 @@ function order(overrides: Record<string, unknown> = {}) {
 }
 
 function fakeProvider(
-  carrier: string,
+  name: string,
   booked: BookedShipment,
   resumed: BookedShipment = booked,
 ): ShippingProvider & {
@@ -38,7 +41,7 @@ function fakeProvider(
   resume: ReturnType<typeof vi.fn>;
 } {
   return {
-    carrier,
+    name,
     book: vi.fn(async () => booked),
     resume: vi.fn(async () => resumed),
   };
@@ -70,19 +73,23 @@ const TRACKED: BookedShipment = {
 describe("shipOrder", () => {
   it("books the carrier the method routes to and records the parcel on the order", async () => {
     const inpost = fakeProvider("InPost", TRACKED);
-    const bring = fakeProvider("Bring", TRACKED);
-    const d = deps(order(), { inpost, bring });
+    const shippo = fakeProvider("Shippo", TRACKED);
+    const d = deps(order(), { inpost, shippo });
 
     const outcome = await shipOrder("o1", d);
 
     expect(outcome).toEqual({ shipped: { ...TRACKED, carrier: "InPost" } });
-    expect(bring.book).not.toHaveBeenCalled();
+    expect(shippo.book).not.toHaveBeenCalled();
     expect(inpost.book).toHaveBeenCalledWith({
       orderId: "o1",
       orderNumber: 42,
       email: "buyer@example.com",
       address: ADDRESS,
       parcel: { weightKg: 5, lengthCm: 40, widthCm: 30, heightCm: 20 },
+      service: null,
+      origin: null,
+      currency: "EUR",
+      lines: [{ name: "Oak desk", sku: "DESK-1", quantity: 2, unitPrice: 24900 }],
     });
     const [query, variables] = d.calls.mock.calls[1]!;
     expect(query).toContain("createShipment");
@@ -97,21 +104,54 @@ describe("shipOrder", () => {
     });
   });
 
-  it("routes a Norwegian home delivery to Bring", async () => {
-    const inpost = fakeProvider("InPost", TRACKED);
-    const bring = fakeProvider("Bring", { reference: "7043", trackingNumber: "7043", trackingUrl: null });
+  it.each([
+    ["dhl-express", "NO", "DHL Express", "dhl_express_worldwide", "us", 5],
+    ["nordic-letter", "SE", "Deutsche Post", "deutsche_post_maxibrief_plus", "de", 1.5],
+    ["us-ground", "US", "USPS", "usps_ground_advantage", "us", 5],
+  ])(
+    "books %s to %s through Shippo and records it under %s",
+    async (method, country, carrier, service, origin, weightKg) => {
+      const inpost = fakeProvider("InPost", TRACKED);
+      const shippo = fakeProvider("Shippo", { reference: "tx1", trackingNumber: "8503175446", trackingUrl: null });
+      const d = deps(
+        order({
+          shippingMethod: { id: method },
+          shippingAddress: { ...ADDRESS, country },
+        }),
+        { inpost, shippo },
+      );
+
+      const outcome = await shipOrder("o1", d);
+
+      expect(outcome).toEqual({
+        shipped: { reference: "tx1", trackingNumber: "8503175446", trackingUrl: null, carrier },
+      });
+      expect(inpost.book).not.toHaveBeenCalled();
+      expect(shippo.book).toHaveBeenCalledWith(
+        expect.objectContaining({ service, origin, parcel: expect.objectContaining({ weightKg }) }),
+      );
+      expect(d.calls.mock.calls[1]![1]).toMatchObject({
+        input: { carrier, note: `${carrier} shipment tx1` },
+      });
+    },
+  );
+
+  it("finds a resumable Shippo parcel under the carrier it was recorded as, not under Shippo", async () => {
+    const shippo = fakeProvider("Shippo", TRACKED, { reference: "tx1", trackingNumber: "8503175446", trackingUrl: null });
     const d = deps(
       order({
-        shippingMethod: { id: "bring-home" },
+        shippingMethod: { id: "dhl-express" },
         shippingAddress: { ...ADDRESS, country: "NO" },
+        shipments: [
+          { id: "s1", carrier: "DHL Express", trackingNumber: null, events: [{ note: "DHL Express shipment tx1" }] },
+        ],
       }),
-      { inpost, bring },
+      { shippo },
     );
 
-    const outcome = await shipOrder("o1", d);
-
-    expect(outcome).toMatchObject({ shipped: { carrier: "Bring", trackingNumber: "7043" } });
-    expect(inpost.book).not.toHaveBeenCalled();
+    expect(await shipOrder("o1", d)).toMatchObject({ shipped: { carrier: "DHL Express" } });
+    expect(shippo.book).not.toHaveBeenCalled();
+    expect(shippo.resume).toHaveBeenCalledWith("tx1");
   });
 
   it.each([
