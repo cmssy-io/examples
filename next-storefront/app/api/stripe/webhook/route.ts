@@ -2,11 +2,37 @@ import type Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { stripeClient, stripeWebhookSecret } from "@/lib/stripe";
 import { recordOrderPayment } from "@/services/payments";
+import { recordStripeRefund, refundFromStripe } from "@/services/refunds";
 
 const PAID_EVENTS = new Set<Stripe.Event.Type>([
   "checkout.session.completed",
   "checkout.session.async_payment_succeeded",
 ]);
+
+const REFUND_EVENTS = new Set<Stripe.Event.Type>([
+  "refund.created",
+  "refund.updated",
+]);
+
+async function handleRefund(refund: Stripe.Refund) {
+  try {
+    const outcome = await recordStripeRefund(refundFromStripe(refund));
+    if ("recorded" in outcome) {
+      return NextResponse.json({
+        received: true,
+        handled: true,
+        paymentStatus: outcome.recorded.paymentStatus,
+      });
+    }
+    if ("refused" in outcome) {
+      console.warn("stripe webhook: cmssy refused the refund", outcome.refused);
+    }
+    return NextResponse.json({ received: true, handled: false, ...outcome });
+  } catch (error) {
+    console.error("stripe webhook: refund not recorded on cmssy", error);
+    return new Response("Refund not recorded", { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   const stripe = stripeClient();
@@ -32,6 +58,9 @@ export async function POST(request: Request) {
     return new Response("Invalid Stripe signature", { status: 400 });
   }
 
+  if (REFUND_EVENTS.has(event.type)) {
+    return handleRefund(event.data.object as Stripe.Refund);
+  }
   if (!PAID_EVENTS.has(event.type)) {
     return NextResponse.json({ received: true, handled: false });
   }

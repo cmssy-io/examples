@@ -97,7 +97,7 @@ order and the confirmation page reads "awaiting payment", which is the net-30 fl
 | Variable                | Where to find it                                                                                   |
 | ----------------------- | -------------------------------------------------------------------------------------------------- |
 | `STRIPE_SECRET_KEY`     | `sk_test_...` from the Stripe dashboard, Developers -> API keys, test mode                         |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` of a webhook endpoint at `<origin>/api/stripe/webhook` subscribed to `checkout.session.completed` and `checkout.session.async_payment_succeeded` |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` of a webhook endpoint at `<origin>/api/stripe/webhook` subscribed to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `refund.created` and `refund.updated` |
 | `CMSSY_API_TOKEN`       | `cs_...` from cmssy dashboard -> Settings -> API tokens, created by a member whose role can manage orders; the token acts as that member. Server-only. Cart, checkout, order and member-auth calls also send it with the shopper's address, so cmssy's per-address limits count each shopper rather than this server; without it every shopper shares the server's budget. The address is the first `x-forwarded-for` hop, else `x-real-ip`, so deploy behind a proxy that overwrites both with the connecting address (Vercel does); behind one that passes a client's value through, a shopper can pick the address cmssy counts them under. |
 
 ### Paying an order with Stripe
@@ -132,6 +132,29 @@ which is what makes Stripe try again. The amount recorded is the one in the orde
 otherwise. `recordPayment` lives in the admin schema, outside the delivery codegen this app types
 its other operations against, so `services/payments.ts` carries that one mutation by hand.
 
+#### Refunds, either way
+
+A refund can start on either side, and each side learns of the other's:
+
+- **Refunded in the Stripe Dashboard.** `refund.created` and `refund.updated` reach the same Stripe
+  webhook. Once the refund has `succeeded`, the route reads the order id from its PaymentIntent and
+  records it with `order.refund`, the Stripe refund id as the reference - cmssy ignores a reference
+  it already holds, so both events and every retry record it once.
+- **Refunded in cmssy** (the order's Refund button, or `refund_order` over MCP). cmssy sends
+  `order.refunded` or `order.partially_refunded`; `services/refunds.ts` reads the order's payments
+  and refunds on Stripe what cmssy has refunded beyond the Stripe refunds already pending or
+  settled. The refund carries `origin: cmssy` in its metadata, so the Stripe webhook that follows
+  does not record it a second time. The idempotency key names the PaymentIntent and the amount
+  Stripe already held, so two refund events racing each other cannot both refund the same money:
+  the second trips Stripe's idempotency check, answers 500, and on cmssy's retry finds the first
+  refund and refunds only what is still owed.
+
+An order paid any other way than Stripe - a wire recorded by hand, say - is left alone: cmssy
+records the refund, and the money goes back however it came. A refund Stripe refuses (more than the
+charge holds) is logged and not retried; a refund that fails on Stripe after cmssy recorded it is
+logged as a warning, since only a person can decide what the buyer is owed then. Amounts move as
+they are, so the sync assumes the buyer paid in the order's currency.
+
 Locally, `stripe listen --forward-to localhost:3000/api/stripe/webhook` prints the webhook secret to
 use. Test cards: `4242 4242 4242 4242`, any future date, any CVC.
 
@@ -143,7 +166,7 @@ buyer's order page shows it.
 
 | Variable | What it is |
 | --- | --- |
-| `CMSSY_WEBHOOK_SECRET` | signing secret of a cmssy webhook at `<origin>/api/cmssy/webhook` subscribed to `order.paid` and `shipment.label_requested` (Settings -> Webhooks) |
+| `CMSSY_WEBHOOK_SECRET` | signing secret of a cmssy webhook at `<origin>/api/cmssy/webhook` subscribed to `order.paid`, `shipment.label_requested`, `order.refunded` and `order.partially_refunded` (Settings -> Webhooks) |
 | `SHIPPO_API_TOKEN` | Shippo API token (Settings -> API). A `shippo_test_` token buys free test labels on Shippo's own carrier accounts; DHL Express needs "Activate Account" under Settings -> Carriers first |
 | `SHIPPO_ADDRESS_FROM_US`, `SHIPPO_ADDRESS_FROM_DE` | `object_id` of a Shippo address for each warehouse, created once with `POST /addresses`. A warehouse without one is off |
 | `SHIPPO_CUSTOMS_SIGNER` | the name that certifies the customs declaration on parcels leaving the EU or the US; without it those parcels are refused |
