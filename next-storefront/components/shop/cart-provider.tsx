@@ -21,6 +21,7 @@ import {
   removeDiscountAction,
   removeItemAction,
   setShippingAction,
+  setShippingAddressAction,
   updateItemAction,
   type CartResult,
 } from "@/lib/actions/cart";
@@ -103,6 +104,7 @@ export interface CartContextValue {
   applyDiscount(code: string): Promise<boolean>;
   removeDiscount(): Promise<boolean>;
   setShippingMethod(shippingMethodId: string | null): Promise<boolean>;
+  setShippingAddress(shippingAddress: ShippingAddressInput): Promise<boolean>;
   merge(): Promise<boolean>;
   checkout(input: CheckoutInput): Promise<CheckoutOutcome>;
   refresh(): Promise<void>;
@@ -202,6 +204,8 @@ export function CartProvider({
       removeDiscount: () => run(null, () => removeDiscountAction()),
       setShippingMethod: (shippingMethodId) =>
         run(null, () => setShippingAction(shippingMethodId)),
+      setShippingAddress: (shippingAddress) =>
+        run(null, () => setShippingAddressAction(shippingAddress)),
       merge: () => run(null, () => mergeCartAction()),
       checkout: async (input) => {
         let result: Awaited<ReturnType<typeof checkoutAction>>;

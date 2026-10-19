@@ -66,6 +66,18 @@ export async function setShippingAction(
   return settle(cart.setShippingMethod(shippingMethodId));
 }
 
+export async function setShippingAddressAction(
+  shippingAddress: ShippingAddressInput,
+): Promise<CartResult> {
+  try {
+    return settle(
+      cart.setShippingAddress(parseShippingAddress(shippingAddress)),
+    );
+  } catch (err) {
+    return { error: errorMessage(err) };
+  }
+}
+
 export async function mergeCartAction(): Promise<CartResult> {
   return settle(cart.mergeCart());
 }

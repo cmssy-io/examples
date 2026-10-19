@@ -244,6 +244,14 @@ export type RemoveDiscountMutationVariables = Exact<{
 
 export type RemoveDiscountMutation = { cart: { removeDiscount: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
+export type SetShippingAddressMutationVariables = Exact<{
+  workspaceId: string | number;
+  shippingAddress?: ShippingAddressInput | null | undefined;
+}>;
+
+
+export type SetShippingAddressMutation = { cart: { setShippingAddress: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+
 export type SetShippingMethodMutationVariables = Exact<{
   workspaceId: string | number;
   shippingMethodId?: string | null | undefined;
@@ -1082,6 +1090,69 @@ export const RemoveDiscountDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<RemoveDiscountMutation, RemoveDiscountMutationVariables>;
+export const SetShippingAddressDocument = new TypedDocumentString(`
+    mutation SetShippingAddress($workspaceId: ID!, $shippingAddress: ShippingAddressInput) {
+  cart {
+    setShippingAddress(workspaceId: $workspaceId, shippingAddress: $shippingAddress) {
+      id
+      status
+      itemCount
+      subtotal
+      currency
+      discountedTotal
+      tax
+      totalGross
+      pricesIncludeTax
+      shippingTotal
+      taxSummary {
+        rateId
+        name
+        rate
+        base
+        amount
+      }
+      shippingMethod {
+        id
+        label
+        price
+        etaLabel
+      }
+      availableShippingMethods {
+        id
+        label
+        price
+        etaLabel
+      }
+      appliedDiscount {
+        code
+        type
+        value
+        computedAmount
+      }
+      items {
+        id
+        recordId
+        quantity
+        variantSelections
+        unitPrice
+        currentPrice
+        priceMismatch
+        snapshot {
+          name
+          price
+          currency
+          imageUrl
+          sku
+          tiers {
+            minQty
+            price
+          }
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SetShippingAddressMutation, SetShippingAddressMutationVariables>;
 export const SetShippingMethodDocument = new TypedDocumentString(`
     mutation SetShippingMethod($workspaceId: ID!, $shippingMethodId: String) {
   cart {
