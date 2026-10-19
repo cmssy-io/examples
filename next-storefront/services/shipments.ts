@@ -138,7 +138,7 @@ const defaultDeps = (): ShipDeps => ({
 });
 
 export interface ShipOptions {
-  retry?: boolean;
+  retryOf?: string;
 }
 
 async function mutate(
@@ -308,18 +308,23 @@ export async function shipOrder(
     .sort((a, b) => a.attempt - b.attempt);
   const latest = attempts[attempts.length - 1];
 
+  const byHand = order.shipments.some(
+    (s) => s.carrier === carrier && attemptOf(s.idempotencyKey, base) === null,
+  );
+
   if (!latest) {
-    if (order.shipments.some((s) => s.carrier === carrier)) {
-      return { skipped: "shipment recorded by hand" };
-    }
+    if (byHand) return { skipped: "shipment recorded by hand" };
     return claim(base);
   }
 
   const claimed = latest.shipment;
   if (claimed.trackingNumber) return { skipped: "already shipped" };
   if (claimed.status === "exception" || claimed.status === "canceled") {
-    if (options.retry) {
-      return claim(shipmentKey(route.provider, order.id, carrier, latest.attempt + 1));
+    if (options.retryOf === claimed.id && claimed.status === "canceled") {
+      if (byHand) return { skipped: "shipment recorded by hand" };
+      return claim(
+        shipmentKey(route.provider, order.id, carrier, latest.attempt + 1),
+      );
     }
     return {
       skipped:

@@ -191,7 +191,7 @@ service) marks the parcel `exception` with the reason and is answered 200 with `
 retry would be refused the same way. A carrier outage is noted on the parcel and answered 500, and
 cmssy tries again. A parcel of that carrier recorded by hand, without the key, is left alone.
 
-When the carrier refuses a booking, a person fixes the order (the address, usually) and presses **Retry label purchase** on the parcel in the admin. cmssy sends `shipment.label_requested`; the app claims the next attempt under the key with `:2`, `:3`... appended and books it. cmssy marks the refused parcel `canceled`; it stays on the order as its record. Only one delivery wins each attempt's key, so a double press or a redelivery buys one label.
+When the carrier refuses a booking, a person fixes the order (the address, usually) and presses **Retry label purchase** on the parcel in the admin. cmssy sends `shipment.label_requested`; the app claims the next attempt under the key with `:2`, `:3`... appended and books it - only when the event names the latest attempt and that attempt is `canceled`, so a redelivered request never starts a second one, and never when a parcel of that carrier was recorded by hand. cmssy marks the refused parcel `canceled`; it stays on the order as its record. Only one delivery wins each attempt's key, so a double press or a redelivery buys one label.
 
 Each bought label's PDF is recorded on the parcel as `labelUrl`; the admin shows **Print label** for it.
 

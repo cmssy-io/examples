@@ -10,6 +10,11 @@ const PENDING_RETRY_SECONDS = 60;
 const LABEL_REQUESTED = "shipment.label_requested";
 const HANDLED_EVENTS = new Set(["order.paid", LABEL_REQUESTED]);
 
+function requestedShipment(data: object): string | undefined {
+  const shipment = (data as { shipment?: { id?: unknown } }).shipment;
+  return typeof shipment?.id === "string" ? shipment.id : undefined;
+}
+
 export async function POST(request: Request) {
   const secret = process.env.CMSSY_WEBHOOK_SECRET;
   if (!secret || !adminToken()) {
@@ -37,7 +42,8 @@ export async function POST(request: Request) {
 
   try {
     const outcome = await shipOrder(event.data.order.id, undefined, {
-      retry: event.event === LABEL_REQUESTED,
+      retryOf:
+        event.event === LABEL_REQUESTED ? requestedShipment(event.data) : undefined,
     });
     if ("pending" in outcome) {
       return NextResponse.json(
