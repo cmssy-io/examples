@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@cmssy/core':
-        specifier: ^19.7.0
-        version: 19.7.0
+        specifier: ^19.8.0
+        version: 19.8.0
       '@cmssy/react':
-        specifier: ^19.7.0
-        version: 19.7.0(react@19.3.0)
+        specifier: ^19.8.0
+        version: 19.8.0(react@19.3.0)
       react:
         specifier: ^19.2.8
         version: 19.3.0
@@ -45,16 +45,16 @@ importers:
 
 packages:
 
-  '@cmssy/core@19.7.0':
-    resolution: {integrity: sha512-mCHKvoeLPMRW/dg0R/8RroVVlQFrJ1yTG8qOXmp0vU4OXG4ksUEzSLVKWVe5SRxs+bV0nzh89BtQ1jI7s1hfDg==}
+  '@cmssy/core@19.8.0':
+    resolution: {integrity: sha512-K+Jtni9RgxdUQESqBbwIjddn05WZ1FHasZh4L9IsksHttxIBJdCHdhrcMbXnAC6ILPfpBeU2z2f28yNIcLCVGw==}
 
-  '@cmssy/react@19.7.0':
-    resolution: {integrity: sha512-lI1kMuxik0/AmGMF9Ndwz/y6P0B3gFLCZ7B3HmmZfcFPBBEQPEV7ha1+ReGm0dJvu5qtb5qJVNgso2UtzuYmjQ==}
+  '@cmssy/react@19.8.0':
+    resolution: {integrity: sha512-er8qKxVQd0YyQpuxxnJv9RCzSH7qXmD/PeDViQCbBmv8gEPGGqcT7IF9YoTq0tcRKOJ5CJ+bxRSp/qIuwkXvSg==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
 
-  '@cmssy/types@0.61.0':
-    resolution: {integrity: sha512-wL5Io1jToiEbc+492gXGCOvBeiEWbBs82dTt8miErFXpjPeayWHce0hr3wAqRm4paSWnvgZys9tDmJsZaWwGzg==}
+  '@cmssy/types@0.62.0':
+    resolution: {integrity: sha512-Ec44Zoi5mmjIPf4MFnVeOr63+Dh2bsMGRKc5YEpxy4GUxPH6faKuoGJeI3oN8waJ54XhIurAN6GvYz8Dj8GuUA==}
 
   '@oxc-project/types@0.150.0':
     resolution: {integrity: sha512-rDS5/31E9HfPl/CIzGrn0DOlvBbXFseQ5URJ9sYMfstbKLD/c6Gm9vmRzRGDdAXyOIL4zmO37lc9RIwYqVruZw==}
@@ -447,18 +447,18 @@ packages:
 
 snapshots:
 
-  '@cmssy/core@19.7.0':
+  '@cmssy/core@19.8.0':
     dependencies:
-      '@cmssy/types': 0.61.0
+      '@cmssy/types': 0.62.0
       jose: 6.2.12
 
-  '@cmssy/react@19.7.0(react@19.3.0)':
+  '@cmssy/react@19.8.0(react@19.3.0)':
     dependencies:
-      '@cmssy/core': 19.7.0
-      '@cmssy/types': 0.61.0
+      '@cmssy/core': 19.8.0
+      '@cmssy/types': 0.62.0
       react: 19.3.0
 
-  '@cmssy/types@0.61.0': {}
+  '@cmssy/types@0.62.0': {}
 
   '@oxc-project/types@0.150.0': {}
 

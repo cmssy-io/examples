@@ -1,4 +1,8 @@
-import { CmssyWebhookError, verifyCmssyWebhook } from "@cmssy/core";
+import {
+  CmssyWebhookError,
+  verifyCmssyWebhook,
+  type CmssyWebhookReturn,
+} from "@cmssy/core";
 import { NextResponse } from "next/server";
 import { ShippingProviderError } from "@/lib/shipping";
 import { adminToken } from "@/services/admin";
@@ -10,11 +14,27 @@ export const maxDuration = 30;
 const PENDING_RETRY_SECONDS = 60;
 const LABEL_REQUESTED = "shipment.label_requested";
 const REFUND_EVENTS = new Set(["order.refunded", "order.partially_refunded"]);
+const RETURN_EVENT_PREFIX = "return.";
 const HANDLED_EVENTS = new Set(["order.paid", LABEL_REQUESTED]);
 
 function requestedShipment(data: object): string | undefined {
   const shipment = (data as { shipment?: { id?: unknown } }).shipment;
   return typeof shipment?.id === "string" ? shipment.id : undefined;
+}
+
+function acknowledgeReturn(event: string, ret: CmssyWebhookReturn | undefined) {
+  if (!ret) return NextResponse.json({ received: true, handled: false });
+  console.info("cmssy webhook: return", event, {
+    returnId: ret.id,
+    number: ret.number,
+    status: ret.status,
+  });
+  return NextResponse.json({
+    received: true,
+    handled: true,
+    returnId: ret.id,
+    status: ret.status,
+  });
 }
 
 async function refundOrder(orderId: string) {
@@ -58,6 +78,9 @@ export async function POST(request: Request) {
     throw error;
   }
 
+  if (event.event.startsWith(RETURN_EVENT_PREFIX)) {
+    return acknowledgeReturn(event.event, event.data.return);
+  }
   if (REFUND_EVENTS.has(event.event)) {
     return refundOrder(event.data.order.id);
   }

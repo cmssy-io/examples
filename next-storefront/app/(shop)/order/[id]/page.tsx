@@ -5,6 +5,7 @@ import { AccountOrder } from "@/components/shop/account-order";
 import { OrderReceipt, paymentLabel } from "@/components/shop/order-receipt";
 import { PayOrderButton } from "@/components/shop/pay-order-button";
 import { OrderCustomFields } from "@/components/shop/order-fields";
+import { OrderReturns } from "@/components/shop/order-returns";
 import { fetchShopSettings } from "@/services/site";
 import { payOnline } from "@/lib/stripe";
 import { localePath, shopLocale } from "@/lib/locale";
@@ -125,6 +126,8 @@ export default async function OrderPage({
       </div>
 
       <OrderReceipt order={order} copy={copy} />
+
+      <OrderReturns order={order} accessToken={token} />
 
       <OrderCustomFields
         values={order.customFields}
