@@ -6,6 +6,8 @@ mutation MemberUpdateProfile($fields: JSON!) {
       pendingLogin
       data
       editableFields
+      loginField
+      passwordField
     }
   }
 }

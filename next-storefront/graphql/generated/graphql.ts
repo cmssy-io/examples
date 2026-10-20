@@ -294,7 +294,7 @@ export type MemberUpdateProfileMutationVariables = Exact<{
 }>;
 
 
-export type MemberUpdateProfileMutation = { siteMember: { updateProfile: { id: string, login: string, pendingLogin: string | null, data: unknown, editableFields: Array<string> } } };
+export type MemberUpdateProfileMutation = { siteMember: { updateProfile: { id: string, login: string, pendingLogin: string | null, data: unknown, editableFields: Array<string>, loginField: string, passwordField: string } } };
 
 export type MergeCartMutationVariables = Exact<{
   workspaceId: string | number;
@@ -429,7 +429,7 @@ export type MyProfileQueryVariables = Exact<{
 }>;
 
 
-export type MyProfileQuery = { account: { profile: { id: string, login: string, pendingLogin: string | null, data: unknown, editableFields: Array<string> } } };
+export type MyProfileQuery = { account: { profile: { id: string, login: string, pendingLogin: string | null, data: unknown, editableFields: Array<string>, loginField: string, passwordField: string } } };
 
 export type PublicOrderQueryVariables = Exact<{
   workspaceId: string | number;
@@ -1068,6 +1068,8 @@ export const MemberUpdateProfileDocument = new TypedDocumentString(`
       pendingLogin
       data
       editableFields
+      loginField
+      passwordField
     }
   }
 }
@@ -1652,6 +1654,8 @@ export const MyProfileDocument = new TypedDocumentString(`
       pendingLogin
       data
       editableFields
+      loginField
+      passwordField
     }
   }
 }
