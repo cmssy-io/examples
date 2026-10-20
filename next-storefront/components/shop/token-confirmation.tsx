@@ -60,7 +60,7 @@ export function TokenConfirmation({
     setPending(true);
     try {
       const result = await confirmation.run(token);
-      setOutcome(result.ok ? "done" : copy.linkInvalid);
+      setOutcome(result.ok ? "done" : result.message || copy.linkInvalid);
     } catch (cause) {
       setOutcome(actionErrorMessage(cause, copy.linkInvalid));
     } finally {
