@@ -52,8 +52,12 @@ so every read and write here is this app's own typed GraphQL:
 - **Cart + checkout** - Server Actions in `lib/actions/`, optimistic UI with `useOptimistic`,
   cart bound to a random cart token, minted on the first write and merged into the member's cart on sign-in.
 - **Order history** - `/account` and `/order/[id]`, read through `services/orders.ts`.
+- **Member account** - `/account` edits the profile, the login and the password, and deletes the
+  account; `/verify-email`, `/reset-password`, `/forgot-password` and `/confirm-login-change`
+  host the links this app emails (see [Member account emails](#member-account-emails)).
 
-The storefront routes (`/c`, `/p`, `/cart`, `/account`, `/order`, `/quick-order`) are plain
+The storefront routes (`/c`, `/p`, `/cart`, `/account`, `/order`, `/quick-order` and the account
+pages above) are plain
 app routes, not CMS pages, so they don't consume the workspace's page quota. The catalogue
 lives in the `product` data model.
 
@@ -181,6 +185,25 @@ buyer's order page shows it.
 `CMSSY_API_TOKEN` from the Stripe section is needed too: it reads the order and records the parcel.
 Without them shipping is simply off, and orders are left for a person to ship.
 
+### Member account emails
+
+cmssy never emails a shop's members. When a member registers, asks for a password reset or asks
+to change their login, cmssy issues a single-use token and sends it to `/api/cmssy/webhook` as
+`account.verification_requested`, `account.password_reset_requested` or
+`account.login_change_requested`. The route builds the link on this site's own origin
+(`/verify-email?token=`, `/reset-password?token=`, `/confirm-login-change?token=`) and hands
+`{ to, subject, text, link, event }` to the sender in `lib/account-mail.ts`. A login change is
+mailed to the new login, which is how it proves the member owns it.
+
+| Variable | What it is |
+| --- | --- |
+| `CMSSY_WEBHOOK_SECRET` | the same cmssy webhook as above, also subscribed to the three `account.*` events. Account events need no `CMSSY_API_TOKEN` |
+| `NEXT_PUBLIC_SITE_URL` | the origin the links point at |
+| `ACCOUNT_MAIL_WEBHOOK_URL` | optional. Each mail is POSTed there as JSON for your mail provider (or a Zapier/Make hook) to send. Unset, the mail is only logged with `console.info("account mail", ...)` - enough to click the link locally |
+
+A sender that fails answers 500, so cmssy retries the delivery. To send from code instead, return
+your own `AccountMailSender` from `accountMailSender()`.
+
 Which carrier ships an order is decided by the shipping method the buyer chose and the destination
 country, in `SHIPPING_ROUTES` in `lib/shipping.ts`:
 
@@ -265,7 +288,7 @@ app/(shop)/
   cart/ account/ order/  cart, sign-in, order history and receipts
 app/api/draft/route.ts   draft/preview mode entry (createDraftRoute)
 app/api/stripe/webhook/  verifies Stripe's signature, records the payment on the order
-app/api/cmssy/webhook/   verifies cmssy's signature, books a paid order's parcel with the carrier
+app/api/cmssy/webhook/   verifies cmssy's signature, books a paid order's parcel, mails account links
 app/api/shippo/webhook/  checks the URL token, writes carrier tracking and recovered labels on the parcel
 app/sitemap.ts robots.ts SEO built from the workspace's pages plus the catalogue
 blocks/                  14 blocks; each is block.ts + Component.tsx + CSS Module

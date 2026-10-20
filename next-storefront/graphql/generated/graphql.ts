@@ -259,6 +259,43 @@ export type ClearCartMutationVariables = Exact<{
 
 export type ClearCartMutation = { cart: { clear: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
+export type MemberChangePasswordMutationVariables = Exact<{
+  currentPassword: string;
+  newPassword: string;
+}>;
+
+
+export type MemberChangePasswordMutation = { siteMember: { changePassword: { success: boolean, message: string, accessToken: string | null, refreshToken: string | null, accessTokenExpiresIn: number | null } } };
+
+export type MemberConfirmLoginChangeMutationVariables = Exact<{
+  token: string;
+}>;
+
+
+export type MemberConfirmLoginChangeMutation = { siteMember: { confirmLoginChange: { success: boolean, message: string } } };
+
+export type MemberDeleteAccountMutationVariables = Exact<{
+  currentPassword: string;
+}>;
+
+
+export type MemberDeleteAccountMutation = { siteMember: { deleteAccount: { success: boolean, message: string } } };
+
+export type MemberRequestLoginChangeMutationVariables = Exact<{
+  newLogin: string;
+  currentPassword: string;
+}>;
+
+
+export type MemberRequestLoginChangeMutation = { siteMember: { requestLoginChange: { success: boolean, message: string } } };
+
+export type MemberUpdateProfileMutationVariables = Exact<{
+  fields: unknown;
+}>;
+
+
+export type MemberUpdateProfileMutation = { siteMember: { updateProfile: { id: string, login: string, pendingLogin: string | null, data: unknown, editableFields: Array<string>, loginField: string, passwordField: string } } };
+
 export type MergeCartMutationVariables = Exact<{
   workspaceId: string | number;
 }>;
@@ -308,6 +345,14 @@ export type SetShippingMethodMutationVariables = Exact<{
 
 export type SetShippingMethodMutation = { cart: { setShippingMethod: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
+export type SiteMemberForgotPasswordMutationVariables = Exact<{
+  modelSlug: string;
+  identity: string;
+}>;
+
+
+export type SiteMemberForgotPasswordMutation = { siteMember: { forgotPassword: { success: boolean, message: string } } };
+
 export type SiteMemberLoginMutationVariables = Exact<{
   input: SiteMemberLoginInput;
 }>;
@@ -336,6 +381,21 @@ export type SiteMemberRegisterMutationVariables = Exact<{
 
 export type SiteMemberRegisterMutation = { siteMember: { register: { success: boolean, message: string } } };
 
+export type SiteMemberResetPasswordMutationVariables = Exact<{
+  token: string;
+  newPassword: string;
+}>;
+
+
+export type SiteMemberResetPasswordMutation = { siteMember: { resetPassword: { success: boolean, message: string } } };
+
+export type SiteMemberVerifyEmailMutationVariables = Exact<{
+  token: string;
+}>;
+
+
+export type SiteMemberVerifyEmailMutation = { siteMember: { verifyEmail: { success: boolean, message: string } } };
+
 export type UpdateCartItemMutationVariables = Exact<{
   input: UpdateCartItemInput;
 }>;
@@ -363,6 +423,13 @@ export type PublicModelProductsQueryVariables = Exact<{
 
 
 export type PublicModelProductsQuery = { public: { model: { records: { total: number, hasMore: boolean, items: Array<{ id: string, data: unknown, variantCount: number, available: number | null, priceTiers: Array<{ minQty: number, price: number }>, variantPriceRange: { min: number } | null }> } } } };
+
+export type MyProfileQueryVariables = Exact<{
+  workspaceId: string | number;
+}>;
+
+
+export type MyProfileQuery = { account: { profile: { id: string, login: string, pendingLogin: string | null, data: unknown, editableFields: Array<string>, loginField: string, passwordField: string } } };
 
 export type PublicOrderQueryVariables = Exact<{
   workspaceId: string | number;
@@ -949,6 +1016,64 @@ export const ClearCartDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ClearCartMutation, ClearCartMutationVariables>;
+export const MemberChangePasswordDocument = new TypedDocumentString(`
+    mutation MemberChangePassword($currentPassword: String!, $newPassword: String!) {
+  siteMember {
+    changePassword(currentPassword: $currentPassword, newPassword: $newPassword) {
+      success
+      message
+      accessToken
+      refreshToken
+      accessTokenExpiresIn
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MemberChangePasswordMutation, MemberChangePasswordMutationVariables>;
+export const MemberConfirmLoginChangeDocument = new TypedDocumentString(`
+    mutation MemberConfirmLoginChange($token: String!) {
+  siteMember {
+    confirmLoginChange(token: $token) {
+      success
+      message
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MemberConfirmLoginChangeMutation, MemberConfirmLoginChangeMutationVariables>;
+export const MemberDeleteAccountDocument = new TypedDocumentString(`
+    mutation MemberDeleteAccount($currentPassword: String!) {
+  siteMember {
+    deleteAccount(currentPassword: $currentPassword) {
+      success
+      message
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MemberDeleteAccountMutation, MemberDeleteAccountMutationVariables>;
+export const MemberRequestLoginChangeDocument = new TypedDocumentString(`
+    mutation MemberRequestLoginChange($newLogin: String!, $currentPassword: String!) {
+  siteMember {
+    requestLoginChange(newLogin: $newLogin, currentPassword: $currentPassword) {
+      success
+      message
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MemberRequestLoginChangeMutation, MemberRequestLoginChangeMutationVariables>;
+export const MemberUpdateProfileDocument = new TypedDocumentString(`
+    mutation MemberUpdateProfile($fields: JSON!) {
+  siteMember {
+    updateProfile(fields: $fields) {
+      id
+      login
+      pendingLogin
+      data
+      editableFields
+      loginField
+      passwordField
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MemberUpdateProfileMutation, MemberUpdateProfileMutationVariables>;
 export const MergeCartDocument = new TypedDocumentString(`
     mutation MergeCart($workspaceId: ID!) {
   cart {
@@ -1284,6 +1409,16 @@ export const SetShippingMethodDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SetShippingMethodMutation, SetShippingMethodMutationVariables>;
+export const SiteMemberForgotPasswordDocument = new TypedDocumentString(`
+    mutation SiteMemberForgotPassword($modelSlug: String!, $identity: String!) {
+  siteMember {
+    forgotPassword(modelSlug: $modelSlug, identity: $identity) {
+      success
+      message
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SiteMemberForgotPasswordMutation, SiteMemberForgotPasswordMutationVariables>;
 export const SiteMemberLoginDocument = new TypedDocumentString(`
     mutation SiteMemberLogin($input: SiteMemberLoginInput!) {
   siteMember {
@@ -1330,6 +1465,26 @@ export const SiteMemberRegisterDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SiteMemberRegisterMutation, SiteMemberRegisterMutationVariables>;
+export const SiteMemberResetPasswordDocument = new TypedDocumentString(`
+    mutation SiteMemberResetPassword($token: String!, $newPassword: String!) {
+  siteMember {
+    resetPassword(token: $token, newPassword: $newPassword) {
+      success
+      message
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SiteMemberResetPasswordMutation, SiteMemberResetPasswordMutationVariables>;
+export const SiteMemberVerifyEmailDocument = new TypedDocumentString(`
+    mutation SiteMemberVerifyEmail($token: String!) {
+  siteMember {
+    verifyEmail(token: $token) {
+      success
+      message
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SiteMemberVerifyEmailMutation, SiteMemberVerifyEmailMutationVariables>;
 export const UpdateCartItemDocument = new TypedDocumentString(`
     mutation UpdateCartItem($input: UpdateCartItemInput!) {
   cart {
@@ -1490,6 +1645,21 @@ export const PublicModelProductsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PublicModelProductsQuery, PublicModelProductsQueryVariables>;
+export const MyProfileDocument = new TypedDocumentString(`
+    query MyProfile($workspaceId: ID!) {
+  account {
+    profile(workspaceId: $workspaceId) {
+      id
+      login
+      pendingLogin
+      data
+      editableFields
+      loginField
+      passwordField
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MyProfileQuery, MyProfileQueryVariables>;
 export const PublicOrderDocument = new TypedDocumentString(`
     query PublicOrder($workspaceId: ID!, $orderId: ID!, $accessToken: String!) {
   public {

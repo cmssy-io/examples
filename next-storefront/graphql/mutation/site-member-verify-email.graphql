@@ -1,0 +1,8 @@
+mutation SiteMemberVerifyEmail($token: String!) {
+  siteMember {
+    verifyEmail(token: $token) {
+      success
+      message
+    }
+  }
+}

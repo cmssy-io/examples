@@ -1,16 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/components/shop/cart-provider";
 import { useCmssyUser } from "@/components/shop/user-provider";
 import { Button } from "./ui/button";
-import { useShopCopy } from "./locale-ui";
+import { useLocalePath, useShopCopy } from "./locale-ui";
 import styles from "./order.module.css";
 import auth from "./auth.module.css";
 
 export function AccountPanel() {
   const copy = useShopCopy();
+  const localePath = useLocalePath();
   const router = useRouter();
   const { user, signIn, register, signOut, loading } = useCmssyUser();
   const { merge, refresh } = useCart();
@@ -184,6 +186,14 @@ export function AccountPanel() {
                   minLength={8}
                   className="shop-input"
                 />
+                {signIn_ ? (
+                  <Link
+                    className={auth.switchLink}
+                    href={localePath("/forgot-password")}
+                  >
+                    {copy.forgotPassword}
+                  </Link>
+                ) : null}
               </div>
 
               {!signIn_ ? (

@@ -1,0 +1,8 @@
+mutation MemberConfirmLoginChange($token: String!) {
+  siteMember {
+    confirmLoginChange(token: $token) {
+      success
+      message
+    }
+  }
+}

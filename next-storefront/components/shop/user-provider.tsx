@@ -33,6 +33,7 @@ export interface UserContextValue {
     fields?: Record<string, unknown>,
   ): Promise<AuthResult>;
   signOut(): Promise<void>;
+  forget(): void;
 }
 
 const UserContext = createContext<UserContextValue | null>(null);
@@ -88,6 +89,7 @@ export function UserProvider({
           if (!reloadIfStaleDeployment(err)) setUser(user);
         }
       },
+      forget: () => setUser(null),
     }),
     [user, loading],
   );
