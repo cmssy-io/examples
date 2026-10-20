@@ -1,0 +1,8 @@
+mutation MemberRequestLoginChange($newLogin: String!, $currentPassword: String!) {
+  siteMember {
+    requestLoginChange(newLogin: $newLogin, currentPassword: $currentPassword) {
+      success
+      message
+    }
+  }
+}

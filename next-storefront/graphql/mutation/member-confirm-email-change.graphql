@@ -1,8 +1,0 @@
-mutation MemberConfirmEmailChange($token: String!) {
-  siteMember {
-    confirmEmailChange(token: $token) {
-      success
-      message
-    }
-  }
-}

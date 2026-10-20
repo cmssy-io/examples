@@ -2,8 +2,8 @@ query MyProfile($workspaceId: ID!) {
   account {
     profile(workspaceId: $workspaceId) {
       id
-      email
-      pendingEmail
+      login
+      pendingLogin
       data
       editableFields
     }

@@ -1,8 +1,0 @@
-mutation MemberRequestEmailChange($newEmail: String!, $currentPassword: String!) {
-  siteMember {
-    requestEmailChange(newEmail: $newEmail, currentPassword: $currentPassword) {
-      success
-      message
-    }
-  }
-}

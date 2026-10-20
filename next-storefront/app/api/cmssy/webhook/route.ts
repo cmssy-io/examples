@@ -1,9 +1,15 @@
 import {
   CmssyWebhookError,
   verifyCmssyWebhook,
+  type CmssyWebhookAccountEvent,
   type CmssyWebhookReturn,
 } from "@cmssy/core";
 import { NextResponse } from "next/server";
+import {
+  accountMail,
+  accountMailSender,
+  isAccountEvent,
+} from "@/lib/account-mail";
 import { ShippingProviderError } from "@/lib/shipping";
 import { adminToken } from "@/services/admin";
 import { refundOnStripe } from "@/services/refunds";
@@ -37,6 +43,16 @@ function acknowledgeReturn(event: string, ret: CmssyWebhookReturn | undefined) {
   });
 }
 
+async function mailAccount(event: CmssyWebhookAccountEvent) {
+  try {
+    await accountMailSender().send(accountMail(event));
+    return NextResponse.json({ received: true, handled: true });
+  } catch (error) {
+    console.error("cmssy webhook: account mail not sent", error);
+    return new Response("Account mail not sent", { status: 500 });
+  }
+}
+
 async function refundOrder(orderId: string) {
   try {
     const outcome = await refundOnStripe(orderId);
@@ -59,7 +75,7 @@ async function refundOrder(orderId: string) {
 
 export async function POST(request: Request) {
   const secret = process.env.CMSSY_WEBHOOK_SECRET;
-  if (!secret || !adminToken()) {
+  if (!secret) {
     return new Response("cmssy webhook is not configured", { status: 503 });
   }
 
@@ -78,14 +94,20 @@ export async function POST(request: Request) {
     throw error;
   }
 
+  if (isAccountEvent(event.event)) {
+    return mailAccount(event as unknown as CmssyWebhookAccountEvent);
+  }
   if (event.event.startsWith(RETURN_EVENT_PREFIX)) {
     return acknowledgeReturn(event.event, event.data.return);
   }
+  if (!REFUND_EVENTS.has(event.event) && !HANDLED_EVENTS.has(event.event)) {
+    return NextResponse.json({ received: true, handled: false });
+  }
+  if (!adminToken()) {
+    return new Response("cmssy webhook is not configured", { status: 503 });
+  }
   if (REFUND_EVENTS.has(event.event)) {
     return refundOrder(event.data.order.id);
-  }
-  if (!HANDLED_EVENTS.has(event.event)) {
-    return NextResponse.json({ received: true, handled: false });
   }
 
   try {

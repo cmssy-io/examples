@@ -6,10 +6,11 @@ import type { MemberProfile } from "@/graphql/types";
 import {
   changePasswordAction,
   deleteAccountAction,
-  requestEmailChangeAction,
+  requestLoginChangeAction,
   updateProfileAction,
   type AccountActionResult,
 } from "@/lib/actions/account";
+import { looksLikeEmail, planAccountFields } from "@/lib/account-fields";
 import { actionErrorMessage } from "@/lib/action-errors";
 import { fill, type ShopCopy } from "@/lib/shop-copy";
 import { useCart } from "./cart-provider";
@@ -95,11 +96,13 @@ function Input({
   label,
   type = "text",
   defaultValue,
+  required,
 }: {
   id: string;
   label: string;
   type?: string;
   defaultValue?: string;
+  required?: boolean;
 }) {
   return (
     <>
@@ -113,7 +116,7 @@ function Input({
         className="shop-input"
         defaultValue={defaultValue}
         autoComplete={type === "password" ? "off" : undefined}
-        required={type === "password" || type === "email"}
+        required={required || type === "password" || type === "email"}
       />
     </>
   );
@@ -125,17 +128,17 @@ export function AccountSettings({ profile }: { profile: MemberProfile }) {
   const { forget } = useCmssyUser();
   const { refresh } = useCart();
   const data = (profile.data ?? {}) as Record<string, unknown>;
-  const editable = profile.editableFields;
+  const { profileKeys, loginKey, passwordKey } = planAccountFields(profile);
 
   return (
     <div className={styles.settings}>
-      {editable.length > 0 ? (
+      {profileKeys.length > 0 ? (
         <SettingsForm
           title={copy.profileDetails}
           submitLabel={copy.saveProfile}
           submit={async (form) => {
             const fields = Object.fromEntries(
-              editable.map((key) => [
+              profileKeys.map((key) => [
                 key,
                 profileValue(
                   data[key],
@@ -148,7 +151,7 @@ export function AccountSettings({ profile }: { profile: MemberProfile }) {
             return { ...result, done: copy.profileSaved };
           }}
         >
-          {editable.map((key) => (
+          {profileKeys.map((key) => (
             <Input
               key={key}
               id={`profile-${key}`}
@@ -160,57 +163,66 @@ export function AccountSettings({ profile }: { profile: MemberProfile }) {
         </SettingsForm>
       ) : null}
 
-      <SettingsForm
-        title={copy.changeEmail}
-        submitLabel={copy.sendConfirmation}
-        submit={async (form) => {
-          const newEmail = String(form.get("new-email") ?? "").trim();
-          const result = await requestEmailChangeAction(
-            newEmail,
-            String(form.get("email-password") ?? ""),
-          );
-          router.refresh();
-          return {
-            ...result,
-            done: fill(copy.emailChangeSent, { email: newEmail }),
-          };
-        }}
-      >
-        <p className="shop-muted">
-          {copy.currentEmail}: {profile.email}
-          {profile.pendingEmail ? (
-            <>
-              <br />
-              {fill(copy.emailPending, { email: profile.pendingEmail })}
-            </>
-          ) : null}
-        </p>
-        <Input id="new-email" label={copy.newEmail} type="email" />
-        <Input
-          id="email-password"
-          label={copy.currentPassword}
-          type="password"
-        />
-      </SettingsForm>
+      {loginKey ? (
+        <SettingsForm
+          title={copy.changeLogin}
+          submitLabel={copy.sendConfirmation}
+          submit={async (form) => {
+            const newLogin = String(form.get("new-login") ?? "").trim();
+            const result = await requestLoginChangeAction(
+              newLogin,
+              String(form.get("login-password") ?? ""),
+            );
+            router.refresh();
+            return {
+              ...result,
+              done: fill(copy.loginChangeSent, { login: newLogin }),
+            };
+          }}
+        >
+          <p className="shop-muted">
+            {copy.currentLogin}: {profile.login}
+            {profile.pendingLogin ? (
+              <>
+                <br />
+                {fill(copy.loginPending, { login: profile.pendingLogin })}
+              </>
+            ) : null}
+          </p>
+          <Input
+            id="new-login"
+            label={copy.newLogin}
+            type={looksLikeEmail(profile.login) ? "email" : "text"}
+            required
+          />
+          <Input
+            id="login-password"
+            label={copy.currentPassword}
+            type="password"
+          />
+        </SettingsForm>
+      ) : null}
 
-      <SettingsForm
-        title={copy.changePassword}
-        submitLabel={copy.changePassword}
-        submit={async (form) => {
-          const result = await changePasswordAction(
-            String(form.get("current-password") ?? ""),
-            String(form.get("new-password") ?? ""),
-          );
-          return { ...result, done: copy.passwordChanged };
-        }}
-      >
-        <Input
-          id="current-password"
-          label={copy.currentPassword}
-          type="password"
-        />
-        <Input id="new-password" label={copy.newPassword} type="password" />
-      </SettingsForm>
+      {passwordKey ? (
+        <SettingsForm
+          title={copy.changePassword}
+          submitLabel={copy.changePassword}
+          submit={async (form) => {
+            const result = await changePasswordAction(
+              String(form.get("current-password") ?? ""),
+              String(form.get("new-password") ?? ""),
+            );
+            return { ...result, done: copy.passwordChanged };
+          }}
+        >
+          <Input
+            id="current-password"
+            label={copy.currentPassword}
+            type="password"
+          />
+          <Input id="new-password" label={copy.newPassword} type="password" />
+        </SettingsForm>
+      ) : null}
 
       <SettingsForm
         title={copy.deleteAccount}

@@ -49,24 +49,55 @@ export async function changePasswordAction(
   });
 }
 
-export async function requestEmailChangeAction(
-  newEmail: string,
+export async function requestLoginChangeAction(
+  newLogin: string,
   currentPassword: string,
 ): Promise<AccountActionResult> {
   return refused(async () => {
-    const result = await accountService.requestEmailChange(
-      String(newEmail),
+    const result = await accountService.requestLoginChange(
+      String(newLogin),
       String(currentPassword),
     );
     return { ok: result.success, message: result.message };
   });
 }
 
-export async function confirmEmailChangeAction(
+export async function confirmLoginChangeAction(
   token: string,
 ): Promise<AccountActionResult> {
   return refused(async () => {
-    const result = await accountService.confirmEmailChange(String(token));
+    const result = await accountService.confirmLoginChange(String(token));
+    return { ok: result.success, message: result.message };
+  });
+}
+
+export async function verifyEmailAction(
+  token: string,
+): Promise<AccountActionResult> {
+  return refused(async () => {
+    const result = await accountService.verifyEmail(String(token));
+    return { ok: result.success, message: result.message };
+  });
+}
+
+export async function forgotPasswordAction(
+  identity: string,
+): Promise<AccountActionResult> {
+  return refused(async () => {
+    const result = await accountService.forgotPassword(String(identity));
+    return { ok: result.success, message: result.message };
+  });
+}
+
+export async function resetPasswordAction(
+  token: string,
+  newPassword: string,
+): Promise<AccountActionResult> {
+  return refused(async () => {
+    const result = await accountService.resetPassword(
+      String(token),
+      String(newPassword),
+    );
     return { ok: result.success, message: result.message };
   });
 }

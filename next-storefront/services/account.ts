@@ -1,3 +1,4 @@
+import { MEMBER_MODEL_SLUG } from "@/cmssy.config";
 import type { AuthTokenResult } from "@/lib/cmssy/access-claims";
 import { authRequest } from "@/lib/cmssy/auth-request";
 import { memberRequest } from "@/lib/cmssy/member-request";
@@ -5,11 +6,14 @@ import type { MemberProfile } from "@/graphql/types";
 import type { AuthResult } from "@/services/auth";
 import {
   MemberChangePasswordDocument,
-  MemberConfirmEmailChangeDocument,
+  MemberConfirmLoginChangeDocument,
   MemberDeleteAccountDocument,
-  MemberRequestEmailChangeDocument,
+  MemberRequestLoginChangeDocument,
   MemberUpdateProfileDocument,
   MyProfileDocument,
+  SiteMemberForgotPasswordDocument,
+  SiteMemberResetPasswordDocument,
+  SiteMemberVerifyEmailDocument,
 } from "@/graphql/generated/graphql";
 
 const NOT_SIGNED_IN = "Sign in to manage your account.";
@@ -46,21 +50,44 @@ export async function changeMyPassword(
   return signedIn(data).siteMember.changePassword;
 }
 
-export async function requestEmailChange(
-  newEmail: string,
+export async function requestLoginChange(
+  newLogin: string,
   currentPassword: string,
 ): Promise<AuthResult> {
-  const data = await memberRequest(MemberRequestEmailChangeDocument, () => ({
-    newEmail,
+  const data = await memberRequest(MemberRequestLoginChangeDocument, () => ({
+    newLogin,
     currentPassword,
   }));
-  return signedIn(data).siteMember.requestEmailChange;
+  return signedIn(data).siteMember.requestLoginChange;
 }
 
-export function confirmEmailChange(token: string): Promise<AuthResult> {
-  return authRequest(MemberConfirmEmailChangeDocument, { token }).then(
-    (data) => data.siteMember.confirmEmailChange,
+export function confirmLoginChange(token: string): Promise<AuthResult> {
+  return authRequest(MemberConfirmLoginChangeDocument, { token }).then(
+    (data) => data.siteMember.confirmLoginChange,
   );
+}
+
+export function verifyEmail(token: string): Promise<AuthResult> {
+  return authRequest(SiteMemberVerifyEmailDocument, { token }).then(
+    (data) => data.siteMember.verifyEmail,
+  );
+}
+
+export function forgotPassword(identity: string): Promise<AuthResult> {
+  return authRequest(SiteMemberForgotPasswordDocument, {
+    modelSlug: MEMBER_MODEL_SLUG,
+    identity,
+  }).then((data) => data.siteMember.forgotPassword);
+}
+
+export function resetPassword(
+  token: string,
+  newPassword: string,
+): Promise<AuthResult> {
+  return authRequest(SiteMemberResetPasswordDocument, {
+    token,
+    newPassword,
+  }).then((data) => data.siteMember.resetPassword);
 }
 
 export async function deleteMyAccount(

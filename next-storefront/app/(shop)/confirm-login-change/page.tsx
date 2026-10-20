@@ -1,4 +1,4 @@
-import { ConfirmEmailChange } from "@/components/shop/confirm-email-change";
+import { TokenConfirmation } from "@/components/shop/token-confirmation";
 import { localePath, shopLocale } from "@/lib/locale";
 import { copyFor } from "@/lib/shop-copy";
 
@@ -7,12 +7,12 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const { locale } = await shopLocale();
   return {
-    title: `${copyFor(locale).emailConfirmTitle} - MACHTEC`,
+    title: `${copyFor(locale).loginConfirmTitle} - MACHTEC`,
     robots: { index: false },
   };
 }
 
-export default async function ConfirmEmailChangePage({
+export default async function ConfirmLoginChangePage({
   searchParams,
 }: {
   searchParams: Promise<{ token?: string }>;
@@ -20,7 +20,8 @@ export default async function ConfirmEmailChangePage({
   const { token } = await searchParams;
   const { locale, defaultLocale } = await shopLocale();
   return (
-    <ConfirmEmailChange
+    <TokenConfirmation
+      kind="login"
       token={token ?? null}
       accountHref={localePath("/account", locale, defaultLocale)}
     />
