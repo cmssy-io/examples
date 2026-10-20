@@ -259,6 +259,43 @@ export type ClearCartMutationVariables = Exact<{
 
 export type ClearCartMutation = { cart: { clear: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
+export type MemberChangePasswordMutationVariables = Exact<{
+  currentPassword: string;
+  newPassword: string;
+}>;
+
+
+export type MemberChangePasswordMutation = { siteMember: { changePassword: { success: boolean, message: string, accessToken: string | null, refreshToken: string | null, accessTokenExpiresIn: number | null } } };
+
+export type MemberConfirmEmailChangeMutationVariables = Exact<{
+  token: string;
+}>;
+
+
+export type MemberConfirmEmailChangeMutation = { siteMember: { confirmEmailChange: { success: boolean, message: string } } };
+
+export type MemberDeleteAccountMutationVariables = Exact<{
+  currentPassword: string;
+}>;
+
+
+export type MemberDeleteAccountMutation = { siteMember: { deleteAccount: { success: boolean, message: string } } };
+
+export type MemberRequestEmailChangeMutationVariables = Exact<{
+  newEmail: string;
+  currentPassword: string;
+}>;
+
+
+export type MemberRequestEmailChangeMutation = { siteMember: { requestEmailChange: { success: boolean, message: string } } };
+
+export type MemberUpdateProfileMutationVariables = Exact<{
+  fields: unknown;
+}>;
+
+
+export type MemberUpdateProfileMutation = { siteMember: { updateProfile: { id: string, email: string, pendingEmail: string | null, data: unknown, editableFields: Array<string> } } };
+
 export type MergeCartMutationVariables = Exact<{
   workspaceId: string | number;
 }>;
@@ -363,6 +400,13 @@ export type PublicModelProductsQueryVariables = Exact<{
 
 
 export type PublicModelProductsQuery = { public: { model: { records: { total: number, hasMore: boolean, items: Array<{ id: string, data: unknown, variantCount: number, available: number | null, priceTiers: Array<{ minQty: number, price: number }>, variantPriceRange: { min: number } | null }> } } } };
+
+export type MyProfileQueryVariables = Exact<{
+  workspaceId: string | number;
+}>;
+
+
+export type MyProfileQuery = { account: { profile: { id: string, email: string, pendingEmail: string | null, data: unknown, editableFields: Array<string> } } };
 
 export type PublicOrderQueryVariables = Exact<{
   workspaceId: string | number;
@@ -949,6 +993,62 @@ export const ClearCartDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ClearCartMutation, ClearCartMutationVariables>;
+export const MemberChangePasswordDocument = new TypedDocumentString(`
+    mutation MemberChangePassword($currentPassword: String!, $newPassword: String!) {
+  siteMember {
+    changePassword(currentPassword: $currentPassword, newPassword: $newPassword) {
+      success
+      message
+      accessToken
+      refreshToken
+      accessTokenExpiresIn
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MemberChangePasswordMutation, MemberChangePasswordMutationVariables>;
+export const MemberConfirmEmailChangeDocument = new TypedDocumentString(`
+    mutation MemberConfirmEmailChange($token: String!) {
+  siteMember {
+    confirmEmailChange(token: $token) {
+      success
+      message
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MemberConfirmEmailChangeMutation, MemberConfirmEmailChangeMutationVariables>;
+export const MemberDeleteAccountDocument = new TypedDocumentString(`
+    mutation MemberDeleteAccount($currentPassword: String!) {
+  siteMember {
+    deleteAccount(currentPassword: $currentPassword) {
+      success
+      message
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MemberDeleteAccountMutation, MemberDeleteAccountMutationVariables>;
+export const MemberRequestEmailChangeDocument = new TypedDocumentString(`
+    mutation MemberRequestEmailChange($newEmail: String!, $currentPassword: String!) {
+  siteMember {
+    requestEmailChange(newEmail: $newEmail, currentPassword: $currentPassword) {
+      success
+      message
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MemberRequestEmailChangeMutation, MemberRequestEmailChangeMutationVariables>;
+export const MemberUpdateProfileDocument = new TypedDocumentString(`
+    mutation MemberUpdateProfile($fields: JSON!) {
+  siteMember {
+    updateProfile(fields: $fields) {
+      id
+      email
+      pendingEmail
+      data
+      editableFields
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MemberUpdateProfileMutation, MemberUpdateProfileMutationVariables>;
 export const MergeCartDocument = new TypedDocumentString(`
     mutation MergeCart($workspaceId: ID!) {
   cart {
@@ -1490,6 +1590,19 @@ export const PublicModelProductsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PublicModelProductsQuery, PublicModelProductsQueryVariables>;
+export const MyProfileDocument = new TypedDocumentString(`
+    query MyProfile($workspaceId: ID!) {
+  account {
+    profile(workspaceId: $workspaceId) {
+      id
+      email
+      pendingEmail
+      data
+      editableFields
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<MyProfileQuery, MyProfileQueryVariables>;
 export const PublicOrderDocument = new TypedDocumentString(`
     query PublicOrder($workspaceId: ID!, $orderId: ID!, $accessToken: String!) {
   public {

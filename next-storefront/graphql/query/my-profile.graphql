@@ -1,0 +1,11 @@
+query MyProfile($workspaceId: ID!) {
+  account {
+    profile(workspaceId: $workspaceId) {
+      id
+      email
+      pendingEmail
+      data
+      editableFields
+    }
+  }
+}

@@ -1,0 +1,8 @@
+mutation MemberDeleteAccount($currentPassword: String!) {
+  siteMember {
+    deleteAccount(currentPassword: $currentPassword) {
+      success
+      message
+    }
+  }
+}

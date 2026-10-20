@@ -1,0 +1,11 @@
+mutation MemberUpdateProfile($fields: JSON!) {
+  siteMember {
+    updateProfile(fields: $fields) {
+      id
+      email
+      pendingEmail
+      data
+      editableFields
+    }
+  }
+}

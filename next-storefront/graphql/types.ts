@@ -1,10 +1,9 @@
-
-
 import type {
   CartQuery,
   CheckoutMutation,
   MyOrderQuery,
   MyOrdersQuery,
+  MyProfileQuery,
   ProductBySkuQuery,
   PublicOrderQuery,
   ShopSettingsQuery,
@@ -16,6 +15,8 @@ export type CartItem = Cart["items"][number];
 export type Order = NonNullable<MyOrderQuery["account"]["order"]>;
 
 export type MyOrders = MyOrdersQuery["account"]["orders"];
+
+export type MemberProfile = MyProfileQuery["account"]["profile"];
 
 export type PublicOrder = NonNullable<
   PublicOrderQuery["public"]["order"]["byToken"]
