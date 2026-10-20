@@ -121,35 +121,11 @@ export interface ServiceData {
 
 export type ServiceRecord = CmssyRecordOf<ServiceData>;
 
-/**
- * Shop Member
- *
- * Site members who can sign in to the demo shop.
- *
- * Model slug: `shopmember`
- * Display field: `email`
- */
-export interface ShopmemberData {
-  /** Email */
-  email: string;
-  /** Name */
-  name?: string;
-  /** Contact name */
-  contactName?: string;
-  /** Company */
-  company?: string;
-  /** VAT ID */
-  vatId?: string;
-}
-
-export type ShopmemberRecord = CmssyRecordOf<ShopmemberData>;
-
 /** Every model in the workspace, by slug. */
 export interface CmssyModels {
   category: CategoryData;
   product: ProductData;
   service: ServiceData;
-  shopmember: ShopmemberData;
 }
 
 export type CmssyModelSlug = keyof CmssyModels;
