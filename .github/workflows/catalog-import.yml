@@ -6,11 +6,6 @@ on:
     paths:
       - "catalog-import/**"
       - ".github/workflows/catalog-import.yml"
-  push:
-    branches: [main]
-    paths:
-      - "catalog-import/**"
-      - ".github/workflows/catalog-import.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
