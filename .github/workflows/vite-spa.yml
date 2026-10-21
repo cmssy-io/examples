@@ -11,13 +11,6 @@ on:
       # or the paths in examples.json changes what CI asserts and runs nothing.
       - "examples.json"
       - "scripts/**"
-  push:
-    branches: [main]
-    paths:
-      - "vite-spa/**"
-      - ".github/workflows/vite-spa.yml"
-      - "examples.json"
-      - "scripts/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
