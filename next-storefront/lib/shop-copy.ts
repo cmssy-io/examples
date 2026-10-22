@@ -24,10 +24,9 @@ const en = {
   browseInStockAlternatives: "Browse in-stock alternatives",
   authPitchTitle: "The trade counter for industrial parts.",
   authPitchText:
-    "48,000+ SKUs, contract pricing, credit terms and next-day dispatch - built for procurement teams.",
+    "Contract pricing, credit terms and next-day dispatch - built for procurement teams.",
   statDispatch: "Dispatch",
   statCreditTerms: "Credit terms",
-  statTradeAccounts: "Trade accounts",
   signInTab: "Sign in",
   requestTab: "Request account",
   signInTitle: "Sign in to your account",
@@ -137,9 +136,13 @@ const en = {
   deliveryMethod: "Delivery method",
   selectAMethod: "Select a method",
   chooseDeliveryMethod: "Choose a delivery method to continue.",
+  deliveryNeedsAddress:
+    "Fill in the delivery address, phone included, to see the delivery methods.",
   discountCode: "Discount code",
   apply: "Apply",
   subtotalNet: "Subtotal (net)",
+  subtotalInclVat: "Subtotal (incl. VAT)",
+  taxIncluded: "of which {tax}",
   discount: "Discount",
   totalInclVat: "Total (incl. VAT)",
   netTotal: "Net total",
@@ -301,9 +304,11 @@ const en = {
   emailVerified: "Your email is verified. You can sign in.",
   forgotPassword: "Forgot password?",
   forgotPasswordTitle: "Reset your password",
-  forgotPasswordLead: "Enter your account email and we will send you a reset link.",
+  forgotPasswordLead:
+    "Enter your account email and we will send you a reset link.",
   sendResetLink: "Send reset link",
-  resetLinkSent: "If an account exists for {email}, a reset link is on its way.",
+  resetLinkSent:
+    "If an account exists for {email}, a reset link is on its way.",
   resetPasswordTitle: "Choose a new password",
   resetPassword: "Set new password",
   passwordReset: "Your password is changed. Sign in with the new one.",
@@ -316,7 +321,8 @@ const en = {
   channelExit: "Exit",
   channelUnavailable:
     "This sales channel is no longer available - you are back in the main shop.",
-  channelSignInToBuy: "This channel sells to signed-in customers. Sign in to buy.",
+  channelSignInToBuy:
+    "This channel sells to signed-in customers. Sign in to buy.",
   channelCompanyOnly:
     "This channel sells to approved company accounts only. Sign in with your company account.",
   tradeChannels: "Trade channels",
@@ -384,10 +390,9 @@ const no: ShopCopy = {
   browseInStockAlternatives: "Se alternativer på lager",
   authPitchTitle: "Handelsdisken for industrideler.",
   authPitchText:
-    "48 000+ varenumre, kontraktspriser, kredittvilkår og neste-dags forsendelse - laget for innkjøpsteam.",
+    "Kontraktspriser, kredittvilkår og neste-dags forsendelse - laget for innkjøpsteam.",
   statDispatch: "Forsendelse",
   statCreditTerms: "Kredittvilkår",
-  statTradeAccounts: "Bedriftskontoer",
   signInTab: "Logg inn",
   requestTab: "Søk om konto",
   signInTitle: "Logg inn på kontoen din",
@@ -497,9 +502,13 @@ const no: ShopCopy = {
   deliveryMethod: "Leveringsmåte",
   selectAMethod: "Velg en leveringsmåte",
   chooseDeliveryMethod: "Velg en leveringsmåte for å fortsette.",
+  deliveryNeedsAddress:
+    "Fyll inn leveringsadressen, inkludert telefon, for å se leveringsmåtene.",
   discountCode: "Rabattkode",
   apply: "Bruk",
   subtotalNet: "Delsum (netto)",
+  subtotalInclVat: "Delsum (inkl. mva.)",
+  taxIncluded: "herav {tax}",
   discount: "Rabatt",
   totalInclVat: "Totalt (inkl. mva.)",
   netTotal: "Sum netto",
@@ -650,7 +659,8 @@ const no: ShopCopy = {
   accountActionFailed: "Noe gikk galt. Prøv igjen.",
   accountSaving: "Lagrer...",
   loginConfirmTitle: "Bekreft ny innlogging",
-  loginConfirmIntro: "Bekreft for å logge inn med denne innloggingen fra nå av.",
+  loginConfirmIntro:
+    "Bekreft for å logge inn med denne innloggingen fra nå av.",
   confirmLogin: "Bekreft innlogging",
   loginConfirmed: "Innloggingen din er endret.",
   linkInvalid: "Lenken er ugyldig eller utløpt.",
@@ -661,7 +671,8 @@ const no: ShopCopy = {
   emailVerified: "E-posten din er bekreftet. Du kan logge inn.",
   forgotPassword: "Glemt passord?",
   forgotPasswordTitle: "Tilbakestill passordet",
-  forgotPasswordLead: "Skriv inn e-posten til kontoen, så sender vi deg en lenke for å tilbakestille passordet.",
+  forgotPasswordLead:
+    "Skriv inn e-posten til kontoen, så sender vi deg en lenke for å tilbakestille passordet.",
   sendResetLink: "Send lenke",
   resetLinkSent: "Hvis det finnes en konto for {email}, er en lenke på vei.",
   resetPasswordTitle: "Velg et nytt passord",
@@ -676,7 +687,8 @@ const no: ShopCopy = {
   channelExit: "Avslutt",
   channelUnavailable:
     "Denne salgskanalen finnes ikke lenger - du er tilbake i hovedbutikken.",
-  channelSignInToBuy: "Denne kanalen selger til innloggede kunder. Logg inn for å handle.",
+  channelSignInToBuy:
+    "Denne kanalen selger til innloggede kunder. Logg inn for å handle.",
   channelCompanyOnly:
     "Denne kanalen selger kun til godkjente bedriftskontoer. Logg inn med bedriftskontoen din.",
   tradeChannels: "Salgskanaler",
@@ -697,7 +709,8 @@ const no: ShopCopy = {
   signInCompanyToSeePrices: "Logg inn med en bedriftskonto for å se priser",
   priceChangesOn: "Prisen endres {date}",
   reverseCharge: "Omvendt avgiftsplikt",
-  reverseChargeNote: "Merverdiavgiften beregnes av kjøper (omvendt avgiftsplikt).",
+  reverseChargeNote:
+    "Merverdiavgiften beregnes av kjøper (omvendt avgiftsplikt).",
   buyerVatId: "Kjøpers MVA-nummer",
   salesChannel: "Salgskanal",
   priceList: "Prisliste",

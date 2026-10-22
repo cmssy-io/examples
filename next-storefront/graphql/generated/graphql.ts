@@ -280,7 +280,7 @@ export type AddToCartMutationVariables = Exact<{
 }>;
 
 
-export type AddToCartMutation = { cart: { addItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type AddToCartMutation = { cart: { addItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, amounts: { subtotal: { gross: number }, discount: { gross: number }, shipping: { gross: number } }, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null, amount: { gross: number } }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type ApplyDiscountMutationVariables = Exact<{
   workspaceId: string | number;
@@ -289,7 +289,7 @@ export type ApplyDiscountMutationVariables = Exact<{
 }>;
 
 
-export type ApplyDiscountMutation = { cart: { applyDiscount: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type ApplyDiscountMutation = { cart: { applyDiscount: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, amounts: { subtotal: { gross: number }, discount: { gross: number }, shipping: { gross: number } }, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null, amount: { gross: number } }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type CheckoutMutationVariables = Exact<{
   input: CheckoutInput;
@@ -304,7 +304,7 @@ export type ClearCartMutationVariables = Exact<{
 }>;
 
 
-export type ClearCartMutation = { cart: { clear: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type ClearCartMutation = { cart: { clear: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, amounts: { subtotal: { gross: number }, discount: { gross: number }, shipping: { gross: number } }, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null, amount: { gross: number } }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type MemberChangePasswordMutationVariables = Exact<{
   currentPassword: string;
@@ -349,7 +349,7 @@ export type MergeCartMutationVariables = Exact<{
 }>;
 
 
-export type MergeCartMutation = { cart: { merge: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type MergeCartMutation = { cart: { merge: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, amounts: { subtotal: { gross: number }, discount: { gross: number }, shipping: { gross: number } }, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null, amount: { gross: number } }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type RemoveCartItemMutationVariables = Exact<{
   workspaceId: string | number;
@@ -358,7 +358,7 @@ export type RemoveCartItemMutationVariables = Exact<{
 }>;
 
 
-export type RemoveCartItemMutation = { cart: { removeItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type RemoveCartItemMutation = { cart: { removeItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, amounts: { subtotal: { gross: number }, discount: { gross: number }, shipping: { gross: number } }, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null, amount: { gross: number } }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type RemoveDiscountMutationVariables = Exact<{
   workspaceId: string | number;
@@ -366,7 +366,7 @@ export type RemoveDiscountMutationVariables = Exact<{
 }>;
 
 
-export type RemoveDiscountMutation = { cart: { removeDiscount: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type RemoveDiscountMutation = { cart: { removeDiscount: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, amounts: { subtotal: { gross: number }, discount: { gross: number }, shipping: { gross: number } }, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null, amount: { gross: number } }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type RequestReturnMutationVariables = Exact<{
   workspaceId: string | number;
@@ -386,7 +386,7 @@ export type SetShippingAddressMutationVariables = Exact<{
 }>;
 
 
-export type SetShippingAddressMutation = { cart: { setShippingAddress: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type SetShippingAddressMutation = { cart: { setShippingAddress: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, amounts: { subtotal: { gross: number }, discount: { gross: number }, shipping: { gross: number } }, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null, amount: { gross: number } }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type SetShippingMethodMutationVariables = Exact<{
   workspaceId: string | number;
@@ -395,7 +395,7 @@ export type SetShippingMethodMutationVariables = Exact<{
 }>;
 
 
-export type SetShippingMethodMutation = { cart: { setShippingMethod: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type SetShippingMethodMutation = { cart: { setShippingMethod: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, amounts: { subtotal: { gross: number }, discount: { gross: number }, shipping: { gross: number } }, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null, amount: { gross: number } }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type SiteMemberForgotPasswordMutationVariables = Exact<{
   modelSlug: string;
@@ -453,7 +453,7 @@ export type UpdateCartItemMutationVariables = Exact<{
 }>;
 
 
-export type UpdateCartItemMutation = { cart: { updateItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type UpdateCartItemMutation = { cart: { updateItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, amounts: { subtotal: { gross: number }, discount: { gross: number }, shipping: { gross: number } }, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null, amount: { gross: number } }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type CartQueryVariables = Exact<{
   workspaceId: string | number;
@@ -461,7 +461,7 @@ export type CartQueryVariables = Exact<{
 }>;
 
 
-export type CartQuery = { cart: { get: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type CartQuery = { cart: { get: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, amounts: { subtotal: { gross: number }, discount: { gross: number }, shipping: { gross: number } }, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null, amount: { gross: number } }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type PublicModelProductsQueryVariables = Exact<{
   workspaceId: string;
@@ -871,6 +871,17 @@ export const AddToCartDocument = new TypedDocumentString(`
       discountedTotal
       tax
       totalGross
+      amounts {
+        subtotal {
+          gross
+        }
+        discount {
+          gross
+        }
+        shipping {
+          gross
+        }
+      }
       pricesIncludeTax
       channel
       displayMode
@@ -899,6 +910,9 @@ export const AddToCartDocument = new TypedDocumentString(`
         label
         price
         etaLabel
+        amount {
+          gross
+        }
       }
       appliedDiscount {
         code
@@ -950,6 +964,17 @@ export const ApplyDiscountDocument = new TypedDocumentString(`
       discountedTotal
       tax
       totalGross
+      amounts {
+        subtotal {
+          gross
+        }
+        discount {
+          gross
+        }
+        shipping {
+          gross
+        }
+      }
       pricesIncludeTax
       channel
       displayMode
@@ -978,6 +1003,9 @@ export const ApplyDiscountDocument = new TypedDocumentString(`
         label
         price
         etaLabel
+        amount {
+          gross
+        }
       }
       appliedDiscount {
         code
@@ -1093,6 +1121,17 @@ export const ClearCartDocument = new TypedDocumentString(`
       discountedTotal
       tax
       totalGross
+      amounts {
+        subtotal {
+          gross
+        }
+        discount {
+          gross
+        }
+        shipping {
+          gross
+        }
+      }
       pricesIncludeTax
       channel
       displayMode
@@ -1121,6 +1160,9 @@ export const ClearCartDocument = new TypedDocumentString(`
         label
         price
         etaLabel
+        amount {
+          gross
+        }
       }
       appliedDiscount {
         code
@@ -1239,6 +1281,17 @@ export const MergeCartDocument = new TypedDocumentString(`
       discountedTotal
       tax
       totalGross
+      amounts {
+        subtotal {
+          gross
+        }
+        discount {
+          gross
+        }
+        shipping {
+          gross
+        }
+      }
       pricesIncludeTax
       channel
       displayMode
@@ -1267,6 +1320,9 @@ export const MergeCartDocument = new TypedDocumentString(`
         label
         price
         etaLabel
+        amount {
+          gross
+        }
       }
       appliedDiscount {
         code
@@ -1318,6 +1374,17 @@ export const RemoveCartItemDocument = new TypedDocumentString(`
       discountedTotal
       tax
       totalGross
+      amounts {
+        subtotal {
+          gross
+        }
+        discount {
+          gross
+        }
+        shipping {
+          gross
+        }
+      }
       pricesIncludeTax
       channel
       displayMode
@@ -1346,6 +1413,9 @@ export const RemoveCartItemDocument = new TypedDocumentString(`
         label
         price
         etaLabel
+        amount {
+          gross
+        }
       }
       appliedDiscount {
         code
@@ -1397,6 +1467,17 @@ export const RemoveDiscountDocument = new TypedDocumentString(`
       discountedTotal
       tax
       totalGross
+      amounts {
+        subtotal {
+          gross
+        }
+        discount {
+          gross
+        }
+        shipping {
+          gross
+        }
+      }
       pricesIncludeTax
       channel
       displayMode
@@ -1425,6 +1506,9 @@ export const RemoveDiscountDocument = new TypedDocumentString(`
         label
         price
         etaLabel
+        amount {
+          gross
+        }
       }
       appliedDiscount {
         code
@@ -1497,6 +1581,17 @@ export const SetShippingAddressDocument = new TypedDocumentString(`
       discountedTotal
       tax
       totalGross
+      amounts {
+        subtotal {
+          gross
+        }
+        discount {
+          gross
+        }
+        shipping {
+          gross
+        }
+      }
       pricesIncludeTax
       channel
       displayMode
@@ -1525,6 +1620,9 @@ export const SetShippingAddressDocument = new TypedDocumentString(`
         label
         price
         etaLabel
+        amount {
+          gross
+        }
       }
       appliedDiscount {
         code
@@ -1580,6 +1678,17 @@ export const SetShippingMethodDocument = new TypedDocumentString(`
       discountedTotal
       tax
       totalGross
+      amounts {
+        subtotal {
+          gross
+        }
+        discount {
+          gross
+        }
+        shipping {
+          gross
+        }
+      }
       pricesIncludeTax
       channel
       displayMode
@@ -1608,6 +1717,9 @@ export const SetShippingMethodDocument = new TypedDocumentString(`
         label
         price
         etaLabel
+        amount {
+          gross
+        }
       }
       appliedDiscount {
         code
@@ -1735,6 +1847,17 @@ export const UpdateCartItemDocument = new TypedDocumentString(`
       discountedTotal
       tax
       totalGross
+      amounts {
+        subtotal {
+          gross
+        }
+        discount {
+          gross
+        }
+        shipping {
+          gross
+        }
+      }
       pricesIncludeTax
       channel
       displayMode
@@ -1763,6 +1886,9 @@ export const UpdateCartItemDocument = new TypedDocumentString(`
         label
         price
         etaLabel
+        amount {
+          gross
+        }
       }
       appliedDiscount {
         code
@@ -1814,6 +1940,17 @@ export const CartDocument = new TypedDocumentString(`
       discountedTotal
       tax
       totalGross
+      amounts {
+        subtotal {
+          gross
+        }
+        discount {
+          gross
+        }
+        shipping {
+          gross
+        }
+      }
       pricesIncludeTax
       channel
       displayMode
@@ -1842,6 +1979,9 @@ export const CartDocument = new TypedDocumentString(`
         label
         price
         etaLabel
+        amount {
+          gross
+        }
       }
       appliedDiscount {
         code
