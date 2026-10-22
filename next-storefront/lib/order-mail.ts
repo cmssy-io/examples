@@ -91,7 +91,8 @@ export function orderUrl(order: OrderForMail, brand: Brand): string | null {
 }
 
 export function taxNote(order: OrderForMail): string | null {
-  if (order.taxTreatment.kind !== "reverse_charge") return null;
+  const { kind } = order.taxTreatment;
+  if (kind !== "reverse_charge" && kind !== "export") return null;
   const { legalNote, buyerVatId } = order.taxTreatment;
   const vatId = buyerVatId ? `Buyer VAT ID: ${buyerVatId}.` : null;
   return [legalNote, vatId].filter(Boolean).join(" ") || null;

@@ -177,6 +177,20 @@ describe("taxNote", () => {
     ).toBe("Buyer VAT ID: DE123456789.");
   });
 
+  it("prints the export note of an order shipped abroad", () => {
+    expect(
+      taxNote(
+        order({
+          taxTreatment: {
+            kind: "export",
+            legalNote: "Zero-rated export - goods shipped outside the seller's VAT area",
+            buyerVatId: null,
+          },
+        }),
+      ),
+    ).toBe("Zero-rated export - goods shipped outside the seller's VAT area");
+  });
+
   it("stays silent for an exempt order", () => {
     expect(
       taxNote(

@@ -3,7 +3,7 @@ import type { MyOrders, Order, PublicOrder } from "@/graphql/types";
 import { formatMoney } from "@/lib/money";
 import { fill, type ShopCopy } from "@/lib/shop-copy";
 import { orderPricingFacts } from "@/lib/tax-treatment";
-import { ReverseChargeNotice } from "./reverse-charge-notice";
+import { TaxTreatmentNotice } from "./tax-treatment-notice";
 import styles from "./order.module.css";
 
 type ReceiptOrder = Order | PublicOrder | MyOrders["items"][number];
@@ -161,7 +161,7 @@ export function OrderReceipt({
           </div>
         ))}
 
-        <ReverseChargeNotice treatment={order.taxTreatment} copy={copy} />
+        <TaxTreatmentNotice treatment={order.taxTreatment} copy={copy} />
 
         <div className={styles.grandTotal}>
           <span>{copy.totalGross}</span>

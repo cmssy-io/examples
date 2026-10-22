@@ -1,19 +1,19 @@
 import type { ShopCopy } from "@/lib/shop-copy";
-import { reverseChargeNote, type TaxTreatmentView } from "@/lib/tax-treatment";
+import { taxTreatmentNote, type TaxTreatmentView } from "@/lib/tax-treatment";
 import styles from "./order.module.css";
 
-export function ReverseChargeNotice({
+export function TaxTreatmentNotice({
   treatment,
   copy,
 }: {
   treatment: TaxTreatmentView | null | undefined;
   copy: ShopCopy;
 }) {
-  const notice = reverseChargeNote(treatment, copy);
+  const notice = taxTreatmentNote(treatment, copy);
   if (!notice) return null;
   return (
-    <div className={styles.reverseCharge} role="note">
-      <strong>{copy.reverseCharge}</strong>
+    <div className={styles.taxTreatment} role="note">
+      <strong>{notice.title}</strong>
       <span>{notice.note}</span>
       {notice.buyerVatId ? (
         <span>
