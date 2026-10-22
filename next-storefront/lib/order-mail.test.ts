@@ -97,7 +97,7 @@ describe("orderConfirmationMail", () => {
 });
 
 describe("taxNote", () => {
-  it("names reverse charge even when the order has no note of its own", () => {
+  it("adds no legal text of its own when the seller set none", () => {
     expect(
       taxNote(
         order({
@@ -108,7 +108,21 @@ describe("taxNote", () => {
           },
         }),
       ),
-    ).toBe("Reverse charge: VAT is to be accounted for by the recipient.");
+    ).toBeNull();
+  });
+
+  it("gives the buyer VAT id without a note when the seller set none", () => {
+    expect(
+      taxNote(
+        order({
+          taxTreatment: {
+            ...REVERSE_CHARGE,
+            legalNote: null,
+            buyerVatId: "DE123456789",
+          },
+        }),
+      ),
+    ).toBe("Buyer VAT ID: DE123456789.");
   });
 
   it("stays silent for an exempt order", () => {

@@ -4,9 +4,6 @@ import { formatMoney } from "@/lib/money";
 
 export type WebhookShipment = NonNullable<CmssyWebhookEvent["data"]["shipment"]>;
 
-const REVERSE_CHARGE_NOTE =
-  "Reverse charge: VAT is to be accounted for by the recipient.";
-
 interface TaxedAmount {
   net: number;
   tax: number;
@@ -85,10 +82,9 @@ function amountRow(
 
 export function taxNote(order: OrderForMail): string | null {
   if (order.taxTreatment.kind !== "reverse_charge") return null;
-  const note = order.taxTreatment.legalNote ?? REVERSE_CHARGE_NOTE;
-  return order.taxTreatment.buyerVatId
-    ? `${note} Buyer VAT ID: ${order.taxTreatment.buyerVatId}.`
-    : note;
+  const { legalNote, buyerVatId } = order.taxTreatment;
+  const vatId = buyerVatId ? `Buyer VAT ID: ${buyerVatId}.` : null;
+  return [legalNote, vatId].filter(Boolean).join(" ") || null;
 }
 
 export function orderConfirmationMail(order: OrderForMail): OutgoingMail {
