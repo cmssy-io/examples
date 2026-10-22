@@ -141,21 +141,31 @@ export async function loadPriceOverlay(
   });
 }
 
+function priceItems(product: Product): CmssyPriceQueryItem[] {
+  return [
+    { recordId: product.id },
+    ...product.variants.map((variant) => ({
+      recordId: product.id,
+      variantKey: variant.id,
+    })),
+  ];
+}
+
 export async function priceProduct(
   product: Product,
   locale?: string,
 ): Promise<{ product: Product; overlay: PriceOverlay | null }> {
-  const overlay = await loadPriceOverlay(
-    [
-      { recordId: product.id },
-      ...product.variants.map((variant) => ({
-        recordId: product.id,
-        variantKey: variant.id,
-      })),
-    ],
-    locale,
-  );
+  const overlay = await loadPriceOverlay(priceItems(product), locale);
   return { product: repriceProduct(product, overlay), overlay };
+}
+
+// A handful of products picked by a block, priced in one overlay read.
+export async function priceProducts(
+  products: readonly Product[],
+  locale?: string,
+): Promise<Product[]> {
+  const overlay = await loadPriceOverlay(products.flatMap(priceItems), locale);
+  return products.map((product) => repriceProduct(product, overlay));
 }
 
 type CatalogQuery = Pick<

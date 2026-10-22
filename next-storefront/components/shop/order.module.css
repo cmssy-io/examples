@@ -517,6 +517,14 @@
   margin-bottom: 12px;
 }
 
+.orderPager {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
 .orderTabActive {
   font-weight: var(--font-semibold);
   text-decoration: underline;

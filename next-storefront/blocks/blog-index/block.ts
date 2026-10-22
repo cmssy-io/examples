@@ -12,7 +12,7 @@ export const blogIndexBlock = defineBlock({
     const { loadPosts } = await import("./load-posts");
     return loadPosts({
       parentSlug,
-      limit: Number(content.postsPerPage) || 9,
+      limit: Number(content.postsPerPage) || 20,
     });
   },
 });

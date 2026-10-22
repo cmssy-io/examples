@@ -7,17 +7,16 @@ export const productGridBlock = defineBlock({
   component: ProductGrid,
   props: productGridProps,
   loader: async ({ content, context }) => {
-    const { loadProducts } = await import("@/lib/catalog");
+    const [{ loadProducts }, { priceProducts }] = await Promise.all([
+      import("@/lib/catalog"),
+      import("@/services/prices"),
+    ]);
 
     const categoryId = content.category?.id;
     const limit = Number(content.limit) || 8;
     const sort = typeof content.sort === "string" ? content.sort : "title";
-    const page = await loadProducts({
-      categoryId,
-      sort,
-      limit,
-      locale: context?.locale.current,
-    });
-    return { items: page.items };
+    const locale = context?.locale.current;
+    const page = await loadProducts({ categoryId, sort, limit, locale });
+    return { items: await priceProducts(page.items, locale) };
   },
 });
