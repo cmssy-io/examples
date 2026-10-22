@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { formatMoney } from "../../lib/money";
 import { fill } from "../../lib/shop-copy";
 import { readOrderFieldValues } from "../../lib/order-fields";
 import type { OrderField } from "../../graphql/types";
 import { selectionLabel } from "../../lib/variants";
 import { useCart } from "./cart-provider";
 import styles from "./cart.module.css";
-import { useLocalePath, useShopCopy, useShopLocale } from "./locale-ui";
+import {
+  useLocalePath,
+  useMoney,
+  useShopCopy,
+  useShopLocale,
+} from "./locale-ui";
 import { OrderFieldInputs } from "./order-fields";
 
 export function CartView({ orderFields }: { orderFields: OrderField[] }) {
@@ -25,6 +29,7 @@ export function CartView({ orderFields }: { orderFields: OrderField[] }) {
     setShippingMethod,
     checkout,
   } = useCart();
+  const money = useMoney(cart?.currency);
   const navigate = useNavigate();
 
   const [code, setCode] = useState("");
@@ -42,7 +47,6 @@ export function CartView({ orderFields }: { orderFields: OrderField[] }) {
     );
   }
 
-  const currency = cart.currency;
 
   async function handleCheckout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -113,10 +117,10 @@ export function CartView({ orderFields }: { orderFields: OrderField[] }) {
                   <span>
                     {discounted ? (
                       <span className={styles.lineWas}>
-                        {formatMoney(listPrice, currency)}
+                        {money(listPrice)}
                       </span>
                     ) : null}
-                    {formatMoney(item.unitPrice, currency)} {copy.netEach}
+                    {money(item.unitPrice)} {copy.netEach}
                   </span>
                   {tier ? (
                     <span className={styles.lineTier}>
@@ -151,7 +155,7 @@ export function CartView({ orderFields }: { orderFields: OrderField[] }) {
                 />
 
                 <span className={styles.lineTotal}>
-                  {formatMoney(item.unitPrice * item.quantity, currency)}
+                  {money(item.unitPrice * item.quantity)}
                 </span>
               </div>
             );
@@ -293,7 +297,7 @@ export function CartView({ orderFields }: { orderFields: OrderField[] }) {
                 ) : null}
               </span>
               <span className={styles.shippingPrice}>
-                {formatMoney(method.price, currency)}
+                {money(method.price)}
               </span>
             </label>
           ))}
@@ -329,7 +333,7 @@ export function CartView({ orderFields }: { orderFields: OrderField[] }) {
 
         <div className={styles.row}>
           <span>{copy.subtotalNet}</span>
-          <span>{formatMoney(cart.subtotal, currency)}</span>
+          <span>{money(cart.subtotal)}</span>
         </div>
 
         {cart.appliedDiscount ? (
@@ -338,7 +342,7 @@ export function CartView({ orderFields }: { orderFields: OrderField[] }) {
               {copy.discount} {cart.appliedDiscount.code}
             </span>
             <span>
-              -{formatMoney(cart.subtotal - cart.discountedTotal, currency)}
+              -{money(cart.subtotal - cart.discountedTotal)}
             </span>
           </div>
         ) : null}
@@ -347,7 +351,7 @@ export function CartView({ orderFields }: { orderFields: OrderField[] }) {
           <span>{copy.delivery}</span>
           <span>
             {cart.shippingMethod
-              ? formatMoney(cart.shippingTotal, currency)
+              ? money(cart.shippingTotal)
               : copy.selectAMethod}
           </span>
         </div>
@@ -355,13 +359,13 @@ export function CartView({ orderFields }: { orderFields: OrderField[] }) {
         {cart.taxSummary.map((line) => (
           <div key={line.rateId ?? line.name} className={styles.taxLine}>
             <span>{line.name ?? `VAT ${line.rate}%`}</span>
-            <span>{formatMoney(line.amount, currency)}</span>
+            <span>{money(line.amount)}</span>
           </div>
         ))}
 
         <div className={styles.rowTotal}>
           <span>{copy.totalInclVat}</span>
-          <span>{formatMoney(cart.totalGross, currency)}</span>
+          <span>{money(cart.totalGross)}</span>
         </div>
 
         <button

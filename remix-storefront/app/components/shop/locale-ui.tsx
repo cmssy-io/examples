@@ -6,6 +6,7 @@ import {
   stripLocalePrefix,
   type ShopLocale,
 } from "../../lib/locale-path";
+import { formatMoney } from "../../lib/money";
 import { copyFor, type ShopCopy } from "../../lib/shop-copy";
 
 const LocaleContext = createContext<ShopLocale>({
@@ -30,6 +31,37 @@ export function useShopLocale(): ShopLocale {
   const context = useContext(LocaleContext);
   const { pathname } = useLocation();
   return { ...context, locale: localeFromPathname(pathname, context) };
+}
+
+const CurrencyContext = createContext<string | null | undefined>(undefined);
+
+export function CurrencyProvider({
+  currency,
+  children,
+}: {
+  currency: string | null;
+  children: ReactNode;
+}) {
+  return (
+    <CurrencyContext.Provider value={currency}>
+      {children}
+    </CurrencyContext.Provider>
+  );
+}
+
+export function useShopCurrency(): string | null {
+  const currency = useContext(CurrencyContext);
+  if (currency === undefined) {
+    throw new Error("useShopCurrency needs a CurrencyProvider above it");
+  }
+  return currency;
+}
+
+export function useMoney(currency?: string | null): (minor: number) => string {
+  const { locale } = useShopLocale();
+  const shopCurrency = useShopCurrency();
+  const shown = currency ?? shopCurrency;
+  return (minor: number) => formatMoney(minor, shown, locale);
 }
 
 export function useShopCopy(): ShopCopy {

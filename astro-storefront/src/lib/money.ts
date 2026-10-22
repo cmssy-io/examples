@@ -1,15 +1,14 @@
 import type { PriceTier } from "../services/catalog";
 
-const DEFAULT_CURRENCY = "EUR";
-
 export function formatMoney(
   minorUnits: number,
-  currency: string | null = DEFAULT_CURRENCY,
+  currency: string | null,
+  locale: string,
 ): string {
-  return new Intl.NumberFormat("en-IE", {
-    style: "currency",
-    currency: currency ?? DEFAULT_CURRENCY,
-  }).format(minorUnits / 100);
+  const options: Intl.NumberFormatOptions = currency
+    ? { style: "currency", currency }
+    : { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+  return new Intl.NumberFormat(locale, options).format(minorUnits / 100);
 }
 
 export function unitPriceFor(

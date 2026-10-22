@@ -51,6 +51,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
+      - run: pnpm test
 
       - name: A product's variants are read as one state
         working-directory: .

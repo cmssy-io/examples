@@ -62,6 +62,7 @@ export interface ShopSettings {
   tax: SiteTaxRates | null;
   lowStockThreshold: number | null;
   orderFields: OrderField[];
+  currency: string | null;
 }
 
 const shopSettingsCache = ttlCache<ShopSettings>(60_000);
@@ -76,7 +77,12 @@ async function loadShopSettings(): Promise<ShopSettings> {
   });
   const config = data.public?.siteConfig;
   if (!config) {
-    return { tax: null, lowStockThreshold: null, orderFields: [] };
+    return {
+      tax: null,
+      lowStockThreshold: null,
+      orderFields: [],
+      currency: null,
+    };
   }
   const cart = config.publicCart ?? null;
   return {
@@ -88,6 +94,7 @@ async function loadShopSettings(): Promise<ShopSettings> {
       : null,
     lowStockThreshold: config.lowStockThreshold,
     orderFields: cart?.orderFields ?? [],
+    currency: cart?.defaultCurrency ?? null,
   };
 }
 

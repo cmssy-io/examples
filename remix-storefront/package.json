@@ -13,6 +13,7 @@
     "start": "node --env-file-if-exists=.env.local ./node_modules/@react-router/serve/bin.cjs ./build/server/index.js",
     "typecheck": "react-router typegen && tsc --noEmit",
     "smoke:edit": "node --env-file-if-exists=.env.local scripts/smoke-edit.mjs",
+    "test": "vitest run",
     "codegen": "graphql-codegen --config codegen.ts",
     "types": "cmssy types --out app/graphql/models.ts"
   },
@@ -42,7 +43,8 @@
     "@types/sanitize-html": "^2.16.1",
     "graphql": "^17.0.2",
     "typescript": "^5.9.3",
-    "vite": "^8.2.1"
+    "vite": "^8.2.1",
+    "vitest": "^5.0.5"
   },
   "description": "A storefront on cmssy, on React Router (Remix): products, categories, cart, checkout, member accounts and orders as route actions.",
   "packageManager": "pnpm@11.1.2"

@@ -2,6 +2,7 @@ import type { AstroGlobal } from "astro";
 import type { ShopState } from "../components/shop/island";
 import type { Cart } from "../graphql/types";
 import { getCart } from "../services/cart";
+import { fetchShopSettings } from "../services/site";
 import { clearCartToken, shopAuth, type ShopRequest } from "./context";
 import { shopLocale } from "./locale";
 
@@ -22,15 +23,17 @@ function guestCart(shop: ShopRequest, cart: Cart | null): Cart | null {
 
 export async function shopPageState(astro: PageContext): Promise<ShopState> {
   const { shop } = astro.locals;
-  const [locale, cart] = await Promise.all([
+  const [locale, cart, { currency }] = await Promise.all([
     shopLocale(astro.request),
     shop.cartToken ? getCart(shopAuth(shop)).catch(() => null) : null,
+    fetchShopSettings(),
   ]);
   return {
     location: {
       ...locale,
       pathname: requestPathname(astro),
       search: astro.url.search,
+      currency,
     },
     cart: guestCart(shop, cart),
   };
