@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { Product } from "@/lib/catalog";
-import { formatMoney, savingsPercent, stockState } from "@/lib/money";
+import { savingsPercent, stockState } from "@/lib/money";
 import {
   badgeLabel,
   perUnitLabel,
@@ -15,7 +15,7 @@ import { skuCode } from "./ui/image-placeholder";
 import { ProductImage } from "./ui/product-image";
 import { buttonClass } from "./ui/button";
 import { AddToCartButton } from "./add-to-cart-button";
-import { useLocalePath, useShopCopy } from "./locale-ui";
+import { useLocalePath, useMoney, useShopCopy } from "./locale-ui";
 import styles from "./catalog.module.css";
 
 const STOCK_VARIANT: Record<ReturnType<typeof stockState>, BadgeVariant> = {
@@ -55,6 +55,7 @@ export function PriceBadge({
 export function ProductCard({ product }: { product: Product }) {
   const localePath = useLocalePath();
   const copy = useShopCopy();
+  const money = useMoney();
   const bestTier = product.tiers.at(-1);
   const href = localePath(`/p/${product.slug}`);
   const pricing = product.pricing;
@@ -98,8 +99,8 @@ export function ProductCard({ product }: { product: Product }) {
 
         {bestTier && pricing?.kind !== "withheld" ? (
           <span className={styles.tierHint}>
-            {formatMoney(bestTier.price)} {copy.from} {bestTier.minQty}+ (
-            {copy.save} {savingsPercent(product.fromPrice, bestTier.price)}%)
+            {money(bestTier.price)} {copy.from} {bestTier.minQty}+ ({copy.save}{" "}
+            {savingsPercent(product.fromPrice, bestTier.price)}%)
           </span>
         ) : null}
 
@@ -121,7 +122,7 @@ export function ProductCard({ product }: { product: Product }) {
                 }
               >
                 {product.hasVariants ? `${copy.from} ` : ""}
-                {formatMoney(product.fromPrice)}
+                {money(product.fromPrice)}
               </div>
               <div className={styles.cardPer}>
                 {perUnitLabel(pricing, copy)} {product.unit ?? "pcs"}

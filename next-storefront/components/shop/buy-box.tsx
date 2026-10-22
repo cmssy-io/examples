@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useCart } from "@/components/shop/cart-provider";
 import { useCartUi } from "./cart-ui";
 import type { Product } from "@/lib/catalog";
-import { formatMoney, savingsPercent, unitPriceFor } from "@/lib/money";
+import { savingsPercent, unitPriceFor } from "@/lib/money";
 import { PriceBadge, StockBadge } from "./product-card";
 import { perUnitLabel, withheldLabel } from "@/lib/price-overlay";
 import { Button } from "./ui/button";
-import { useLocalePath, useShopCopy } from "./locale-ui";
+import { useLocalePath, useMoney, useShopCopy } from "./locale-ui";
 import { fill } from "@/lib/shop-copy";
 import {
   axisLabel,
@@ -35,6 +35,7 @@ export function BuyBox({
 }) {
   const copy = useShopCopy();
   const localePath = useLocalePath();
+  const money = useMoney();
   const { addToCart, error, signInRequired } = useCart();
   const { announceAdded } = useCartUi();
   const [quantity, setQuantity] = useState(1);
@@ -108,9 +109,9 @@ export function BuyBox({
             {needsVariant ? (
               <span className={styles.from}>{copy.from}</span>
             ) : null}
-            <span className={styles.price}>{formatMoney(unitPrice)}</span>
+            <span className={styles.price}>{money(unitPrice)}</span>
             {activeTier ? (
-              <span className={styles.listPrice}>{formatMoney(basePrice)}</span>
+              <span className={styles.listPrice}>{money(basePrice)}</span>
             ) : null}
           </div>
           <span className={styles.per}>
@@ -121,7 +122,7 @@ export function BuyBox({
           </span>
           {showsGrossLine ? (
             <span className={styles.gross}>
-              {formatMoney(grossUnit)} {fill(copy.inclVat, { rate: taxRate })}
+              {money(grossUnit)} {fill(copy.inclVat, { rate: taxRate })}
             </span>
           ) : null}
           {priceChangesOn ? (
@@ -231,7 +232,7 @@ export function BuyBox({
             <tbody>
               <tr className={!activeTier ? styles.tierActive : undefined}>
                 <td>1 - {tiers[0].minQty - 1}</td>
-                <td>{formatMoney(basePrice)}</td>
+                <td>{money(basePrice)}</td>
                 <td className={styles.save}>-</td>
               </tr>
               {tiers.map((tier, index) => {
@@ -249,7 +250,7 @@ export function BuyBox({
                     }
                   >
                     <td>{range}</td>
-                    <td>{formatMoney(tier.price)}</td>
+                    <td>{money(tier.price)}</td>
                     <td className={styles.save}>
                       {savingsPercent(basePrice, tier.price)}%
                     </td>
@@ -297,7 +298,7 @@ export function BuyBox({
                   : outOfStock
                     ? copy.backorderNow
                     : fill(copy.addWithTotal, {
-                        total: formatMoney(lineTotal),
+                        total: money(lineTotal),
                       })}
         </Button>
       </div>
@@ -314,9 +315,7 @@ export function BuyBox({
       {withheld ? null : (
         <div className={styles.lineTotal}>
           <span>{shownGross ? copy.lineTotalGross : copy.lineTotalNet}</span>
-          <span className={styles.lineTotalValue}>
-            {formatMoney(lineTotal)}
-          </span>
+          <span className={styles.lineTotalValue}>{money(lineTotal)}</span>
         </div>
       )}
 

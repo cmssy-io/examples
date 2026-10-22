@@ -125,7 +125,7 @@ export default async function OrderPage({
         ) : null}
       </div>
 
-      <OrderReceipt order={order} copy={copy} />
+      <OrderReceipt order={order} copy={copy} locale={locale} />
 
       <OrderReturns order={order} accessToken={token} />
 

@@ -86,7 +86,7 @@ export interface ProductData {
   /** Datasheet URL */
   datasheetUrl?: string;
   /** Tax rate - Cart tax rate id; empty means the cart's default rate */
-  taxRateId?: "vat23" | "vat8";
+  taxRateId?: "mva25" | "mva15" | "zero";
   /** Documents - Datasheets, manuals and certificates (PDF) */
   documents?: CmssyMedia[];
   /** Video - Product clip shown on the product page */

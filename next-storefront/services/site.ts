@@ -96,6 +96,7 @@ export interface ShopSettings {
   lowStockThreshold: number | null;
   orderFields: OrderField[];
   shippingCountries: string[] | null;
+  currency: string | null;
 }
 
 const shopSettingsCache = ttlCache<ShopSettings>(60_000);
@@ -115,6 +116,7 @@ async function loadShopSettings(): Promise<ShopSettings> {
       lowStockThreshold: null,
       orderFields: [],
       shippingCountries: null,
+      currency: null,
     };
   }
   const cart = config.publicCart ?? null;
@@ -128,6 +130,7 @@ async function loadShopSettings(): Promise<ShopSettings> {
     lowStockThreshold: config.lowStockThreshold,
     orderFields: cart?.orderFields ?? [],
     shippingCountries: cart ? shippingCountries(cart.shippingMethods) : null,
+    currency: cart?.defaultCurrency ?? null,
   };
 }
 

@@ -1,7 +1,7 @@
 import { orderProgress, type CmssyOrderProgress } from "@cmssy/core";
 import type { MyOrders, Order, PublicOrder } from "@/graphql/types";
 import { formatMoney } from "@/lib/money";
-import type { ShopCopy } from "@/lib/shop-copy";
+import { fill, type ShopCopy } from "@/lib/shop-copy";
 import { orderPricingFacts } from "@/lib/tax-treatment";
 import { ReverseChargeNotice } from "./reverse-charge-notice";
 import styles from "./order.module.css";
@@ -43,11 +43,13 @@ export function progressLabel(order: ReceiptOrder, copy: ShopCopy): string {
 export function OrderReceipt({
   order,
   copy,
+  locale,
 }: {
   order: ReceiptOrder;
   copy: ShopCopy;
+  locale: string;
 }) {
-  const currency = order.currency;
+  const money = (minor: number) => formatMoney(minor, order.currency, locale);
   const address = order.shippingAddress;
   const items = order.items ?? [];
   const pricingFacts = orderPricingFacts(order, copy);
@@ -95,7 +97,7 @@ export function OrderReceipt({
               <div className={styles.factBody}>
                 <span>{order.shippingMethod.label}</span>
                 <span className="shop-muted">
-                  {formatMoney(order.shippingTotal ?? 0, currency)}
+                  {money(order.shippingTotal ?? 0)}
                 </span>
               </div>
             </div>
@@ -120,7 +122,7 @@ export function OrderReceipt({
             </div>
             <span className={styles.qty}>×{item.quantity}</span>
             <span className={styles.lineTotal}>
-              {formatMoney(item.price * item.quantity, currency)}
+              {money(item.price * item.quantity)}
             </span>
           </div>
         ))}
@@ -129,9 +131,7 @@ export function OrderReceipt({
       <div className={styles.totals}>
         <div className={styles.row}>
           <span>{copy.netTotal}</span>
-          <span className={styles.rowValue}>
-            {formatMoney(order.subtotal, currency)}
-          </span>
+          <span className={styles.rowValue}>{money(order.subtotal)}</span>
         </div>
 
         {order.appliedDiscount ? (
@@ -140,7 +140,7 @@ export function OrderReceipt({
               {copy.discount} ({order.appliedDiscount.code})
             </span>
             <span className={styles.rowValue}>
-              -{formatMoney(order.appliedDiscount.amount, currency)}
+              -{money(order.appliedDiscount.amount)}
             </span>
           </div>
         ) : null}
@@ -149,17 +149,15 @@ export function OrderReceipt({
           <div className={styles.row}>
             <span>{copy.delivery}</span>
             <span className={styles.rowValue}>
-              {formatMoney(order.shippingTotal ?? 0, currency)}
+              {money(order.shippingTotal ?? 0)}
             </span>
           </div>
         ) : null}
 
         {(order.taxSummary ?? []).map((line) => (
           <div key={line.name ?? String(line.rate)} className={styles.row}>
-            <span>{line.name ?? `VAT ${line.rate}%`}</span>
-            <span className={styles.rowValue}>
-              {formatMoney(line.amount, currency)}
-            </span>
+            <span>{line.name ?? fill(copy.taxLine, { rate: line.rate })}</span>
+            <span className={styles.rowValue}>{money(line.amount)}</span>
           </div>
         ))}
 
@@ -167,9 +165,7 @@ export function OrderReceipt({
 
         <div className={styles.grandTotal}>
           <span>{copy.totalGross}</span>
-          <span className={styles.grandTotalValue}>
-            {formatMoney(order.total, currency)}
-          </span>
+          <span className={styles.grandTotalValue}>{money(order.total)}</span>
         </div>
       </div>
     </div>

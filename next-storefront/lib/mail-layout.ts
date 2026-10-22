@@ -1,6 +1,8 @@
 import { escapeHtml } from "@/lib/mailer";
 import { localizedText } from "@/lib/localized";
 
+export const MAIL_LOCALE = "en";
+
 export interface Brand {
   name: string;
   logoUrl: string | null;
@@ -122,7 +124,7 @@ export function renderMail({
   const name = escapeHtml(brand.name);
   return [
     "<!doctype html>",
-    '<html lang="en">',
+    `<html lang="${MAIL_LOCALE}">`,
     "<head>",
     '<meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width,initial-scale=1">',
