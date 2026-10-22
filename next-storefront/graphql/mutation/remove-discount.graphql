@@ -9,6 +9,7 @@ mutation RemoveDiscount($workspaceId: ID!, $channel: String) {
       discountedTotal
       tax
       totalGross
+      amounts { subtotal { gross } discount { gross } shipping { gross } }
       pricesIncludeTax
       channel
       displayMode
@@ -16,7 +17,7 @@ mutation RemoveDiscount($workspaceId: ID!, $channel: String) {
       shippingTotal
       taxSummary { rateId name rate base amount }
       shippingMethod { id label price etaLabel }
-      availableShippingMethods { id label price etaLabel }
+      availableShippingMethods { id label price etaLabel amount { gross } }
       appliedDiscount { code type value computedAmount }
       items {
         id

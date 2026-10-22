@@ -20,7 +20,6 @@ export function AccountPanel({ brandName }: { brandName: string }) {
   const [error, setError] = useState<string | null>(null);
 
   function switchMode(next: "signin" | "signup") {
-
     setError(null);
     setMode(next);
   }
@@ -104,13 +103,11 @@ export function AccountPanel({ brandName }: { brandName: string }) {
               <div className={auth.statValue}>Net 30</div>
               <div className={auth.statLabel}>{copy.statCreditTerms}</div>
             </div>
-            <div>
-              <div className={auth.statValue}>1,800+</div>
-              <div className={auth.statLabel}>{copy.statTradeAccounts}</div>
-            </div>
           </div>
         </div>
-        <div className={auth.legal}>© {new Date().getFullYear()} {brandName}</div>
+        <div className={auth.legal}>
+          © {new Date().getFullYear()} {brandName}
+        </div>
       </div>
 
       <div className={auth.formPane}>

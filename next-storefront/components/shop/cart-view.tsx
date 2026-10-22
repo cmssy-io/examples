@@ -58,12 +58,12 @@ const REGION_REQUIRED = new Set(["US", "CA", "AU"]);
 function isComplete(address: ShippingAddressInput): boolean {
   return Boolean(
     address.name &&
-      address.line1 &&
-      address.postalCode &&
-      address.city &&
-      address.phone &&
-      /^[A-Z]{2}$/.test(address.country) &&
-      (address.region || !REGION_REQUIRED.has(address.country)),
+    address.line1 &&
+    address.postalCode &&
+    address.city &&
+    address.phone &&
+    /^[A-Z]{2}$/.test(address.country) &&
+    (address.region || !REGION_REQUIRED.has(address.country)),
   );
 }
 
@@ -164,8 +164,7 @@ export function CartView({
 
   function syncAddress(
     event:
-      | React.FocusEvent<HTMLFormElement>
-      | React.ChangeEvent<HTMLFormElement>,
+      React.FocusEvent<HTMLFormElement> | React.ChangeEvent<HTMLFormElement>,
   ) {
     const field = event.target;
     if (
@@ -224,12 +223,9 @@ export function CartView({
                   ) : null}
                   <span>
                     {discounted && !gross ? (
-                      <span className={styles.lineWas}>
-                        {money(listPrice)}
-                      </span>
+                      <span className={styles.lineWas}>{money(listPrice)}</span>
                     ) : null}
-                    {money(shownUnit)}{" "}
-                    {gross ? copy.inclVatEach : copy.netEach}
+                    {money(shownUnit)} {gross ? copy.inclVatEach : copy.netEach}
                   </span>
                   {tier ? (
                     <span className={styles.lineTier}>
@@ -263,9 +259,7 @@ export function CartView({
                   }}
                 />
 
-                <span className={styles.lineTotal}>
-                  {money(shownLine)}
-                </span>
+                <span className={styles.lineTotal}>{money(shownLine)}</span>
               </div>
             );
           })}
@@ -418,6 +412,11 @@ export function CartView({
           <span className="shop-label" style={{ margin: 0 }}>
             {copy.delivery}
           </span>
+          {cart.availableShippingMethods.length === 0 ? (
+            <span className="shop-muted" style={{ fontSize: 13 }}>
+              {copy.deliveryNeedsAddress}
+            </span>
+          ) : null}
           {cart.availableShippingMethods.map((method) => (
             <label
               key={method.id}
@@ -443,7 +442,7 @@ export function CartView({
                 ) : null}
               </span>
               <span className={styles.shippingPrice}>
-                {money(method.price)}
+                {money(gross ? method.amount.gross : method.price)}
               </span>
             </label>
           ))}
@@ -478,8 +477,10 @@ export function CartView({
         </div>
 
         <div className={styles.row}>
-          <span>{copy.subtotalNet}</span>
-          <span>{money(cart.subtotal)}</span>
+          <span>{gross ? copy.subtotalInclVat : copy.subtotalNet}</span>
+          <span>
+            {money(gross ? cart.amounts.subtotal.gross : cart.subtotal)}
+          </span>
         </div>
 
         {cart.appliedDiscount ? (
@@ -488,7 +489,12 @@ export function CartView({
               {copy.discount} {cart.appliedDiscount.code}
             </span>
             <span>
-              -{money(cart.subtotal - cart.discountedTotal)}
+              -
+              {money(
+                gross
+                  ? cart.amounts.discount.gross
+                  : cart.subtotal - cart.discountedTotal,
+              )}
             </span>
           </div>
         ) : null}
@@ -497,7 +503,7 @@ export function CartView({
           <span>{copy.delivery}</span>
           <span>
             {cart.shippingMethod
-              ? money(cart.shippingTotal)
+              ? money(gross ? cart.amounts.shipping.gross : cart.shippingTotal)
               : copy.selectAMethod}
           </span>
         </div>
@@ -506,7 +512,13 @@ export function CartView({
 
         {cart.taxSummary.map((line) => (
           <div key={line.rateId ?? line.name} className={styles.taxLine}>
-            <span>{line.name ?? fill(copy.taxLine, { rate: line.rate })}</span>
+            <span>
+              {gross
+                ? fill(copy.taxIncluded, {
+                    tax: line.name ?? fill(copy.taxLine, { rate: line.rate }),
+                  })
+                : (line.name ?? fill(copy.taxLine, { rate: line.rate }))}
+            </span>
             <span>{money(line.amount)}</span>
           </div>
         ))}
