@@ -18,6 +18,7 @@ import {
   useShopLocale,
 } from "./locale-ui";
 import { OrderFieldInputs } from "./order-fields";
+import { chargesVat } from "@/lib/tax-treatment";
 import { TaxTreatmentNotice } from "./tax-treatment-notice";
 import { Badge } from "./ui/badge";
 import { badgeLabel, type PriceBadge } from "@/lib/price-overlay";
@@ -117,6 +118,8 @@ export function CartView({
   }
 
   const gross = cart.displayMode === "gross";
+  const vatCharged = chargesVat(cart.taxTreatment);
+  const showsVat = gross && vatCharged;
 
   async function handleCheckout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -225,7 +228,7 @@ export function CartView({
                     {discounted && !gross ? (
                       <span className={styles.lineWas}>{money(listPrice)}</span>
                     ) : null}
-                    {money(shownUnit)} {gross ? copy.inclVatEach : copy.netEach}
+                    {money(shownUnit)} {showsVat ? copy.inclVatEach : copy.netEach}
                   </span>
                   {tier ? (
                     <span className={styles.lineTier}>
@@ -477,7 +480,7 @@ export function CartView({
         </div>
 
         <div className={styles.row}>
-          <span>{gross ? copy.subtotalInclVat : copy.subtotalNet}</span>
+          <span>{showsVat ? copy.subtotalInclVat : copy.subtotalNet}</span>
           <span>
             {money(gross ? cart.amounts.subtotal.gross : cart.subtotal)}
           </span>
@@ -510,7 +513,7 @@ export function CartView({
 
         <TaxTreatmentNotice treatment={cart.taxTreatment} copy={copy} />
 
-        {cart.taxSummary.map((line) => (
+        {(vatCharged ? cart.taxSummary : []).map((line) => (
           <div key={line.rateId ?? line.name} className={styles.taxLine}>
             <span>
               {gross
@@ -524,7 +527,7 @@ export function CartView({
         ))}
 
         <div className={styles.rowTotal}>
-          <span>{copy.totalInclVat}</span>
+          <span>{vatCharged ? copy.totalInclVat : copy.totalNoVat}</span>
           <span>{money(cart.totalGross)}</span>
         </div>
 

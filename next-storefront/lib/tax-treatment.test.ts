@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { orderPricingFacts, taxTreatmentNote } from "./tax-treatment";
+import {
+  chargesVat,
+  orderPricingFacts,
+  taxTreatmentNote,
+} from "./tax-treatment";
 import { copyFor } from "./shop-copy";
 
 const copy = copyFor("en");
@@ -119,4 +123,18 @@ describe("orderPricingFacts", () => {
       ),
     ).toEqual([]);
   });
+});
+
+describe("chargesVat", () => {
+  it("charges VAT on a standard cart and on one not decided yet", () => {
+    expect(chargesVat({ kind: "standard" })).toBe(true);
+    expect(chargesVat(null)).toBe(true);
+  });
+
+  it.each(["reverse_charge", "exempt", "export"] as const)(
+    "charges none on a %s cart",
+    (kind) => {
+      expect(chargesVat({ kind })).toBe(false);
+    },
+  );
 });
