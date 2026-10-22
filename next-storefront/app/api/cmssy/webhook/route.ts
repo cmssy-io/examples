@@ -2,6 +2,7 @@ import {
   CmssyWebhookError,
   verifyCmssyWebhook,
   type CmssyWebhookAccountEvent,
+  type CmssyWebhookEvent,
   type CmssyWebhookReturn,
 } from "@cmssy/core";
 import { NextResponse } from "next/server";
@@ -10,8 +11,10 @@ import {
   accountMailSender,
   isAccountEvent,
 } from "@/lib/account-mail";
+import { idempotencyKey } from "@/lib/mailer";
 import { ShippingProviderError } from "@/lib/shipping";
 import { adminToken } from "@/services/admin";
+import { mailOrderEvent, ORDER_MAIL_EVENTS } from "@/services/order-mails";
 import { refundOnStripe } from "@/services/refunds";
 import { shipOrder } from "@/services/shipments";
 
@@ -45,11 +48,28 @@ function acknowledgeReturn(event: string, ret: CmssyWebhookReturn | undefined) {
 
 async function mailAccount(event: CmssyWebhookAccountEvent) {
   try {
-    await accountMailSender().send(accountMail(event));
+    await accountMailSender().send(accountMail(event), idempotencyKey(event));
     return NextResponse.json({ received: true, handled: true });
   } catch (error) {
     console.error("cmssy webhook: account mail not sent", error);
     return new Response("Account mail not sent", { status: 500 });
+  }
+}
+
+async function mailOrder(event: CmssyWebhookEvent) {
+  try {
+    const mail = await mailOrderEvent(event);
+    if (mail === "no_admin_token") {
+      return new Response("cmssy webhook is not configured", { status: 503 });
+    }
+    return NextResponse.json({
+      received: true,
+      handled: mail === "sent" || mail === "duplicate",
+      mail,
+    });
+  } catch (error) {
+    console.error("cmssy webhook: order mail not sent", error);
+    return new Response("Order mail not sent", { status: 500 });
   }
 }
 
@@ -99,6 +119,9 @@ export async function POST(request: Request) {
   }
   if (event.event.startsWith(RETURN_EVENT_PREFIX)) {
     return acknowledgeReturn(event.event, event.data.return);
+  }
+  if (ORDER_MAIL_EVENTS.has(event.event)) {
+    return mailOrder(event);
   }
   if (!REFUND_EVENTS.has(event.event) && !HANDLED_EVENTS.has(event.event)) {
     return NextResponse.json({ received: true, handled: false });

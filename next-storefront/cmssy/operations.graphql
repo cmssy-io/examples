@@ -157,3 +157,49 @@ mutation SubmitForm($formId: ID!, $input: SubmitFormInput!) {
     }
   }
 }
+
+# The signed-in member's prices, read once after the anonymous catalogue rendered.
+query BuyerPrices(
+  $workspaceId: ID!
+  $items: [PriceQueryItem!]!
+  $channel: String
+) {
+  account {
+    prices(workspaceId: $workspaceId, items: $items, channel: $channel) {
+      recordId
+      variantKey
+      currency
+      price
+      priceMax
+      listed
+      basePrice
+      source
+      listSource
+      minQuantity
+      maxQuantity
+      increment
+      tiers {
+        minQty
+        price
+      }
+      displayMode
+      taxRate
+      taxTreatmentKind
+      priceAmount {
+        net
+        tax
+        gross
+      }
+      priceMaxAmount {
+        net
+        tax
+        gross
+      }
+      basePriceAmount {
+        net
+        tax
+        gross
+      }
+    }
+  }
+}

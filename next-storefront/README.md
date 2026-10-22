@@ -176,7 +176,7 @@ buyer's order page shows it.
 
 | Variable | What it is |
 | --- | --- |
-| `CMSSY_WEBHOOK_SECRET` | signing secret of a cmssy webhook at `<origin>/api/cmssy/webhook` subscribed to `order.paid`, `shipment.label_requested`, `order.refunded` and `order.partially_refunded` (Settings -> Webhooks) |
+| `CMSSY_WEBHOOK_SECRET` | signing secret of a cmssy webhook at `<origin>/api/cmssy/webhook` subscribed to `order.paid`, `shipment.label_requested`, `order.refunded` and `order.partially_refunded` (Settings -> Webhooks), and for order emails to `order.created`, `order.canceled`, `shipment.created` and `shipment.updated` |
 | `SHIPPO_API_TOKEN` | Shippo API token (Settings -> API). A `shippo_test_` token buys free test labels on Shippo's own carrier accounts; DHL Express needs "Activate Account" under Settings -> Carriers first |
 | `SHIPPO_ADDRESS_FROM_US`, `SHIPPO_ADDRESS_FROM_DE` | `object_id` of a Shippo address for each warehouse, created once with `POST /addresses`. A warehouse without one is off |
 | `SHIPPO_CUSTOMS_SIGNER` | the name that certifies the customs declaration on parcels leaving the EU or the US; without it those parcels are refused |
@@ -187,22 +187,52 @@ Without them shipping is simply off, and orders are left for a person to ship.
 
 ### Member account emails
 
-cmssy never emails a shop's members. When a member registers, asks for a password reset or asks
+cmssy never emails a shop's members or customers. When a member registers, asks for a password reset or asks
 to change their login, cmssy issues a single-use token and sends it to `/api/cmssy/webhook` as
 `account.verification_requested`, `account.password_reset_requested` or
 `account.login_change_requested`. The route builds the link on this site's own origin
 (`/verify-email?token=`, `/reset-password?token=`, `/confirm-login-change?token=`) and hands
-`{ to, subject, text, link, event }` to the sender in `lib/account-mail.ts`. A login change is
+`{ to, subject, text, html, link, event }` to the sender in `lib/account-mail.ts`. A login change is
 mailed to the new login, which is how it proves the member owns it.
 
 | Variable | What it is |
 | --- | --- |
 | `CMSSY_WEBHOOK_SECRET` | the same cmssy webhook as above, also subscribed to the three `account.*` events. Account events need no `CMSSY_API_TOKEN` |
 | `NEXT_PUBLIC_SITE_URL` | the origin the links point at |
-| `ACCOUNT_MAIL_WEBHOOK_URL` | optional. Each mail is POSTed there as JSON for your mail provider (or a Zapier/Make hook) to send. Unset, the mail is only logged with `console.info("account mail", ...)` - enough to click the link locally |
+| `RESEND_API_KEY`, `MAIL_FROM` | optional, see [Order emails with Resend](#order-emails-with-resend). With both set, account mails go out through Resend |
+| `ACCOUNT_MAIL_WEBHOOK_URL` | optional, used when Resend is not set. Each mail is POSTed there as JSON for your mail provider (or a Zapier/Make hook) to send. Unset, the mail is only logged with `console.info("account mail", ...)` - enough to click the link locally |
 
 A sender that fails answers 500, so cmssy retries the delivery. To send from code instead, return
 your own `AccountMailSender` from `accountMailSender()`.
+
+### Order emails with Resend
+
+The order mails come from the same webhook, sent by this app through [Resend](https://resend.com):
+
+| cmssy event | Mail |
+| --- | --- |
+| `order.created` | confirmation: order number, lines, subtotal, discount, shipping and total as net, VAT and gross, and the legal note with the buyer's VAT id when the order is reverse charge |
+| `shipment.created` with a tracking number, or `shipment.updated` from `pending` with one | shipped: carrier, tracking number and tracking link |
+| `order.canceled` | canceled |
+
+The webhook carries no order number and no lines, so the route reads the order back with
+`CMSSY_API_TOKEN` before it writes the mail. Later parcel updates (in transit, delivered) send
+nothing.
+
+| Variable | What it is |
+| --- | --- |
+| `RESEND_API_KEY` | `re_...` from resend.com -> API Keys, with sending access to the domain of `MAIL_FROM` |
+| `MAIL_FROM` | the sender, e.g. `MACHTEC demo shop <shop@demo.cmssy.com>`, on a domain verified in Resend |
+| `MAIL_ALLOWLIST` | optional, comma-separated addresses or `@domain` entries. Set, only matching recipients get mail and the rest are logged and skipped - for a demo whose customers are made up. `@example.com` matches `a@example.com`, not `a@mail.example.com` |
+| `CMSSY_API_TOKEN` | the token above; order mails answer 503 without it |
+
+cmssy retries a delivery that fails, so every mail is sent with Resend's `Idempotency-Key` set to
+`<event>/<delivery id>`. A retry carries the same delivery id, and Resend answers it with the mail
+it already sent instead of a second one (it keeps keys for 24 hours; cmssy's last retry comes
+about 27 hours after the first attempt, but only a delivery that failed every time in between gets
+that far). A redelivery started by hand from the dashboard gets a new id and sends again. Without
+`RESEND_API_KEY` and `MAIL_FROM` order mails are skipped with a log line and account mails keep
+the behaviour above.
 
 Which carrier ships an order is decided by the shipping method the buyer chose and the destination
 country, in `SHIPPING_ROUTES` in `lib/shipping.ts`:
