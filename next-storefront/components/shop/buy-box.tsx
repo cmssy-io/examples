@@ -6,7 +6,8 @@ import { useCart } from "@/components/shop/cart-provider";
 import { useCartUi } from "./cart-ui";
 import type { Product } from "@/lib/catalog";
 import { formatMoney, savingsPercent, unitPriceFor } from "@/lib/money";
-import { StockBadge } from "./product-card";
+import { PriceBadge, StockBadge } from "./product-card";
+import { perUnitLabel, withheldLabel } from "@/lib/price-overlay";
 import { Button } from "./ui/button";
 import { useLocalePath, useShopCopy } from "./locale-ui";
 import { fill } from "@/lib/shop-copy";
@@ -26,13 +27,15 @@ import styles from "./product-detail.module.css";
 export function BuyBox({
   product,
   categorySlug,
+  priceChangesOn,
 }: {
   product: Product;
   categorySlug?: string | null;
+  priceChangesOn?: string | null;
 }) {
   const copy = useShopCopy();
   const localePath = useLocalePath();
-  const { addToCart, error } = useCart();
+  const { addToCart, error, signInRequired } = useCart();
   const { announceAdded } = useCartUi();
   const [quantity, setQuantity] = useState(1);
   const [selection, setSelection] = useState<VariantSelection>({});
@@ -68,7 +71,15 @@ export function BuyBox({
     .filter((tier) => quantity >= tier.minQty)
     .at(-1);
 
-  const blocked = needsVariant || (hasVariants && outOfStock);
+  const pricing = product.pricing;
+  const withheld = pricing?.kind === "withheld" ? pricing : null;
+  const shownGross =
+    pricing?.kind === "priced" && pricing.displayMode === "gross";
+  const showsGrossLine =
+    pricing?.kind !== "priced" ||
+    (pricing.displayMode === "net" && pricing.taxTreatmentKind === "standard");
+
+  const blocked = needsVariant || (hasVariants && outOfStock) || !!withheld;
 
   async function handleAdd() {
     setAdding(true);
@@ -86,26 +97,40 @@ export function BuyBox({
 
   return (
     <aside className={`shop-card ${styles.buyBox}`}>
-      <div>
-        <div className={styles.priceRow}>
-          {needsVariant ? (
-            <span className={styles.from}>{copy.from}</span>
+      {withheld ? (
+        <Link href={localePath("/account")} className={styles.withheld}>
+          {withheldLabel(withheld.reason, copy)}
+        </Link>
+      ) : (
+        <div>
+          <PriceBadge pricing={pricing} />
+          <div className={styles.priceRow}>
+            {needsVariant ? (
+              <span className={styles.from}>{copy.from}</span>
+            ) : null}
+            <span className={styles.price}>{formatMoney(unitPrice)}</span>
+            {activeTier ? (
+              <span className={styles.listPrice}>{formatMoney(basePrice)}</span>
+            ) : null}
+          </div>
+          <span className={styles.per}>
+            {perUnitLabel(pricing, copy)} {product.unit ?? "pcs"}
+            {activeTier
+              ? ` - ${copy.contractDiscount} -${savingsPercent(basePrice, activeTier.price)}%`
+              : ""}
+          </span>
+          {showsGrossLine ? (
+            <span className={styles.gross}>
+              {formatMoney(grossUnit)} {fill(copy.inclVat, { rate: taxRate })}
+            </span>
           ) : null}
-          <span className={styles.price}>{formatMoney(unitPrice)}</span>
-          {activeTier ? (
-            <span className={styles.listPrice}>{formatMoney(basePrice)}</span>
+          {priceChangesOn ? (
+            <span className={styles.gross}>
+              {fill(copy.priceChangesOn, { date: priceChangesOn })}
+            </span>
           ) : null}
         </div>
-        <span className={styles.per}>
-          net / {product.unit ?? "pcs"}
-          {activeTier
-            ? ` - ${copy.contractDiscount} -${savingsPercent(basePrice, activeTier.price)}%`
-            : ""}
-        </span>
-        <span className={styles.gross}>
-          {formatMoney(grossUnit)} {fill(copy.inclVat, { rate: taxRate })}
-        </span>
-      </div>
+      )}
 
       {axes.length > 0 ? (
         <div className={styles.options} data-variant-selector>
@@ -263,13 +288,17 @@ export function BuyBox({
         >
           {adding
             ? copy.adding
-            : needsVariant
-              ? copy.chooseOptions
-              : hasVariants && outOfStock
-                ? copy.outOfStock
-                : outOfStock
-                  ? copy.backorderNow
-                  : fill(copy.addWithTotal, { total: formatMoney(lineTotal) })}
+            : withheld
+              ? withheldLabel(withheld.reason, copy)
+              : needsVariant
+                ? copy.chooseOptions
+                : hasVariants && outOfStock
+                  ? copy.outOfStock
+                  : outOfStock
+                    ? copy.backorderNow
+                    : fill(copy.addWithTotal, {
+                        total: formatMoney(lineTotal),
+                      })}
         </Button>
       </div>
 
@@ -282,12 +311,26 @@ export function BuyBox({
         </Link>
       ) : null}
 
-      <div className={styles.lineTotal}>
-        <span>{copy.lineTotalNet}</span>
-        <span className={styles.lineTotalValue}>{formatMoney(lineTotal)}</span>
-      </div>
+      {withheld ? null : (
+        <div className={styles.lineTotal}>
+          <span>{shownGross ? copy.lineTotalGross : copy.lineTotalNet}</span>
+          <span className={styles.lineTotalValue}>
+            {formatMoney(lineTotal)}
+          </span>
+        </div>
+      )}
 
-      {error ? <span className="shop-error">{error}</span> : null}
+      {error ? (
+        <span className="shop-error">
+          {error}
+          {signInRequired ? (
+            <>
+              {" "}
+              <Link href={localePath("/account")}>{copy.signIn}</Link>
+            </>
+          ) : null}
+        </span>
+      ) : null}
 
       <div className={styles.meta}>
         {product.packaging ? (

@@ -15,6 +15,7 @@ import type {
 } from "@/graphql/models";
 import { localizedText } from "@/lib/localized";
 import { ttlCache } from "@/lib/ttl-cache";
+import type { ProductPricing } from "@/lib/price-overlay";
 import {
   fetchProductRoles,
   fetchShopSettings,
@@ -85,6 +86,8 @@ export type Product = {
   hasVariants: boolean;
   variantCount: number;
   variants: ProductVariant[];
+  /** Set when a buyer's or a channel's price replaced the catalogue price. */
+  pricing?: ProductPricing;
 };
 
 type RecordRow = { id: string; data: unknown };
@@ -318,7 +321,7 @@ function scanProducts(
   return scanCache(key, () => fetchAllProducts(filter, stockState, locale));
 }
 
-function productFilter(query: {
+export function productFilter(query: {
   categoryId?: string;
   brand?: string;
 }): Record<string, unknown> {
@@ -335,7 +338,13 @@ function matchesSearch(product: Product, needle: string): boolean {
     .includes(needle);
 }
 
-export async function loadProducts(query: ProductQuery): Promise<ProductPage> {
+// `reprice` lays a buyer's or a channel's prices over the scan before it is
+// sorted, so a price sort follows the price the visitor sees. The scan itself
+// stays the shared, channel-neutral catalogue.
+export async function loadProducts(
+  query: ProductQuery,
+  reprice?: (products: Product[]) => Promise<Product[]>,
+): Promise<ProductPage> {
   const page = Math.max(1, query.page ?? 1);
   const limit = Math.max(1, query.limit ?? PAGE_SIZE);
   const offset = (page - 1) * limit;
@@ -345,8 +354,11 @@ export async function loadProducts(query: ProductQuery): Promise<ProductPage> {
     query.stockState,
     query.locale,
   );
+  const matching = needle
+    ? all.filter((product) => matchesSearch(product, needle))
+    : all;
   const sorted = sortProducts(
-    needle ? all.filter((product) => matchesSearch(product, needle)) : all,
+    reprice ? await reprice(matching) : matching,
     query.sort,
   );
   const items = sorted.slice(offset, offset + limit);

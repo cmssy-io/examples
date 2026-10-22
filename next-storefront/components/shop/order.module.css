@@ -462,3 +462,63 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
+
+.reverseCharge {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  background: var(--background);
+  font-size: var(--text-sm);
+}
+
+.accountSection {
+  margin-top: 32px;
+}
+
+.companyFacts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 16px 20px;
+  margin: 0 0 8px;
+}
+
+.companyFacts dt {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+  margin-bottom: 4px;
+}
+
+.companyFacts dd {
+  margin: 0;
+}
+
+.allowances {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.channelLinks {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.orderTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.orderTabActive {
+  font-weight: var(--font-semibold);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}

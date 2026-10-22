@@ -8,6 +8,8 @@ mutation MemberUpdateProfile($fields: JSON!) {
       editableFields
       loginField
       passwordField
+      company { id name role permissions }
+      priceList { name }
     }
   }
 }

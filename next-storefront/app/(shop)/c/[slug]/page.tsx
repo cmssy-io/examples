@@ -4,7 +4,6 @@ import { Suspense, cache } from "react";
 import {
   PAGE_SIZE,
   loadBrandFacets,
-  loadProducts,
   loadStockFacets,
   type ProductQuery,
   type StockState,
@@ -13,6 +12,8 @@ import { loadCategories } from "@/lib/catalog-cached";
 import { ProductCard } from "@/components/shop/product-card";
 import { localePath, shopLocale } from "@/lib/locale";
 import { copyFor, fill, type ShopCopy } from "@/lib/shop-copy";
+import { priceChangeDate } from "@/lib/price-overlay";
+import { loadPricedProducts } from "@/services/prices";
 import styles from "@/components/shop/catalog.module.css";
 
 export const dynamic = "force-dynamic";
@@ -47,7 +48,7 @@ function buildHref(
 }
 
 const productsFor = cache((key: string) =>
-  loadProducts(JSON.parse(key) as ProductQuery),
+  loadPricedProducts(JSON.parse(key) as ProductQuery),
 );
 
 type Current = Record<string, string | undefined>;
@@ -182,8 +183,19 @@ async function ProductResults({
 }) {
   const result = await productsFor(productsKey);
   const lastPage = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
+  const { locale } = JSON.parse(productsKey) as ProductQuery;
+  const changesOn = result.items
+    .map((product) =>
+      priceChangeDate(product.pricing, result.nextChangeAt, locale ?? "en"),
+    )
+    .find(Boolean);
   return (
     <>
+      {changesOn ? (
+        <p className={styles.priceChange}>
+          {fill(copy.priceChangesOn, { date: changesOn })}
+        </p>
+      ) : null}
       {result.items.length === 0 ? (
         <div className={`shop-card ${styles.empty}`}>
           {term ? (

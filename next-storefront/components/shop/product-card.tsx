@@ -3,6 +3,12 @@
 import Link from "next/link";
 import type { Product } from "@/lib/catalog";
 import { formatMoney, savingsPercent, stockState } from "@/lib/money";
+import {
+  badgeLabel,
+  perUnitLabel,
+  withheldLabel,
+  type ProductPricing,
+} from "@/lib/price-overlay";
 import type { BadgeVariant } from "./ui/badge";
 import { Badge } from "./ui/badge";
 import { skuCode } from "./ui/image-placeholder";
@@ -36,11 +42,22 @@ export function StockBadge({
   );
 }
 
+export function PriceBadge({
+  pricing,
+}: {
+  pricing: ProductPricing | undefined;
+}) {
+  const copy = useShopCopy();
+  if (pricing?.kind !== "priced" || !pricing.badge) return null;
+  return <Badge variant="info">{badgeLabel(pricing.badge, copy)}</Badge>;
+}
+
 export function ProductCard({ product }: { product: Product }) {
   const localePath = useLocalePath();
   const copy = useShopCopy();
   const bestTier = product.tiers.at(-1);
   const href = localePath(`/p/${product.slug}`);
+  const pricing = product.pricing;
 
   return (
     <article className={`sf-card ${styles.card}`}>
@@ -77,7 +94,9 @@ export function ProductCard({ product }: { product: Product }) {
           />
         )}
 
-        {bestTier ? (
+        <PriceBadge pricing={pricing} />
+
+        {bestTier && pricing?.kind !== "withheld" ? (
           <span className={styles.tierHint}>
             {formatMoney(bestTier.price)} {copy.from} {bestTier.minQty}+ (
             {copy.save} {savingsPercent(product.fromPrice, bestTier.price)}%)
@@ -85,21 +104,31 @@ export function ProductCard({ product }: { product: Product }) {
         ) : null}
 
         <div className={styles.cardBottom}>
-          <div>
-            <div
-              className={styles.price}
-              data-from-price={
-                product.hasVariants ? product.fromPrice : undefined
-              }
+          {pricing?.kind === "withheld" ? (
+            <Link
+              href={localePath("/account")}
+              prefetch={false}
+              className={styles.withheld}
             >
-              {product.hasVariants ? `${copy.from} ` : ""}
-              {formatMoney(product.fromPrice)}
+              {withheldLabel(pricing.reason, copy)}
+            </Link>
+          ) : (
+            <div>
+              <div
+                className={styles.price}
+                data-from-price={
+                  product.hasVariants ? product.fromPrice : undefined
+                }
+              >
+                {product.hasVariants ? `${copy.from} ` : ""}
+                {formatMoney(product.fromPrice)}
+              </div>
+              <div className={styles.cardPer}>
+                {perUnitLabel(pricing, copy)} {product.unit ?? "pcs"}
+              </div>
             </div>
-            <div className={styles.cardPer}>
-              {copy.netPer} {product.unit ?? "pcs"}
-            </div>
-          </div>
-          {product.hasVariants ? (
+          )}
+          {pricing?.kind === "withheld" ? null : product.hasVariants ? (
             <Link
               href={href}
               prefetch={false}

@@ -4,6 +4,11 @@ type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 /** Internal type. DO NOT USE DIRECTLY. */
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import { DocumentTypeDecoration } from '@graphql-typed-document-node/core';
+/** Whose orders account.orders lists: MINE - the member's own; COMPANY - every order placed for the member's company, which needs the orders.company.read company permission. */
+export type AccountOrderScope =
+  | 'COMPANY'
+  | 'MINE';
+
 /** Input for adding an item to a cart */
 export type AddToCartInput = {
   channel?: string | null | undefined;
@@ -275,15 +280,16 @@ export type AddToCartMutationVariables = Exact<{
 }>;
 
 
-export type AddToCartMutation = { cart: { addItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type AddToCartMutation = { cart: { addItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type ApplyDiscountMutationVariables = Exact<{
   workspaceId: string | number;
   code: string;
+  channel?: string | null | undefined;
 }>;
 
 
-export type ApplyDiscountMutation = { cart: { applyDiscount: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type ApplyDiscountMutation = { cart: { applyDiscount: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type CheckoutMutationVariables = Exact<{
   input: CheckoutInput;
@@ -294,10 +300,11 @@ export type CheckoutMutation = { cart: { checkout: { id: string, orderNumber: nu
 
 export type ClearCartMutationVariables = Exact<{
   workspaceId: string | number;
+  channel?: string | null | undefined;
 }>;
 
 
-export type ClearCartMutation = { cart: { clear: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type ClearCartMutation = { cart: { clear: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type MemberChangePasswordMutationVariables = Exact<{
   currentPassword: string;
@@ -334,29 +341,32 @@ export type MemberUpdateProfileMutationVariables = Exact<{
 }>;
 
 
-export type MemberUpdateProfileMutation = { siteMember: { updateProfile: { id: string, login: string, pendingLogin: string | null, data: unknown, editableFields: Array<string>, loginField: string, passwordField: string } } };
+export type MemberUpdateProfileMutation = { siteMember: { updateProfile: { id: string, login: string, pendingLogin: string | null, data: unknown, editableFields: Array<string>, loginField: string, passwordField: string, company: { id: string, name: string | null, role: string, permissions: Array<string> } | null, priceList: { name: string } | null } } };
 
 export type MergeCartMutationVariables = Exact<{
   workspaceId: string | number;
+  channel?: string | null | undefined;
 }>;
 
 
-export type MergeCartMutation = { cart: { merge: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type MergeCartMutation = { cart: { merge: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type RemoveCartItemMutationVariables = Exact<{
   workspaceId: string | number;
   itemId: string | number;
+  channel?: string | null | undefined;
 }>;
 
 
-export type RemoveCartItemMutation = { cart: { removeItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type RemoveCartItemMutation = { cart: { removeItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type RemoveDiscountMutationVariables = Exact<{
   workspaceId: string | number;
+  channel?: string | null | undefined;
 }>;
 
 
-export type RemoveDiscountMutation = { cart: { removeDiscount: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type RemoveDiscountMutation = { cart: { removeDiscount: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type RequestReturnMutationVariables = Exact<{
   workspaceId: string | number;
@@ -372,18 +382,20 @@ export type RequestReturnMutation = { public: { order: { requestReturn: { id: st
 export type SetShippingAddressMutationVariables = Exact<{
   workspaceId: string | number;
   shippingAddress?: ShippingAddressInput | null | undefined;
+  channel?: string | null | undefined;
 }>;
 
 
-export type SetShippingAddressMutation = { cart: { setShippingAddress: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type SetShippingAddressMutation = { cart: { setShippingAddress: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type SetShippingMethodMutationVariables = Exact<{
   workspaceId: string | number;
   shippingMethodId?: string | null | undefined;
+  channel?: string | null | undefined;
 }>;
 
 
-export type SetShippingMethodMutation = { cart: { setShippingMethod: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type SetShippingMethodMutation = { cart: { setShippingMethod: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type SiteMemberForgotPasswordMutationVariables = Exact<{
   modelSlug: string;
@@ -441,14 +453,15 @@ export type UpdateCartItemMutationVariables = Exact<{
 }>;
 
 
-export type UpdateCartItemMutation = { cart: { updateItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type UpdateCartItemMutation = { cart: { updateItem: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type CartQueryVariables = Exact<{
   workspaceId: string | number;
+  channel?: string | null | undefined;
 }>;
 
 
-export type CartQuery = { cart: { get: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, shippingTotal: number, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
+export type CartQuery = { cart: { get: { id: string, status: string, itemCount: number, subtotal: number, currency: string | null, discountedTotal: number, tax: number, totalGross: number, pricesIncludeTax: boolean, channel: string | null, displayMode: PriceDisplayMode, shippingTotal: number, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number, etaLabel: string | null } | null, availableShippingMethods: Array<{ id: string, label: string, price: number, etaLabel: string | null }>, appliedDiscount: { code: string, type: string, value: number, computedAmount: number } | null, items: Array<{ id: string, recordId: string, quantity: number, variantSelections: unknown, unitPrice: number, currentPrice: number | null, priceMismatch: boolean, unit: { net: number, gross: number }, line: { net: number, gross: number }, snapshot: { name: string, price: number, currency: string, imageUrl: string | null, sku: string | null, tiers: Array<{ minQty: number, price: number }> } }> } } };
 
 export type PublicModelProductsQueryVariables = Exact<{
   workspaceId: string;
@@ -469,7 +482,7 @@ export type MyProfileQueryVariables = Exact<{
 }>;
 
 
-export type MyProfileQuery = { account: { profile: { id: string, login: string, pendingLogin: string | null, data: unknown, editableFields: Array<string>, loginField: string, passwordField: string } } };
+export type MyProfileQuery = { account: { profile: { id: string, login: string, pendingLogin: string | null, data: unknown, editableFields: Array<string>, loginField: string, passwordField: string, company: { id: string, name: string | null, role: string, permissions: Array<string> } | null, priceList: { name: string } | null } } };
 
 export type PublicOrderQueryVariables = Exact<{
   workspaceId: string | number;
@@ -478,16 +491,17 @@ export type PublicOrderQueryVariables = Exact<{
 }>;
 
 
-export type PublicOrderQuery = { public: { order: { byToken: { id: string, orderNumber: number | null, state: OrderState, paymentStatus: string, fulfillmentStatus: string, deliveryStatus: OrderDeliveryStatus, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, poNumber: string | null, customerNote: string | null, customFields: unknown, shippingTotal: number, amountPaid: number, balanceDue: number, refundedAmount: number, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, deliveredAt: string | null, createdAt: string, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, shipments: Array<{ carrier: string | null, trackingNumber: string | null, trackingUrl: string | null, status: ShipmentStatus, updatedAt: string, deliveredAt: string | null, items: Array<{ itemId: string, quantity: number }> }>, returns: Array<{ id: string, number: number, status: OrderReturnStatus, requestedAt: string, receivedAt: string | null, completedAt: string | null, refundedAmount: number, carrier: string | null, trackingNumber: string | null, lines: Array<{ itemId: string, quantity: number, reason: ReturnReason, receivedQuantity: number | null }> }>, items: Array<{ id: string, name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null, taxRate: number, taxAmount: number }> } } } };
+export type PublicOrderQuery = { public: { order: { byToken: { id: string, orderNumber: number | null, state: OrderState, paymentStatus: string, fulfillmentStatus: string, deliveryStatus: OrderDeliveryStatus, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, companyName: string | null, priceListSource: PriceListSource | null, currency: string, customerEmail: string, poNumber: string | null, customerNote: string | null, customFields: unknown, shippingTotal: number, amountPaid: number, balanceDue: number, refundedAmount: number, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, deliveredAt: string | null, createdAt: string, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, channel: { key: string, name: string } | null, priceList: { name: string } | null, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, shipments: Array<{ carrier: string | null, trackingNumber: string | null, trackingUrl: string | null, status: ShipmentStatus, updatedAt: string, deliveredAt: string | null, items: Array<{ itemId: string, quantity: number }> }>, returns: Array<{ id: string, number: number, status: OrderReturnStatus, requestedAt: string, receivedAt: string | null, completedAt: string | null, refundedAmount: number, carrier: string | null, trackingNumber: string | null, lines: Array<{ itemId: string, quantity: number, reason: ReturnReason, receivedQuantity: number | null }> }>, items: Array<{ id: string, name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null, taxRate: number, taxAmount: number }> } } } };
 
 export type MyOrdersQueryVariables = Exact<{
   workspaceId: string | number;
   skip?: number | null | undefined;
   limit?: number | null | undefined;
+  scope?: AccountOrderScope | null | undefined;
 }>;
 
 
-export type MyOrdersQuery = { account: { orders: { total: number, hasMore: boolean, items: Array<{ id: string, state: OrderState, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, refundedAmount: number, paymentStatus: string, fulfillmentStatus: string, deliveryStatus: OrderDeliveryStatus, amountPaid: number, balanceDue: number, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, deliveredAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, customFields: unknown, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shipments: Array<{ carrier: string | null, trackingNumber: string | null, trackingUrl: string | null, status: ShipmentStatus, updatedAt: string }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }> }> } } };
+export type MyOrdersQuery = { account: { orders: { total: number, hasMore: boolean, items: Array<{ id: string, state: OrderState, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, companyName: string | null, priceListSource: PriceListSource | null, currency: string, customerEmail: string, refundedAmount: number, paymentStatus: string, fulfillmentStatus: string, deliveryStatus: OrderDeliveryStatus, amountPaid: number, balanceDue: number, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, deliveredAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, customFields: unknown, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, channel: { key: string, name: string } | null, priceList: { name: string } | null, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shipments: Array<{ carrier: string | null, trackingNumber: string | null, trackingUrl: string | null, status: ShipmentStatus, updatedAt: string }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }> }> } } };
 
 export type MyOrderQueryVariables = Exact<{
   workspaceId: string | number;
@@ -495,7 +509,7 @@ export type MyOrderQueryVariables = Exact<{
 }>;
 
 
-export type MyOrderQuery = { account: { order: { id: string, state: OrderState, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, currency: string, customerEmail: string, refundedAmount: number, paymentStatus: string, fulfillmentStatus: string, deliveryStatus: OrderDeliveryStatus, amountPaid: number, balanceDue: number, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, deliveredAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, customFields: unknown, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shipments: Array<{ carrier: string | null, trackingNumber: string | null, trackingUrl: string | null, status: ShipmentStatus, updatedAt: string, deliveredAt: string | null, items: Array<{ itemId: string, quantity: number }> }>, returns: Array<{ id: string, number: number, status: OrderReturnStatus, requestedAt: string, receivedAt: string | null, completedAt: string | null, refundedAmount: number, carrier: string | null, trackingNumber: string | null, lines: Array<{ itemId: string, quantity: number, reason: ReturnReason, receivedQuantity: number | null }> }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ id: string, name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }> } | null } };
+export type MyOrderQuery = { account: { order: { id: string, state: OrderState, subtotal: number, discount: number, tax: number, total: number, pricesIncludeTax: boolean, companyName: string | null, priceListSource: PriceListSource | null, currency: string, customerEmail: string, refundedAmount: number, paymentStatus: string, fulfillmentStatus: string, deliveryStatus: OrderDeliveryStatus, amountPaid: number, balanceDue: number, invoiceNumber: string | null, invoiceUrl: string | null, paidAt: string | null, fulfilledAt: string | null, deliveredAt: string | null, createdAt: string, orderNumber: number | null, poNumber: string | null, customerNote: string | null, customFields: unknown, shippingTotal: number, appliedDiscount: { code: string, type: string, value: number, amount: number } | null, channel: { key: string, name: string } | null, priceList: { name: string } | null, taxTreatment: { kind: TaxTreatmentKind, legalNote: string | null, buyerVatId: string | null, buyerVatCountry: string | null }, taxSummary: Array<{ rateId: string | null, name: string | null, rate: number, base: number, amount: number }>, shipments: Array<{ carrier: string | null, trackingNumber: string | null, trackingUrl: string | null, status: ShipmentStatus, updatedAt: string, deliveredAt: string | null, items: Array<{ itemId: string, quantity: number }> }>, returns: Array<{ id: string, number: number, status: OrderReturnStatus, requestedAt: string, receivedAt: string | null, completedAt: string | null, refundedAmount: number, carrier: string | null, trackingNumber: string | null, lines: Array<{ itemId: string, quantity: number, reason: ReturnReason, receivedQuantity: number | null }> }>, shippingMethod: { id: string, label: string, price: number } | null, shippingAddress: { name: string, company: string | null, line1: string, line2: string | null, postalCode: string, city: string, region: string | null, country: string, phone: string | null, vatId: string | null } | null, items: Array<{ id: string, name: string, price: number, listPrice: number | null, tierMinQty: number | null, currency: string, quantity: number, sku: string | null }> } | null } };
 
 export type PublicPagesByTypeQueryVariables = Exact<{
   workspaceId: string;
@@ -858,6 +872,14 @@ export const AddToCartDocument = new TypedDocumentString(`
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment {
+        kind
+        legalNote
+        buyerVatId
+        buyerVatCountry
+      }
       shippingTotal
       taxSummary {
         rateId
@@ -892,6 +914,14 @@ export const AddToCartDocument = new TypedDocumentString(`
         unitPrice
         currentPrice
         priceMismatch
+        unit {
+          net
+          gross
+        }
+        line {
+          net
+          gross
+        }
         snapshot {
           name
           price
@@ -909,9 +939,9 @@ export const AddToCartDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<AddToCartMutation, AddToCartMutationVariables>;
 export const ApplyDiscountDocument = new TypedDocumentString(`
-    mutation ApplyDiscount($workspaceId: ID!, $code: String!) {
+    mutation ApplyDiscount($workspaceId: ID!, $code: String!, $channel: String) {
   cart {
-    applyDiscount(workspaceId: $workspaceId, code: $code) {
+    applyDiscount(workspaceId: $workspaceId, channel: $channel, code: $code) {
       id
       status
       itemCount
@@ -921,6 +951,14 @@ export const ApplyDiscountDocument = new TypedDocumentString(`
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment {
+        kind
+        legalNote
+        buyerVatId
+        buyerVatCountry
+      }
       shippingTotal
       taxSummary {
         rateId
@@ -955,6 +993,14 @@ export const ApplyDiscountDocument = new TypedDocumentString(`
         unitPrice
         currentPrice
         priceMismatch
+        unit {
+          net
+          gross
+        }
+        line {
+          net
+          gross
+        }
         snapshot {
           name
           price
@@ -1036,9 +1082,9 @@ export const CheckoutDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<CheckoutMutation, CheckoutMutationVariables>;
 export const ClearCartDocument = new TypedDocumentString(`
-    mutation ClearCart($workspaceId: ID!) {
+    mutation ClearCart($workspaceId: ID!, $channel: String) {
   cart {
-    clear(workspaceId: $workspaceId) {
+    clear(workspaceId: $workspaceId, channel: $channel) {
       id
       status
       itemCount
@@ -1048,6 +1094,14 @@ export const ClearCartDocument = new TypedDocumentString(`
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment {
+        kind
+        legalNote
+        buyerVatId
+        buyerVatCountry
+      }
       shippingTotal
       taxSummary {
         rateId
@@ -1082,6 +1136,14 @@ export const ClearCartDocument = new TypedDocumentString(`
         unitPrice
         currentPrice
         priceMismatch
+        unit {
+          net
+          gross
+        }
+        line {
+          net
+          gross
+        }
         snapshot {
           name
           price
@@ -1152,14 +1214,23 @@ export const MemberUpdateProfileDocument = new TypedDocumentString(`
       editableFields
       loginField
       passwordField
+      company {
+        id
+        name
+        role
+        permissions
+      }
+      priceList {
+        name
+      }
     }
   }
 }
     `) as unknown as TypedDocumentString<MemberUpdateProfileMutation, MemberUpdateProfileMutationVariables>;
 export const MergeCartDocument = new TypedDocumentString(`
-    mutation MergeCart($workspaceId: ID!) {
+    mutation MergeCart($workspaceId: ID!, $channel: String) {
   cart {
-    merge(workspaceId: $workspaceId) {
+    merge(workspaceId: $workspaceId, channel: $channel) {
       id
       status
       itemCount
@@ -1169,6 +1240,14 @@ export const MergeCartDocument = new TypedDocumentString(`
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment {
+        kind
+        legalNote
+        buyerVatId
+        buyerVatCountry
+      }
       shippingTotal
       taxSummary {
         rateId
@@ -1203,6 +1282,14 @@ export const MergeCartDocument = new TypedDocumentString(`
         unitPrice
         currentPrice
         priceMismatch
+        unit {
+          net
+          gross
+        }
+        line {
+          net
+          gross
+        }
         snapshot {
           name
           price
@@ -1220,9 +1307,9 @@ export const MergeCartDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<MergeCartMutation, MergeCartMutationVariables>;
 export const RemoveCartItemDocument = new TypedDocumentString(`
-    mutation RemoveCartItem($workspaceId: ID!, $itemId: ID!) {
+    mutation RemoveCartItem($workspaceId: ID!, $itemId: ID!, $channel: String) {
   cart {
-    removeItem(workspaceId: $workspaceId, itemId: $itemId) {
+    removeItem(workspaceId: $workspaceId, channel: $channel, itemId: $itemId) {
       id
       status
       itemCount
@@ -1232,6 +1319,14 @@ export const RemoveCartItemDocument = new TypedDocumentString(`
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment {
+        kind
+        legalNote
+        buyerVatId
+        buyerVatCountry
+      }
       shippingTotal
       taxSummary {
         rateId
@@ -1266,6 +1361,14 @@ export const RemoveCartItemDocument = new TypedDocumentString(`
         unitPrice
         currentPrice
         priceMismatch
+        unit {
+          net
+          gross
+        }
+        line {
+          net
+          gross
+        }
         snapshot {
           name
           price
@@ -1283,9 +1386,9 @@ export const RemoveCartItemDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<RemoveCartItemMutation, RemoveCartItemMutationVariables>;
 export const RemoveDiscountDocument = new TypedDocumentString(`
-    mutation RemoveDiscount($workspaceId: ID!) {
+    mutation RemoveDiscount($workspaceId: ID!, $channel: String) {
   cart {
-    removeDiscount(workspaceId: $workspaceId) {
+    removeDiscount(workspaceId: $workspaceId, channel: $channel) {
       id
       status
       itemCount
@@ -1295,6 +1398,14 @@ export const RemoveDiscountDocument = new TypedDocumentString(`
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment {
+        kind
+        legalNote
+        buyerVatId
+        buyerVatCountry
+      }
       shippingTotal
       taxSummary {
         rateId
@@ -1329,6 +1440,14 @@ export const RemoveDiscountDocument = new TypedDocumentString(`
         unitPrice
         currentPrice
         priceMismatch
+        unit {
+          net
+          gross
+        }
+        line {
+          net
+          gross
+        }
         snapshot {
           name
           price
@@ -1363,9 +1482,13 @@ export const RequestReturnDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<RequestReturnMutation, RequestReturnMutationVariables>;
 export const SetShippingAddressDocument = new TypedDocumentString(`
-    mutation SetShippingAddress($workspaceId: ID!, $shippingAddress: ShippingAddressInput) {
+    mutation SetShippingAddress($workspaceId: ID!, $shippingAddress: ShippingAddressInput, $channel: String) {
   cart {
-    setShippingAddress(workspaceId: $workspaceId, shippingAddress: $shippingAddress) {
+    setShippingAddress(
+      workspaceId: $workspaceId
+      channel: $channel
+      shippingAddress: $shippingAddress
+    ) {
       id
       status
       itemCount
@@ -1375,6 +1498,14 @@ export const SetShippingAddressDocument = new TypedDocumentString(`
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment {
+        kind
+        legalNote
+        buyerVatId
+        buyerVatCountry
+      }
       shippingTotal
       taxSummary {
         rateId
@@ -1409,6 +1540,14 @@ export const SetShippingAddressDocument = new TypedDocumentString(`
         unitPrice
         currentPrice
         priceMismatch
+        unit {
+          net
+          gross
+        }
+        line {
+          net
+          gross
+        }
         snapshot {
           name
           price
@@ -1426,10 +1565,11 @@ export const SetShippingAddressDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<SetShippingAddressMutation, SetShippingAddressMutationVariables>;
 export const SetShippingMethodDocument = new TypedDocumentString(`
-    mutation SetShippingMethod($workspaceId: ID!, $shippingMethodId: String) {
+    mutation SetShippingMethod($workspaceId: ID!, $shippingMethodId: String, $channel: String) {
   cart {
     setShippingMethod(
       workspaceId: $workspaceId
+      channel: $channel
       shippingMethodId: $shippingMethodId
     ) {
       id
@@ -1441,6 +1581,14 @@ export const SetShippingMethodDocument = new TypedDocumentString(`
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment {
+        kind
+        legalNote
+        buyerVatId
+        buyerVatCountry
+      }
       shippingTotal
       taxSummary {
         rateId
@@ -1475,6 +1623,14 @@ export const SetShippingMethodDocument = new TypedDocumentString(`
         unitPrice
         currentPrice
         priceMismatch
+        unit {
+          net
+          gross
+        }
+        line {
+          net
+          gross
+        }
         snapshot {
           name
           price
@@ -1580,6 +1736,14 @@ export const UpdateCartItemDocument = new TypedDocumentString(`
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment {
+        kind
+        legalNote
+        buyerVatId
+        buyerVatCountry
+      }
       shippingTotal
       taxSummary {
         rateId
@@ -1614,6 +1778,14 @@ export const UpdateCartItemDocument = new TypedDocumentString(`
         unitPrice
         currentPrice
         priceMismatch
+        unit {
+          net
+          gross
+        }
+        line {
+          net
+          gross
+        }
         snapshot {
           name
           price
@@ -1631,9 +1803,9 @@ export const UpdateCartItemDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<UpdateCartItemMutation, UpdateCartItemMutationVariables>;
 export const CartDocument = new TypedDocumentString(`
-    query Cart($workspaceId: ID!) {
+    query Cart($workspaceId: ID!, $channel: String) {
   cart {
-    get(workspaceId: $workspaceId) {
+    get(workspaceId: $workspaceId, channel: $channel) {
       id
       status
       itemCount
@@ -1643,6 +1815,14 @@ export const CartDocument = new TypedDocumentString(`
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment {
+        kind
+        legalNote
+        buyerVatId
+        buyerVatCountry
+      }
       shippingTotal
       taxSummary {
         rateId
@@ -1677,6 +1857,14 @@ export const CartDocument = new TypedDocumentString(`
         unitPrice
         currentPrice
         priceMismatch
+        unit {
+          net
+          gross
+        }
+        line {
+          net
+          gross
+        }
         snapshot {
           name
           price
@@ -1738,6 +1926,15 @@ export const MyProfileDocument = new TypedDocumentString(`
       editableFields
       loginField
       passwordField
+      company {
+        id
+        name
+        role
+        permissions
+      }
+      priceList {
+        name
+      }
     }
   }
 }
@@ -1764,6 +1961,21 @@ export const PublicOrderDocument = new TypedDocumentString(`
         tax
         total
         pricesIncludeTax
+        companyName
+        channel {
+          key
+          name
+        }
+        priceList {
+          name
+        }
+        priceListSource
+        taxTreatment {
+          kind
+          legalNote
+          buyerVatId
+          buyerVatCountry
+        }
         taxSummary {
           rateId
           name
@@ -1850,9 +2062,9 @@ export const PublicOrderDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<PublicOrderQuery, PublicOrderQueryVariables>;
 export const MyOrdersDocument = new TypedDocumentString(`
-    query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int) {
+    query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int, $scope: AccountOrderScope) {
   account {
-    orders(workspaceId: $workspaceId, skip: $skip, limit: $limit) {
+    orders(workspaceId: $workspaceId, skip: $skip, limit: $limit, scope: $scope) {
       total
       hasMore
       items {
@@ -1869,6 +2081,21 @@ export const MyOrdersDocument = new TypedDocumentString(`
         tax
         total
         pricesIncludeTax
+        companyName
+        channel {
+          key
+          name
+        }
+        priceList {
+          name
+        }
+        priceListSource
+        taxTreatment {
+          kind
+          legalNote
+          buyerVatId
+          buyerVatCountry
+        }
         taxSummary {
           rateId
           name
@@ -1950,6 +2177,21 @@ export const MyOrderDocument = new TypedDocumentString(`
       tax
       total
       pricesIncludeTax
+      companyName
+      channel {
+        key
+        name
+      }
+      priceList {
+        name
+      }
+      priceListSource
+      taxTreatment {
+        kind
+        legalNote
+        buyerVatId
+        buyerVatCountry
+      }
       taxSummary {
         rateId
         name

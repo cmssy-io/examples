@@ -1,6 +1,6 @@
-mutation SetShippingMethod($workspaceId: ID!, $shippingMethodId: String) {
+mutation SetShippingMethod($workspaceId: ID!, $shippingMethodId: String, $channel: String) {
   cart {
-    setShippingMethod(workspaceId: $workspaceId, shippingMethodId: $shippingMethodId) {
+    setShippingMethod(workspaceId: $workspaceId, channel: $channel, shippingMethodId: $shippingMethodId) {
       id
       status
       itemCount
@@ -10,6 +10,9 @@ mutation SetShippingMethod($workspaceId: ID!, $shippingMethodId: String) {
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment { kind legalNote buyerVatId buyerVatCountry }
       shippingTotal
       taxSummary { rateId name rate base amount }
       shippingMethod { id label price etaLabel }
@@ -23,6 +26,8 @@ mutation SetShippingMethod($workspaceId: ID!, $shippingMethodId: String) {
         unitPrice
         currentPrice
         priceMismatch
+        unit { net gross }
+        line { net gross }
         snapshot { name price currency imageUrl sku tiers { minQty price } }
       }
     }

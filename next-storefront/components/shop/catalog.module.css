@@ -230,3 +230,14 @@
     top: auto;
   }
 }
+
+.priceChange {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+.withheld {
+  font-size: 13px;
+  font-weight: var(--font-semibold);
+}

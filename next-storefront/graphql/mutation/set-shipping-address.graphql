@@ -1,6 +1,6 @@
-mutation SetShippingAddress($workspaceId: ID!, $shippingAddress: ShippingAddressInput) {
+mutation SetShippingAddress($workspaceId: ID!, $shippingAddress: ShippingAddressInput, $channel: String) {
   cart {
-    setShippingAddress(workspaceId: $workspaceId, shippingAddress: $shippingAddress) {
+    setShippingAddress(workspaceId: $workspaceId, channel: $channel, shippingAddress: $shippingAddress) {
       id
       status
       itemCount
@@ -10,6 +10,9 @@ mutation SetShippingAddress($workspaceId: ID!, $shippingAddress: ShippingAddress
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment { kind legalNote buyerVatId buyerVatCountry }
       shippingTotal
       taxSummary { rateId name rate base amount }
       shippingMethod { id label price etaLabel }
@@ -23,6 +26,8 @@ mutation SetShippingAddress($workspaceId: ID!, $shippingAddress: ShippingAddress
         unitPrice
         currentPrice
         priceMismatch
+        unit { net gross }
+        line { net gross }
         snapshot { name price currency imageUrl sku tiers { minQty price } }
       }
     }

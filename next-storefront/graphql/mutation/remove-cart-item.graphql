@@ -1,6 +1,6 @@
-mutation RemoveCartItem($workspaceId: ID!, $itemId: ID!) {
+mutation RemoveCartItem($workspaceId: ID!, $itemId: ID!, $channel: String) {
   cart {
-    removeItem(workspaceId: $workspaceId, itemId: $itemId) {
+    removeItem(workspaceId: $workspaceId, channel: $channel, itemId: $itemId) {
       id
       status
       itemCount
@@ -10,6 +10,9 @@ mutation RemoveCartItem($workspaceId: ID!, $itemId: ID!) {
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment { kind legalNote buyerVatId buyerVatCountry }
       shippingTotal
       taxSummary { rateId name rate base amount }
       shippingMethod { id label price etaLabel }
@@ -23,6 +26,8 @@ mutation RemoveCartItem($workspaceId: ID!, $itemId: ID!) {
         unitPrice
         currentPrice
         priceMismatch
+        unit { net gross }
+        line { net gross }
         snapshot { name price currency imageUrl sku tiers { minQty price } }
       }
     }

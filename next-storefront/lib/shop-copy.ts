@@ -310,6 +310,49 @@ const en = {
 
   productNotFound: "Product not found",
   by: "by",
+
+  channelShoppingOn: "Shopping on",
+  channelExit: "Exit",
+  channelUnavailable:
+    "This sales channel is no longer available - you are back in the main shop.",
+  channelSignInToBuy: "This channel sells to signed-in customers. Sign in to buy.",
+  channelCompanyOnly:
+    "This channel sells to approved company accounts only. Sign in with your company account.",
+  tradeChannels: "Trade channels",
+  tradeChannelsLead:
+    "Shop through one of our sales channels to see its prices and terms.",
+  channelForMembers: "signed-in customers",
+  channelForCompanies: "approved company accounts",
+  channelForEveryone: "everyone",
+  pricesUpdatedReview:
+    "Your prices were updated. Please review your cart and place the order again.",
+  priceBadgeCompany: "Company price",
+  priceBadgeChannel: "Channel price",
+  priceBadgeMember: "Your price",
+  grossPer: "incl. VAT /",
+  inclVatEach: "incl. VAT each",
+  lineTotalGross: "Line total (incl. VAT)",
+  signInToSeePrices: "Sign in to see prices",
+  signInCompanyToSeePrices: "Sign in with a company account to see prices",
+  priceChangesOn: "Price changes on {date}",
+  reverseCharge: "Reverse charge",
+  reverseChargeNote: "VAT is reverse charged to the buyer.",
+  buyerVatId: "Buyer VAT ID",
+  salesChannel: "Sales channel",
+  priceList: "Price list",
+  priceListFromMember: "your account",
+  priceListFromCompany: "your company",
+  priceListFromChannel: "the sales channel",
+  yourCompany: "Your company",
+  companyRole: "Role",
+  roleAllows: "Your role lets you",
+  permissionOwnOrders: "Place orders and see your own orders",
+  permissionCompanyOrders: "See every order placed for your company",
+  rolesManagedNote:
+    "Company roles are managed by your company admin or the shop - contact them to change yours.",
+  myOrders: "My orders",
+  companyOrders: "Company orders",
+  placedBy: "placed by {email}",
 } as const;
 
 export type ShopCopy = Record<keyof typeof en, string>;
@@ -626,6 +669,49 @@ const no: ShopCopy = {
 
   productNotFound: "Fant ikke produktet",
   by: "fra",
+
+  channelShoppingOn: "Du handler i",
+  channelExit: "Avslutt",
+  channelUnavailable:
+    "Denne salgskanalen finnes ikke lenger - du er tilbake i hovedbutikken.",
+  channelSignInToBuy: "Denne kanalen selger til innloggede kunder. Logg inn for å handle.",
+  channelCompanyOnly:
+    "Denne kanalen selger kun til godkjente bedriftskontoer. Logg inn med bedriftskontoen din.",
+  tradeChannels: "Salgskanaler",
+  tradeChannelsLead:
+    "Handle gjennom en av våre salgskanaler for å se dens priser og vilkår.",
+  channelForMembers: "innloggede kunder",
+  channelForCompanies: "godkjente bedriftskontoer",
+  channelForEveryone: "alle",
+  pricesUpdatedReview:
+    "Prisene dine er oppdatert. Se over handlekurven og legg inn bestillingen på nytt.",
+  priceBadgeCompany: "Bedriftspris",
+  priceBadgeChannel: "Kanalpris",
+  priceBadgeMember: "Din pris",
+  grossPer: "inkl. mva. /",
+  inclVatEach: "inkl. mva. per stk",
+  lineTotalGross: "Linjesum (inkl. mva.)",
+  signInToSeePrices: "Logg inn for å se priser",
+  signInCompanyToSeePrices: "Logg inn med en bedriftskonto for å se priser",
+  priceChangesOn: "Prisen endres {date}",
+  reverseCharge: "Omvendt avgiftsplikt",
+  reverseChargeNote: "Merverdiavgiften beregnes av kjøper (omvendt avgiftsplikt).",
+  buyerVatId: "Kjøpers MVA-nummer",
+  salesChannel: "Salgskanal",
+  priceList: "Prisliste",
+  priceListFromMember: "kontoen din",
+  priceListFromCompany: "bedriften din",
+  priceListFromChannel: "salgskanalen",
+  yourCompany: "Din bedrift",
+  companyRole: "Rolle",
+  roleAllows: "Rollen din lar deg",
+  permissionOwnOrders: "Legge inn bestillinger og se dine egne",
+  permissionCompanyOrders: "Se alle bestillinger lagt inn for bedriften din",
+  rolesManagedNote:
+    "Bedriftsroller styres av bedriftens administrator eller butikken - kontakt dem for å endre din.",
+  myOrders: "Mine bestillinger",
+  companyOrders: "Bedriftens bestillinger",
+  placedBy: "lagt inn av {email}",
 };
 
 const dictionaries: Record<string, ShopCopy> = { en, no };

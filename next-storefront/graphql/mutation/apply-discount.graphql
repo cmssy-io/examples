@@ -1,6 +1,6 @@
-mutation ApplyDiscount($workspaceId: ID!, $code: String!) {
+mutation ApplyDiscount($workspaceId: ID!, $code: String!, $channel: String) {
   cart {
-    applyDiscount(workspaceId: $workspaceId, code: $code) {
+    applyDiscount(workspaceId: $workspaceId, channel: $channel, code: $code) {
       id
       status
       itemCount
@@ -10,6 +10,9 @@ mutation ApplyDiscount($workspaceId: ID!, $code: String!) {
       tax
       totalGross
       pricesIncludeTax
+      channel
+      displayMode
+      taxTreatment { kind legalNote buyerVatId buyerVatCountry }
       shippingTotal
       taxSummary { rateId name rate base amount }
       shippingMethod { id label price etaLabel }
@@ -23,6 +26,8 @@ mutation ApplyDiscount($workspaceId: ID!, $code: String!) {
         unitPrice
         currentPrice
         priceMismatch
+        unit { net gross }
+        line { net gross }
         snapshot { name price currency imageUrl sku tiers { minQty price } }
       }
     }
