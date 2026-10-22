@@ -45,7 +45,7 @@ describe("cartFailure", () => {
     expect(failure).toEqual({ error: copy.channelCompanyOnly, signIn: true });
   });
 
-  it.each(["BUYER_CHANGED", "TAX_TREATMENT_CHANGED"] as const)(
+  it.each(["BUYER_CHANGED", "CART_REPRICED", "TAX_TREATMENT_CHANGED"] as const)(
     "asks the buyer to review the cart on %s",
     (reason) => {
       const failure = cartFailure(
@@ -61,15 +61,15 @@ describe("cartFailure", () => {
 
   it("passes other checkout refusals through with their message", () => {
     const failure = cartFailure(
-      new CmssyGraphqlError("Cart was repriced", [
+      new CmssyGraphqlError("Product is not sold here", [
         {
-          message: "Cart was repriced",
-          extensions: { code: "CONFLICT", reason: "CART_REPRICED" },
+          message: "Product is not sold here",
+          extensions: { code: "BAD_USER_INPUT", reason: "PRODUCT_NOT_SOLD" },
         },
       ]),
       copy,
     );
-    expect(failure).toEqual({ error: "Cart was repriced" });
+    expect(failure).toEqual({ error: "Product is not sold here" });
   });
 
   it("does not read a bad-input error without a channel as a channel refusal", () => {
