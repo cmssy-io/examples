@@ -139,7 +139,7 @@ export const blogIndexBlock = defineBlock({
     return {
       items: await loadPosts({
         parentSlug,
-        limit: Number(content.postsPerPage) || 9,
+        limit: Number(content.postsPerPage) || 20,
         locale: context?.locale.current,
         defaultLocale: context?.locale.default,
       }),

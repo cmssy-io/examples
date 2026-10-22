@@ -10,7 +10,7 @@ export const blogIndexProps = {
     helperText: "Posts are the children of this page.",
     localized: false,
   }),
-  postsPerPage: fields.number({ label: "Posts per page", defaultValue: 9 }),
+  postsPerPage: fields.number({ label: "Posts per page", defaultValue: 20 }),
 };
 
 function pickLocale(

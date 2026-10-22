@@ -15,6 +15,8 @@ import {
 
 const EMPTY_ORDERS: MyOrders = { total: 0, hasMore: false, items: [] };
 
+export const ORDERS_PAGE_SIZE = 20;
+
 const client = createCmssyClient(cmssy);
 
 export async function listMyOrders(
@@ -25,7 +27,7 @@ export async function listMyOrders(
     (workspaceId) => ({
       workspaceId,
       skip: options.skip ?? 0,
-      limit: options.limit ?? 20,
+      limit: options.limit ?? ORDERS_PAGE_SIZE,
       ...(options.scope ? { scope: options.scope } : {}),
     }),
   );

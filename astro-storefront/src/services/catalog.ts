@@ -29,7 +29,7 @@ export { PRODUCT_MODEL, CATEGORY_MODEL } from "./catalog-models";
 import { PRODUCT_MODEL, CATEGORY_MODEL } from "./catalog-models";
 import { retryMode } from "../lib/cmssy/retry-mode";
 import { readAllVariants, variantStates } from "../lib/variants";
-export const PAGE_SIZE = 12;
+export const PAGE_SIZE = 20;
 const API_PAGE_SIZE = 50;
 const SCAN_TTL_MS = 60_000;
 

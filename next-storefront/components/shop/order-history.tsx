@@ -11,10 +11,14 @@ import styles from "./order.module.css";
 
 export function OrderHistory({
   orders,
+  page,
+  lastPage,
   payOnline,
   scope,
 }: {
   orders: MyOrders["items"];
+  page: number;
+  lastPage: number;
   payOnline: boolean;
   /** Set when the member may switch to their company's orders. */
   scope?: AccountOrderScope;
@@ -22,6 +26,13 @@ export function OrderHistory({
   const localePath = useLocalePath();
   const copy = useShopCopy();
   const { locale } = useShopLocale();
+  const pageHref = (target: number) => {
+    const params = new URLSearchParams();
+    if (scope === "COMPANY") params.set("orders", "company");
+    if (target > 1) params.set("page", String(target));
+    const query = params.toString();
+    return localePath(query ? `/account?${query}` : "/account");
+  };
   const tab = (target: AccountOrderScope, label: string) => (
     <Link
       href={localePath(
@@ -78,6 +89,23 @@ export function OrderHistory({
           ))}
         </div>
       )}
+      {lastPage > 1 ? (
+        <nav className={styles.orderPager} aria-label={copy.paginationAria}>
+          {page > 1 ? (
+            <Link className="shop-btn" href={pageHref(page - 1)}>
+              {copy.previous}
+            </Link>
+          ) : null}
+          <span className="shop-muted">
+            {fill(copy.pageOf, { page, last: lastPage })}
+          </span>
+          {page < lastPage ? (
+            <Link className="shop-btn" href={pageHref(page + 1)}>
+              {copy.next}
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
     </>
   );
 }

@@ -31,20 +31,30 @@ function fulfilmentLabel(status: string, copy: ShopCopy): string {
   return copy.fulfilmentUnfulfilled;
 }
 
-function formatDate(iso: string | null | undefined): string | null {
+function formatDate(
+  iso: string | null | undefined,
+  locale: string,
+): string | null {
   if (!iso) return null;
   const date = new Date(iso);
   return Number.isNaN(date.getTime())
     ? null
-    : date.toLocaleDateString(undefined, {
+    : date.toLocaleDateString(locale, {
         year: "numeric",
         month: "short",
         day: "numeric",
       });
 }
 
-function OrderTimeline({ order, copy }: { order: Order; copy: ShopCopy }) {
-
+function OrderTimeline({
+  order,
+  copy,
+  locale,
+}: {
+  order: Order;
+  copy: ShopCopy;
+  locale: string;
+}) {
   const stages = [
     { label: copy.timelinePlaced, at: order.createdAt, done: true },
     {
@@ -68,7 +78,7 @@ function OrderTimeline({ order, copy }: { order: Order; copy: ShopCopy }) {
     <div className={`shop-card ${styles.timeline}`}>
       <div className={styles.timelineTitle}>{copy.statusHistory}</div>
       {stages.map((stage, index) => {
-        const date = formatDate(stage.at);
+        const date = formatDate(stage.at, locale);
         return (
           <div key={stage.label} className={styles.timelineItem}>
             <div className={styles.timelineRail}>
@@ -222,7 +232,7 @@ export function AccountOrder({
 
       <div className={styles.detailGrid}>
         <OrderReceipt order={order} copy={copy} locale={locale} />
-        <OrderTimeline order={order} copy={copy} />
+        <OrderTimeline order={order} copy={copy} locale={locale} />
       </div>
 
       <OrderReturns order={order} />
