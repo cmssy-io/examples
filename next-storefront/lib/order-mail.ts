@@ -3,6 +3,7 @@ import { escapeHtml, type OutgoingMail } from "@/lib/mailer";
 import {
   button,
   details,
+  MAIL_LOCALE,
   panel,
   paragraph,
   renderMail,
@@ -75,9 +76,9 @@ function amountRow(
 ): string[] {
   return [
     label,
-    `${sign}${formatMoney(amount.net, currency)}`,
-    `${sign}${formatMoney(amount.tax, currency)}`,
-    `${sign}${formatMoney(amount.gross, currency)}`,
+    `${sign}${formatMoney(amount.net, currency, MAIL_LOCALE)}`,
+    `${sign}${formatMoney(amount.tax, currency, MAIL_LOCALE)}`,
+    `${sign}${formatMoney(amount.gross, currency, MAIL_LOCALE)}`,
   ];
 }
 
@@ -101,7 +102,8 @@ function orderReason(brand: Brand): string {
 }
 
 function itemsTable(order: OrderForMail): string {
-  const money = (minor: number) => formatMoney(minor, order.currency);
+  const money = (minor: number) =>
+    formatMoney(minor, order.currency, MAIL_LOCALE);
   const head = (label: string, align: string) =>
     `<th align="${align}" style="padding:0 0 8px;font-size:12px;line-height:16px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;${MUTED}text-align:${align};">${label}</th>`;
   const rows = order.items.map((item) => {
@@ -149,7 +151,8 @@ export function orderConfirmationMail(
   order: OrderForMail,
   brand: Brand,
 ): OutgoingMail {
-  const money = (minor: number) => formatMoney(minor, order.currency);
+  const money = (minor: number) =>
+    formatMoney(minor, order.currency, MAIL_LOCALE);
   const lines = order.items.map((item) => [
     item.sku ? `${item.name} (${item.sku})` : item.name,
     String(item.quantity),
@@ -254,7 +257,11 @@ export function orderCanceledMail(
   order: OrderForMail,
   brand: Brand,
 ): OutgoingMail {
-  const total = formatMoney(order.amounts.total.gross, order.currency);
+  const total = formatMoney(
+    order.amounts.total.gross,
+    order.currency,
+    MAIL_LOCALE,
+  );
   const lines = [
     `${orderName(order)} has been canceled.`,
     `Order total: ${total}. Nothing will be charged for it.`,

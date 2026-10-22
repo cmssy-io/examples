@@ -6,7 +6,7 @@ import type { AccountOrderScope } from "@/graphql/generated/graphql";
 import { formatMoney } from "@/lib/money";
 import { fill } from "@/lib/shop-copy";
 import { paymentLabel, progressLabel, showsPayment } from "./order-receipt";
-import { useLocalePath, useShopCopy } from "./locale-ui";
+import { useLocalePath, useShopCopy, useShopLocale } from "./locale-ui";
 import styles from "./order.module.css";
 
 export function OrderHistory({
@@ -21,6 +21,7 @@ export function OrderHistory({
 }) {
   const localePath = useLocalePath();
   const copy = useShopCopy();
+  const { locale } = useShopLocale();
   const tab = (target: AccountOrderScope, label: string) => (
     <Link
       href={localePath(
@@ -72,7 +73,7 @@ export function OrderHistory({
                     : null}
                 </div>
               </div>
-              <span>{formatMoney(order.total, order.currency)}</span>
+              <span>{formatMoney(order.total, order.currency, locale)}</span>
             </Link>
           ))}
         </div>

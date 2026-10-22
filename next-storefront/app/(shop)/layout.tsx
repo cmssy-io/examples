@@ -17,6 +17,8 @@ import { activeChannel } from "@/services/channel";
 import { CartUiProvider } from "@/components/shop/cart-ui";
 import { CartProvider } from "@/components/shop/cart-provider";
 import { UserProvider } from "@/components/shop/user-provider";
+import { CurrencyProvider } from "@/components/shop/locale-ui";
+import { fetchShopSettings } from "@/services/site";
 import "@/styles/shop.css";
 
 const inter = Inter({
@@ -37,12 +39,14 @@ export default async function ShopLayout({
     memberAccessToken(),
     activeChannel(),
   ]);
-  const [initialCart, initialUser, { locale }, editMode] = await Promise.all([
-    cartToken || accessToken ? getCart().catch(() => null) : null,
-    currentUser(),
-    shopLocale(),
-    isCmssyEditMode(),
-  ]);
+  const [initialCart, initialUser, { locale }, editMode, { currency }] =
+    await Promise.all([
+      cartToken || accessToken ? getCart().catch(() => null) : null,
+      currentUser(),
+      shopLocale(),
+      isCmssyEditMode(),
+      fetchShopSettings(),
+    ]);
 
   // No `path` here - a route-group layout has no params - so the language is
   // resolved from the header the proxy set and passed in. That read, and the
@@ -63,25 +67,27 @@ export default async function ShopLayout({
   );
 
   return (
-    <UserProvider initialUser={initialUser}>
-      <CartProvider initialCart={initialCart}>
-        <CartUiProvider>
-          <div className={`shop-scope ${inter.variable}`}>
-            <ChannelBanner
-              channel={
-                channel
-                  ? { name: channel.name, priceAccess: channel.priceAccess }
-                  : null
-              }
-              gone={gone}
-            />
-            {slot("header")}
-            <main className="shop-main">{children}</main>
-            {slot("footer")}
-            <CartDrawer />
-          </div>
-        </CartUiProvider>
-      </CartProvider>
-    </UserProvider>
+    <CurrencyProvider currency={currency}>
+      <UserProvider initialUser={initialUser}>
+        <CartProvider initialCart={initialCart}>
+          <CartUiProvider>
+            <div className={`shop-scope ${inter.variable}`}>
+              <ChannelBanner
+                channel={
+                  channel
+                    ? { name: channel.name, priceAccess: channel.priceAccess }
+                    : null
+                }
+                gone={gone}
+              />
+              {slot("header")}
+              <main className="shop-main">{children}</main>
+              {slot("footer")}
+              <CartDrawer />
+            </div>
+          </CartUiProvider>
+        </CartProvider>
+      </UserProvider>
+    </CurrencyProvider>
   );
 }

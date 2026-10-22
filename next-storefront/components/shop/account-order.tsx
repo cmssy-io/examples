@@ -221,7 +221,7 @@ export function AccountOrder({
       </div>
 
       <div className={styles.detailGrid}>
-        <OrderReceipt order={order} copy={copy} />
+        <OrderReceipt order={order} copy={copy} locale={locale} />
         <OrderTimeline order={order} copy={copy} />
       </div>
 

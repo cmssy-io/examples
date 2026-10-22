@@ -10,12 +10,11 @@ import type {
 import type { Order } from "@/graphql/types";
 import { requestReturnAction } from "@/lib/actions/orders";
 import { actionErrorMessage } from "@/lib/action-errors";
-import { formatMoney } from "@/lib/money";
 import { RETURN_REASONS, returnableLines } from "@/lib/returns";
 import { fill, type ShopCopy } from "@/lib/shop-copy";
 import type { BadgeVariant } from "./ui/badge";
 import { Badge } from "./ui/badge";
-import { useShopCopy } from "./locale-ui";
+import { useMoney, useShopCopy } from "./locale-ui";
 import styles from "./order.module.css";
 
 type ReturnsOrder = Pick<
@@ -58,6 +57,7 @@ function ReturnCard({
   order: ReturnsOrder;
   copy: ShopCopy;
 }) {
+  const money = useMoney(order.currency);
   const names = new Map(order.items.map((item) => [item.id, item.name]));
   const tracking = [ret.carrier, ret.trackingNumber].filter(Boolean).join(" ");
   return (
@@ -91,7 +91,7 @@ function ReturnCard({
       {ret.refundedAmount > 0 ? (
         <div className="shop-muted">
           {fill(copy.returnRefunded, {
-            amount: formatMoney(ret.refundedAmount, order.currency),
+            amount: money(ret.refundedAmount),
           })}
         </div>
       ) : null}
