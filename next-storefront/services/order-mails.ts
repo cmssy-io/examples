@@ -40,7 +40,7 @@ const ORDER_FOR_MAIL = `
         orderNumber
         customerEmail
         currency
-        items { name sku quantity price taxRate line ${TAXED} }
+        items { name sku quantity taxRate line ${TAXED} }
         amounts {
           subtotal ${TAXED}
           discount ${TAXED}
