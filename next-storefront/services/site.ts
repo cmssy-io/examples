@@ -10,6 +10,8 @@ import type { SiteLocales } from "@/lib/locale-path";
 import type { LocalizedValue } from "@/lib/localized";
 import type { OrderField } from "@/graphql/types";
 import { shippingCountries } from "@/lib/shipping-countries";
+import { brandFrom, type Brand } from "@/lib/mail-layout";
+import { siteUrl } from "@/lib/site-url";
 
 export interface SiteConfig {
   /** Translatable, and this cache holds no locale - resolve it at the caller. */
@@ -17,7 +19,11 @@ export interface SiteConfig {
   defaultLanguage: string | null;
   enabledLanguages: string[] | null;
   notFoundPageId: string | null;
-  branding: { ogImageUrl: string | null } | null;
+  branding: {
+    brandName: string | null;
+    logoUrl: string | null;
+    ogImageUrl: string | null;
+  } | null;
 }
 
 // The promise, not the value. Two callers in one `Promise.all` - which is how
@@ -52,6 +58,22 @@ async function loadSiteConfig(): Promise<SiteConfig | null> {
     notFoundPageId: config.notFoundPageId,
     branding: config.branding,
   };
+}
+
+export async function fetchBrand(): Promise<Brand> {
+  const config = await fetchSiteConfig().catch((error: unknown) => {
+    console.warn("mail brand: site config not read", error);
+    return null;
+  });
+  return brandFrom(config, {
+    mailFrom: process.env.MAIL_FROM,
+    siteUrl: siteUrl(),
+  });
+}
+
+export async function pageTitle(label: string): Promise<string> {
+  const { name } = await fetchBrand();
+  return `${label} - ${name}`;
 }
 
 export async function resolveSiteLocales(): Promise<SiteLocales> {

@@ -1,13 +1,14 @@
 import { TokenConfirmation } from "@/components/shop/token-confirmation";
 import { localePath, shopLocale } from "@/lib/locale";
 import { copyFor } from "@/lib/shop-copy";
+import { pageTitle } from "@/services/site";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const { locale } = await shopLocale();
   return {
-    title: `${copyFor(locale).loginConfirmTitle} - MACHTEC`,
+    title: await pageTitle(copyFor(locale).loginConfirmTitle),
     robots: { index: false },
   };
 }

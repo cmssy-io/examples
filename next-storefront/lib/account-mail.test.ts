@@ -5,6 +5,13 @@ import {
   accountMailSender,
   isAccountEvent,
 } from "./account-mail";
+import type { Brand } from "./mail-layout";
+
+const BRAND: Brand = {
+  name: "Northwind Parts",
+  logoUrl: null,
+  siteUrl: "https://shop.example",
+};
 
 const REQUEST = {
   workspaceId: "w1",
@@ -52,7 +59,7 @@ describe("accountMail", () => {
   it("writes a login change to the new login", () => {
     const mail = accountMail(
       { event: "account.login_change_requested", data: REQUEST },
-      "https://shop.example",
+      BRAND,
     );
     expect(mail).toMatchObject({
       to: "new@shop.example",
@@ -61,6 +68,44 @@ describe("accountMail", () => {
     });
     expect(mail.text).toContain(mail.link);
     expect(mail.html).toContain(`href="${mail.link}"`);
+  });
+
+  it("builds the link on the brand's site", () => {
+    const mail = accountMail(
+      { event: "account.verification_requested", data: REQUEST },
+      { ...BRAND, siteUrl: "https://parts.example" },
+    );
+    expect(mail.link).toBe(
+      "https://parts.example/verify-email?token=a%2Bb%2Fc%3D",
+    );
+  });
+
+  it("gives one action button, the raw link as a fallback and a way out", () => {
+    const mail = accountMail(
+      {
+        event: "account.password_reset_requested",
+        data: { ...REQUEST, token: "x&y" },
+      },
+      BRAND,
+    );
+    const href = "https://shop.example/reset-password?token=x%26y";
+    expect(mail.link).toBe(href);
+    expect(mail.html).toMatch(
+      /<a href="https:\/\/shop\.example\/reset-password\?token=x%26y" target="_blank"[^>]*>Choose a new password<\/a>/,
+    );
+    expect(mail.html.match(/>Choose a new password</g)).toHaveLength(1);
+    expect(mail.html).toContain(
+      `copy this link into your browser:<br><a href="${href}"`,
+    );
+    expect(mail.html).toContain(`>${href}</a>`);
+    expect(mail.html).toContain(
+      "If you did not ask for this, ignore this email.",
+    );
+    expect(mail.html).toContain(">Reset your password</h1>");
+    expect(mail.html).toContain("an account at Northwind Parts.");
+    expect(mail.text).toBe(
+      `Someone asked to reset the password of your account. If it was you, choose a new one here:\n\n${href}\n\nThe link works once and expires at 2026-10-02T00:00:00.000Z. If you did not ask for this, ignore this email.`,
+    );
   });
 });
 
@@ -90,7 +135,7 @@ describe("accountMailSender", () => {
 
   const mail = accountMail(
     { event: "account.verification_requested", data: REQUEST },
-    "https://shop.example",
+    BRAND,
   );
 
   it("logs the mail when no mail webhook is set", async () => {

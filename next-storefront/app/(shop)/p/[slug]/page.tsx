@@ -10,6 +10,7 @@ import { localePath, shopLocale } from "@/lib/locale";
 import { productOutOfStock } from "@/lib/variants";
 import { copyFor } from "@/lib/shop-copy";
 import styles from "@/components/shop/product-detail.module.css";
+import { pageTitle } from "@/services/site";
 
 export const dynamic = "force-dynamic";
 
@@ -22,10 +23,10 @@ export async function generateMetadata({
   const { locale } = await shopLocale();
   const product = await loadProductBySlug(slug, locale);
   if (!product) {
-    return { title: `${copyFor(locale).productNotFound} - MACHTEC` };
+    return { title: await pageTitle(copyFor(locale).productNotFound) };
   }
   return {
-    title: `${product.title} (${product.sku}) - MACHTEC`,
+    title: await pageTitle(`${product.title} (${product.sku})`),
     description: product.description
       ? sanitizeHtml(product.description, { allowedTags: [] }).slice(0, 160)
       : undefined,

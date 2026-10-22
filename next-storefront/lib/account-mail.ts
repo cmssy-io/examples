@@ -5,6 +5,13 @@ import {
   sendWithResend,
   type ResendConfig,
 } from "@/lib/mailer";
+import {
+  button,
+  paragraph,
+  renderMail,
+  smallText,
+  type Brand,
+} from "@/lib/mail-layout";
 import { siteUrl } from "@/lib/site-url";
 
 export type AccountMailEvent = CmssyWebhookAccountEvent["event"];
@@ -24,23 +31,26 @@ export interface AccountMailSender {
 
 const ACCOUNT_MAILS: Record<
   AccountMailEvent,
-  { path: string; subject: string; intro: string }
+  { path: string; subject: string; intro: string; action: string }
 > = {
   "account.verification_requested": {
     path: "/verify-email",
     subject: "Verify your email",
     intro: "Confirm this address to finish setting up your account:",
+    action: "Verify email",
   },
   "account.password_reset_requested": {
     path: "/reset-password",
     subject: "Reset your password",
     intro:
       "Someone asked to reset the password of your account. If it was you, choose a new one here:",
+    action: "Choose a new password",
   },
   "account.login_change_requested": {
     path: "/confirm-login-change",
     subject: "Confirm your new login",
     intro: "Confirm to sign in with this login from now on:",
+    action: "Confirm new login",
   },
 };
 
@@ -60,21 +70,30 @@ export function accountLink(
 
 export function accountMail(
   { event, data }: Pick<CmssyWebhookAccountEvent, "event" | "data">,
-  base?: string,
+  brand: Brand,
 ): AccountMail {
   const mail = ACCOUNT_MAILS[event];
-  const link = accountLink(event, data.token, base);
+  const link = accountLink(event, data.token, brand.siteUrl);
   const outro = `The link works once and expires at ${data.expiresAt}. If you did not ask for this, ignore this email.`;
-  const href = escapeHtml(link);
+  const body = [
+    paragraph(mail.intro),
+    button(mail.action, link),
+    smallText(
+      `If the button does not work, copy this link into your browser:<br><a href="${escapeHtml(link)}" style="color:#6b7280;word-break:break-all;">${escapeHtml(link)}</a>`,
+    ),
+    smallText(escapeHtml(outro)),
+  ].join("\n");
   return {
     to: data.login,
     subject: mail.subject,
     text: `${mail.intro}\n\n${link}\n\n${outro}`,
-    html: [
-      `<p>${escapeHtml(mail.intro)}</p>`,
-      `<p><a href="${href}">${href}</a></p>`,
-      `<p>${escapeHtml(outro)}</p>`,
-    ].join("\n"),
+    html: renderMail({
+      brand,
+      preheader: mail.intro.replace(/:$/, "."),
+      heading: mail.subject,
+      body,
+      reason: `You received this email because this address was used for an account at ${brand.name}.`,
+    }),
     link,
     event,
   };

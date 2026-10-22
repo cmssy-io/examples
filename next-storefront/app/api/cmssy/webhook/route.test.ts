@@ -17,6 +17,13 @@ vi.mock("@/services/order-mails", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/services/order-mails")>()),
   mailOrderEvent,
 }));
+vi.mock("@/services/site", () => ({
+  fetchBrand: async () => ({
+    name: "Northwind Parts",
+    logoUrl: null,
+    siteUrl: "https://shop.example",
+  }),
+}));
 vi.mock("@/lib/account-mail", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/account-mail")>()),
   accountMailSender: () => ({ send: sendAccountMail }),
@@ -140,6 +147,9 @@ describe("POST /api/cmssy/webhook", () => {
         event,
       });
       expect(sendAccountMail.mock.calls[0][0].text).toContain(link);
+      expect(sendAccountMail.mock.calls[0][0].html).toContain(
+        "an account at Northwind Parts.",
+      );
       expect(sendAccountMail.mock.calls[0][1]).toBe(`${event}/d1`);
       expect(refundOnStripe).not.toHaveBeenCalled();
       expect(shipOrder).not.toHaveBeenCalled();

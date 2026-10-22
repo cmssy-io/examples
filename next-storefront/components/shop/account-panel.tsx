@@ -10,7 +10,7 @@ import { useLocalePath, useShopCopy } from "./locale-ui";
 import styles from "./order.module.css";
 import auth from "./auth.module.css";
 
-export function AccountPanel() {
+export function AccountPanel({ brandName }: { brandName: string }) {
   const copy = useShopCopy();
   const localePath = useLocalePath();
   const router = useRouter();
@@ -88,9 +88,9 @@ export function AccountPanel() {
       <div className={auth.brandPane}>
         <div className={auth.brandRow}>
           <span className={auth.brandMark} aria-hidden>
-            M
+            {brandName.charAt(0).toUpperCase()}
           </span>
-          <span className={auth.brandName}>MACHTEC</span>
+          <span className={auth.brandName}>{brandName}</span>
         </div>
         <div>
           <h2 className={auth.pitchTitle}>{copy.authPitchTitle}</h2>
@@ -110,7 +110,7 @@ export function AccountPanel() {
             </div>
           </div>
         </div>
-        <div className={auth.legal}>© 2026 MACHTEC Industrial Parts</div>
+        <div className={auth.legal}>© {new Date().getFullYear()} {brandName}</div>
       </div>
 
       <div className={auth.formPane}>

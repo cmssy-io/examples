@@ -8,6 +8,7 @@ import {
   type OutgoingMail,
   type ResendConfig,
 } from "@/lib/mailer";
+import type { Brand } from "@/lib/mail-layout";
 import {
   orderCanceledMail,
   orderConfirmationMail,
@@ -22,6 +23,7 @@ import {
   isRefusal,
   type AdminResult,
 } from "@/services/admin";
+import { fetchBrand } from "@/services/site";
 
 export const ORDER_MAIL_EVENTS = new Set([
   "order.created",
@@ -39,6 +41,7 @@ const ORDER_FOR_MAIL = `
         id
         orderNumber
         customerEmail
+        customerId
         currency
         items { name sku quantity taxRate line ${TAXED} }
         amounts {
@@ -63,6 +66,7 @@ export type OrderMailOutcome =
 export interface OrderMailDeps {
   resend: ResendConfig | null;
   hasAdminToken: boolean;
+  brand: () => Promise<Brand>;
   request: <T>(
     query: string,
     variables: Record<string, unknown>,
@@ -78,11 +82,12 @@ export interface OrderMailDeps {
 const defaultDeps = (): OrderMailDeps => ({
   resend: resendConfig(),
   hasAdminToken: adminToken() !== null,
+  brand: fetchBrand,
   request: adminRequest,
   send: sendWithResend,
 });
 
-type Template = (order: OrderForMail) => OutgoingMail;
+type Template = (order: OrderForMail, brand: Brand) => OutgoingMail;
 
 export function shippedWithTracking(
   event: Pick<CmssyWebhookEvent, "event" | "data">,
@@ -99,7 +104,9 @@ export function templateFor(
   if (event.event === "order.created") return orderConfirmationMail;
   if (event.event === "order.canceled") return orderCanceledMail;
   const shipment = shippedWithTracking(event);
-  return shipment ? (order) => orderShippedMail(order, shipment) : null;
+  return shipment
+    ? (order, brand) => orderShippedMail(order, shipment, brand)
+    : null;
 }
 
 export async function mailOrderEvent(
@@ -137,5 +144,6 @@ export async function mailOrderEvent(
     console.warn(`cmssy order ${order.id}: not found, no mail sent`);
     return "order_not_found";
   }
-  return deps.send(template(found), idempotencyKey(event), deps.resend);
+  const brand = await deps.brand();
+  return deps.send(template(found, brand), idempotencyKey(event), deps.resend);
 }
