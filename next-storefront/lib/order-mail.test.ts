@@ -20,7 +20,6 @@ function order(overrides: Partial<OrderForMail> = {}): OrderForMail {
         name: "Oak <desk>",
         sku: "DESK-1",
         quantity: 2,
-        price: 24900,
         taxRate: 0.23,
         line: taxed(40488, 9312),
       },
@@ -28,7 +27,6 @@ function order(overrides: Partial<OrderForMail> = {}): OrderForMail {
         name: "Cable tray",
         sku: null,
         quantity: 1,
-        price: 1230,
         taxRate: 0.23,
         line: taxed(1000, 230),
       },
@@ -62,6 +60,8 @@ describe("orderConfirmationMail", () => {
     expect(mail.text).toContain("2 x Oak <desk> (DESK-1)  €498.00");
     expect(mail.text).toContain("1 x Cable tray  €12.30");
     expect(mail.html).toContain("Oak &lt;desk&gt; (DESK-1)");
+    expect(mail.html).toContain("€404.88");
+    expect(mail.html).not.toContain("€249.00");
     expect(mail.html).not.toContain("<desk>");
   });
 

@@ -21,7 +21,6 @@ const ORDER: OrderForMail = {
       name: "Oak desk",
       sku: "DESK-1",
       quantity: 1,
-      price: 24900,
       taxRate: 0,
       line: taxed(24900, 0),
     },

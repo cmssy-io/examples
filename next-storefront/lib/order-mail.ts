@@ -19,7 +19,6 @@ export interface OrderForMail {
     name: string;
     sku: string | null;
     quantity: number;
-    price: number;
     taxRate: number;
     line: TaxedAmount;
   }[];
@@ -92,7 +91,7 @@ export function orderConfirmationMail(order: OrderForMail): OutgoingMail {
   const lines = order.items.map((item) => [
     item.sku ? `${item.name} (${item.sku})` : item.name,
     String(item.quantity),
-    money(item.price),
+    money(item.line.net),
     money(item.line.gross),
   ]);
   const { subtotal, discount, shipping, total } = order.amounts;
@@ -124,7 +123,7 @@ export function orderConfirmationMail(order: OrderForMail): OutgoingMail {
   ].join("\n\n");
   const html = [
     paragraphs([intro]),
-    table(["Item", "Qty", "Unit price", "Total"], lines),
+    table(["Item", "Qty", "Net", "Gross"], lines),
     table(["", "Net", "VAT", "Gross"], totals),
     ...(note ? [paragraphs([note])] : []),
   ].join("\n");
