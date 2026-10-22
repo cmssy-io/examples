@@ -37,6 +37,12 @@ export function taxTreatmentNote(
   return null;
 }
 
+export function chargesVat(
+  treatment: Pick<TaxTreatmentView, "kind"> | null | undefined,
+): boolean {
+  return (treatment?.kind ?? "standard") === "standard";
+}
+
 export interface OrderPricingView {
   channel?: { key: string; name: string } | null;
   priceList?: { name: string } | null;
