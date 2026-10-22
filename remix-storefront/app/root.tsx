@@ -9,9 +9,13 @@ import {
 import type { Route } from "./+types/root";
 import { CartProvider } from "./components/shop/cart-provider";
 import { CartUiProvider } from "./components/shop/cart-ui";
-import { LocaleProvider } from "./components/shop/locale-ui";
+import {
+  CurrencyProvider,
+  LocaleProvider,
+} from "./components/shop/locale-ui";
 import { shopLocale } from "./lib/locale";
 import { getCart } from "./services/cart";
+import { fetchShopSettings } from "./services/site";
 import {
   clearCartToken,
   shopAuth,
@@ -46,14 +50,17 @@ function guestCart(shop: ShopRequest, cart: Cart | null): Cart | null {
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const shop = context.get(shopContext);
-  const [{ locale, defaultLocale, locales }, cart] = await Promise.all([
-    shopLocale(request),
-    shop.cartToken ? getCart(shopAuth(shop)).catch(() => null) : null,
-  ]);
+  const [{ locale, defaultLocale, locales }, cart, { currency }] =
+    await Promise.all([
+      shopLocale(request),
+      shop.cartToken ? getCart(shopAuth(shop)).catch(() => null) : null,
+      fetchShopSettings(),
+    ]);
   return {
     locale,
     defaultLocale,
     locales,
+    currency,
     cart: guestCart(shop, cart),
   };
 }
@@ -88,14 +95,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
-  const { locale, defaultLocale, locales, cart } = loaderData;
+  const { locale, defaultLocale, locales, currency, cart } = loaderData;
   return (
     <LocaleProvider value={{ locale, defaultLocale, locales }}>
-      <CartProvider initialCart={cart}>
-        <CartUiProvider>
-          <Outlet />
-        </CartUiProvider>
-      </CartProvider>
+      <CurrencyProvider currency={currency}>
+        <CartProvider initialCart={cart}>
+          <CartUiProvider>
+            <Outlet />
+          </CartUiProvider>
+        </CartProvider>
+      </CurrencyProvider>
     </LocaleProvider>
   );
 }

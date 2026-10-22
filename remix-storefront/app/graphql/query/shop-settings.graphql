@@ -4,6 +4,7 @@ query ShopSettings($workspaceSlug: String!) {
       id
       lowStockThreshold
       publicCart {
+        defaultCurrency
         defaultTaxRateId
         taxRates {
           id

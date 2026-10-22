@@ -6,6 +6,7 @@ export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' |
 import type { DocumentTypeDecoration } from '@graphql-typed-document-node/core';
 /** Input for adding an item to a cart */
 export type AddToCartInput = {
+  channel?: string | null | undefined;
   notes?: string | null | undefined;
   quantity: number;
   /** ModelRecord ID (product) */
@@ -15,6 +16,7 @@ export type AddToCartInput = {
 };
 
 export type CheckoutInput = {
+  channel?: string | null | undefined;
   /** Values for the order fields the customer can set (publicCart.orderFields), by key */
   customFields?: unknown;
   customerEmail: string;
@@ -101,6 +103,7 @@ export type SubmitFormInput = {
 
 /** Input for updating a cart item */
 export type UpdateCartItemInput = {
+  channel?: string | null | undefined;
   itemId: string | number;
   notes?: string | null | undefined;
   /** Set to 0 to remove the item */
@@ -326,7 +329,7 @@ export type ShopSettingsQueryVariables = Exact<{
 }>;
 
 
-export type ShopSettingsQuery = { public: { siteConfig: { id: string, lowStockThreshold: number, publicCart: { defaultTaxRateId: string | null, taxRates: Array<{ id: string, rate: number }>, orderFields: Array<{ key: string, label: unknown, type: OrderFieldType, required: boolean, customerCanSet: boolean, description: unknown, minLength: number | null, maxLength: number | null, minValue: number | null, maxValue: number | null, pattern: string | null, options: Array<{ value: string, label: unknown }> }> } | null } | null } };
+export type ShopSettingsQuery = { public: { siteConfig: { id: string, lowStockThreshold: number, publicCart: { defaultCurrency: string, defaultTaxRateId: string | null, taxRates: Array<{ id: string, rate: number }>, orderFields: Array<{ key: string, label: unknown, type: OrderFieldType, required: boolean, customerCanSet: boolean, description: unknown, minLength: number | null, maxLength: number | null, minValue: number | null, maxValue: number | null, pattern: string | null, options: Array<{ value: string, label: unknown }> }> } | null } | null } };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -1452,6 +1455,7 @@ export const ShopSettingsDocument = new TypedDocumentString(`
       id
       lowStockThreshold
       publicCart {
+        defaultCurrency
         defaultTaxRateId
         taxRates {
           id

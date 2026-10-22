@@ -86,7 +86,7 @@ export interface ProductData {
   /** Datasheet URL */
   datasheetUrl?: string;
   /** Tax rate - Cart tax rate id; empty means the cart's default rate */
-  taxRateId?: "vat23" | "vat8";
+  taxRateId?: "mva25" | "mva15" | "zero";
   /** Documents - Datasheets, manuals and certificates (PDF) */
   documents?: CmssyMedia[];
   /** Video - Product clip shown on the product page */
@@ -121,35 +121,11 @@ export interface ServiceData {
 
 export type ServiceRecord = CmssyRecordOf<ServiceData>;
 
-/**
- * Shop Member
- *
- * Site members who can sign in to the demo shop.
- *
- * Model slug: `shopmember`
- * Display field: `email`
- */
-export interface ShopmemberData {
-  /** Email */
-  email: string;
-  /** Name */
-  name?: string;
-  /** Contact name */
-  contactName?: string;
-  /** Company */
-  company?: string;
-  /** VAT ID */
-  vatId?: string;
-}
-
-export type ShopmemberRecord = CmssyRecordOf<ShopmemberData>;
-
 /** Every model in the workspace, by slug. */
 export interface CmssyModels {
   category: CategoryData;
   product: ProductData;
   service: ServiceData;
-  shopmember: ShopmemberData;
 }
 
 export type CmssyModelSlug = keyof CmssyModels;

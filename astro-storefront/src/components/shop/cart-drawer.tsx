@@ -1,10 +1,9 @@
 import { useEffect } from "react";
-import { formatMoney } from "../../lib/money";
 import { selectionLabel } from "../../lib/variants";
 import { useCart } from "./cart-store";
 import { TOAST_MS, useCartUi } from "./cart-ui";
 import styles from "./cart-drawer.module.css";
-import { useLocalePath, useShopCopy } from "./locale-ui";
+import { useLocalePath, useMoney, useShopCopy } from "./locale-ui";
 
 function CartIcon() {
   return (
@@ -48,6 +47,7 @@ export function CartDrawer() {
   const copy = useShopCopy();
   const { cart } = useCart();
   const { drawerOpen, toastName, closeDrawer, dismissToast } = useCartUi();
+  const money = useMoney(cart?.currency);
 
   useEffect(() => {
     if (!toastName) return;
@@ -66,7 +66,6 @@ export function CartDrawer() {
 
   if (!drawerOpen) return null;
 
-  const currency = cart?.currency ?? "EUR";
   const items = cart?.items ?? [];
   const itemCount = cart?.itemCount ?? 0;
 
@@ -125,7 +124,7 @@ export function CartDrawer() {
                         {copy.qty} {item.quantity}
                       </span>
                       <span className={styles.lineTotal}>
-                        {formatMoney(item.unitPrice * item.quantity, currency)}
+                        {money(item.unitPrice * item.quantity)}
                       </span>
                     </div>
                   </div>
@@ -140,12 +139,12 @@ export function CartDrawer() {
             <div className={styles.row}>
               <span>{copy.netSubtotal}</span>
               <span className={styles.rowValue}>
-                {formatMoney(cart?.subtotal ?? 0, currency)}
+                {money(cart?.subtotal ?? 0)}
               </span>
             </div>
             <div className={styles.total}>
               <span>{copy.totalGross}</span>
-              <span>{formatMoney(cart?.totalGross ?? 0, currency)}</span>
+              <span>{money(cart?.totalGross ?? 0)}</span>
             </div>
             <a
               href={localePath("/cart")}

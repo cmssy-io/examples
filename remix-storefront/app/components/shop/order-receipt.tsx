@@ -1,7 +1,7 @@
 import { orderProgress, type CmssyOrderProgress } from "@cmssy/core";
 import type { PublicOrder } from "../../graphql/types";
-import { formatMoney } from "../../lib/money";
-import type { ShopCopy } from "../../lib/shop-copy";
+import { fill, type ShopCopy } from "../../lib/shop-copy";
+import { useMoney } from "./locale-ui";
 import styles from "./order.module.css";
 
 export function paymentLabel(order: PublicOrder, copy: ShopCopy) {
@@ -39,7 +39,7 @@ export function OrderReceipt({
   order: PublicOrder;
   copy: ShopCopy;
 }) {
-  const currency = order.currency;
+  const money = useMoney(order.currency);
   const address = order.shippingAddress;
   const items = order.items ?? [];
 
@@ -73,7 +73,7 @@ export function OrderReceipt({
               <div className={styles.factBody}>
                 <span>{order.shippingMethod.label}</span>
                 <span className="shop-muted">
-                  {formatMoney(order.shippingTotal ?? 0, currency)}
+                  {money(order.shippingTotal ?? 0)}
                 </span>
               </div>
             </div>
@@ -92,13 +92,13 @@ export function OrderReceipt({
               {item.sku ? <div className={styles.sku}>{item.sku}</div> : null}
               {item.tierMinQty ? (
                 <div className={styles.tier}>
-                  Volume price at {item.tierMinQty}+
+                  {fill(copy.volumePriceApplied, { minQty: item.tierMinQty })}
                 </div>
               ) : null}
             </div>
             <span className={styles.qty}>×{item.quantity}</span>
             <span className={styles.lineTotal}>
-              {formatMoney(item.price * item.quantity, currency)}
+              {money(item.price * item.quantity)}
             </span>
           </div>
         ))}
@@ -108,7 +108,7 @@ export function OrderReceipt({
         <div className={styles.row}>
           <span>{copy.netTotal}</span>
           <span className={styles.rowValue}>
-            {formatMoney(order.subtotal, currency)}
+            {money(order.subtotal)}
           </span>
         </div>
 
@@ -118,7 +118,7 @@ export function OrderReceipt({
               {copy.discount} ({order.appliedDiscount.code})
             </span>
             <span className={styles.rowValue}>
-              -{formatMoney(order.appliedDiscount.amount, currency)}
+              -{money(order.appliedDiscount.amount)}
             </span>
           </div>
         ) : null}
@@ -127,7 +127,7 @@ export function OrderReceipt({
           <div className={styles.row}>
             <span>{copy.delivery}</span>
             <span className={styles.rowValue}>
-              {formatMoney(order.shippingTotal ?? 0, currency)}
+              {money(order.shippingTotal ?? 0)}
             </span>
           </div>
         ) : null}
@@ -136,7 +136,7 @@ export function OrderReceipt({
           <div key={line.name ?? String(line.rate)} className={styles.row}>
             <span>{line.name ?? `VAT ${line.rate}%`}</span>
             <span className={styles.rowValue}>
-              {formatMoney(line.amount, currency)}
+              {money(line.amount)}
             </span>
           </div>
         ))}
@@ -144,7 +144,7 @@ export function OrderReceipt({
         <div className={styles.grandTotal}>
           <span>{copy.totalGross}</span>
           <span className={styles.grandTotalValue}>
-            {formatMoney(order.total, currency)}
+            {money(order.total)}
           </span>
         </div>
       </div>
