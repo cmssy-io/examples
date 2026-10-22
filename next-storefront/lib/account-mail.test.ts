@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   accountLink,
   accountMail,
@@ -60,6 +60,7 @@ describe("accountMail", () => {
       event: "account.login_change_requested",
     });
     expect(mail.text).toContain(mail.link);
+    expect(mail.html).toContain(`href="${mail.link}"`);
   });
 });
 
@@ -75,6 +76,12 @@ describe("isAccountEvent", () => {
 });
 
 describe("accountMailSender", () => {
+  const KEY = "account.verification_requested/d1";
+
+  beforeEach(() => {
+    vi.stubEnv("RESEND_API_KEY", "");
+    vi.stubEnv("MAIL_FROM", "");
+  });
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
@@ -91,7 +98,7 @@ describe("accountMailSender", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     const info = vi.spyOn(console, "info").mockImplementation(() => {});
-    await accountMailSender().send(mail);
+    await accountMailSender().send(mail, KEY);
     expect(info).toHaveBeenCalledWith("account mail", mail);
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -100,7 +107,7 @@ describe("accountMailSender", () => {
     vi.stubEnv("ACCOUNT_MAIL_WEBHOOK_URL", "https://mailer.example/send");
     const fetchMock = vi.fn().mockResolvedValue(new Response(null));
     vi.stubGlobal("fetch", fetchMock);
-    await accountMailSender().send(mail);
+    await accountMailSender().send(mail, KEY);
     expect(fetchMock).toHaveBeenCalledWith(
       "https://mailer.example/send",
       expect.objectContaining({ method: "POST", body: JSON.stringify(mail) }),
@@ -113,6 +120,38 @@ describe("accountMailSender", () => {
       "fetch",
       vi.fn().mockResolvedValue(new Response(null, { status: 502 })),
     );
-    await expect(accountMailSender().send(mail)).rejects.toThrow("502");
+    await expect(accountMailSender().send(mail, KEY)).rejects.toThrow("502");
+  });
+
+  it("sends through Resend when it is configured, keyed by the delivery", async () => {
+    vi.stubEnv("RESEND_API_KEY", "re_test");
+    vi.stubEnv("MAIL_FROM", "Shop <shop@shop.example>");
+    vi.stubEnv("ACCOUNT_MAIL_WEBHOOK_URL", "https://mailer.example/send");
+    const fetchMock = vi.fn().mockResolvedValue(new Response("{}"));
+    vi.stubGlobal("fetch", fetchMock);
+    await accountMailSender().send(mail, KEY);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("https://api.resend.com/emails");
+    expect(init.headers["idempotency-key"]).toBe(KEY);
+    expect(JSON.parse(init.body)).toEqual({
+      from: "Shop <shop@shop.example>",
+      to: [mail.to],
+      subject: mail.subject,
+      text: mail.text,
+      html: mail.html,
+    });
+  });
+
+  it("keeps the mail webhook when Resend has a key but no sender", async () => {
+    vi.stubEnv("RESEND_API_KEY", "re_test");
+    vi.stubEnv("ACCOUNT_MAIL_WEBHOOK_URL", "https://mailer.example/send");
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null));
+    vi.stubGlobal("fetch", fetchMock);
+    await accountMailSender().send(mail, KEY);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://mailer.example/send",
+      expect.anything(),
+    );
   });
 });

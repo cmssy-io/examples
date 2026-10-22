@@ -1,4 +1,10 @@
 import type { CmssyWebhookAccountEvent } from "@cmssy/core";
+import {
+  escapeHtml,
+  resendConfig,
+  sendWithResend,
+  type ResendConfig,
+} from "@/lib/mailer";
 import { siteUrl } from "@/lib/site-url";
 
 export type AccountMailEvent = CmssyWebhookAccountEvent["event"];
@@ -7,12 +13,13 @@ export interface AccountMail {
   to: string;
   subject: string;
   text: string;
+  html: string;
   link: string;
   event: AccountMailEvent;
 }
 
 export interface AccountMailSender {
-  send(mail: AccountMail): Promise<void>;
+  send(mail: AccountMail, idempotencyKey: string): Promise<void>;
 }
 
 const ACCOUNT_MAILS: Record<
@@ -57,12 +64,31 @@ export function accountMail(
 ): AccountMail {
   const mail = ACCOUNT_MAILS[event];
   const link = accountLink(event, data.token, base);
+  const outro = `The link works once and expires at ${data.expiresAt}. If you did not ask for this, ignore this email.`;
+  const href = escapeHtml(link);
   return {
     to: data.login,
     subject: mail.subject,
-    text: `${mail.intro}\n\n${link}\n\nThe link works once and expires at ${data.expiresAt}. If you did not ask for this, ignore this email.`,
+    text: `${mail.intro}\n\n${link}\n\n${outro}`,
+    html: [
+      `<p>${escapeHtml(mail.intro)}</p>`,
+      `<p><a href="${href}">${href}</a></p>`,
+      `<p>${escapeHtml(outro)}</p>`,
+    ].join("\n"),
     link,
     event,
+  };
+}
+
+function resendSender(config: ResendConfig): AccountMailSender {
+  return {
+    async send(mail, idempotencyKey) {
+      await sendWithResend(
+        { to: mail.to, subject: mail.subject, text: mail.text, html: mail.html },
+        idempotencyKey,
+        config,
+      );
+    },
   };
 }
 
@@ -88,6 +114,8 @@ function webhookSender(url: string): AccountMailSender {
 }
 
 export function accountMailSender(): AccountMailSender {
+  const resend = resendConfig();
+  if (resend) return resendSender(resend);
   const url = process.env.ACCOUNT_MAIL_WEBHOOK_URL?.trim();
   return url ? webhookSender(url) : consoleSender;
 }
