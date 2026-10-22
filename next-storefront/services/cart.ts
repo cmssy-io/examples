@@ -38,49 +38,49 @@ export interface CheckoutInput {
 export function getCart(): Promise<Cart | null> {
   return cartRequest(
     CartDocument,
-    (workspaceId) => ({ workspaceId }),
+    (workspaceId, channel) => ({ workspaceId, channel }),
   ).then((data) => data.cart.get);
 }
 
 export function addToCart(input: AddToCartInput): Promise<Cart> {
   return cartRequest(
     AddToCartDocument,
-    (workspaceId) => ({ input: { workspaceId, ...input } }),
+    (workspaceId, channel) => ({ input: { workspaceId, channel, ...input } }),
   ).then((data) => data.cart.addItem);
 }
 
 export function updateItem(input: UpdateItemInput): Promise<Cart> {
   return cartRequest(
     UpdateCartItemDocument,
-    (workspaceId) => ({ input: { workspaceId, ...input } }),
+    (workspaceId, channel) => ({ input: { workspaceId, channel, ...input } }),
   ).then((data) => data.cart.updateItem);
 }
 
 export function removeItem(itemId: string): Promise<Cart> {
   return cartRequest(
     RemoveCartItemDocument,
-    (workspaceId) => ({ workspaceId, itemId }),
+    (workspaceId, channel) => ({ workspaceId, channel, itemId }),
   ).then((data) => data.cart.removeItem);
 }
 
 export function clearCart(): Promise<Cart> {
   return cartRequest(
     ClearCartDocument,
-    (workspaceId) => ({ workspaceId }),
+    (workspaceId, channel) => ({ workspaceId, channel }),
   ).then((data) => data.cart.clear);
 }
 
 export function applyDiscount(code: string): Promise<Cart> {
   return cartRequest(
     ApplyDiscountDocument,
-    (workspaceId) => ({ workspaceId, code }),
+    (workspaceId, channel) => ({ workspaceId, channel, code }),
   ).then((data) => data.cart.applyDiscount);
 }
 
 export function removeDiscount(): Promise<Cart> {
   return cartRequest(
     RemoveDiscountDocument,
-    (workspaceId) => ({ workspaceId }),
+    (workspaceId, channel) => ({ workspaceId, channel }),
   ).then((data) => data.cart.removeDiscount);
 }
 
@@ -89,7 +89,7 @@ export function setShippingMethod(
 ): Promise<Cart> {
   return cartRequest(
     SetShippingMethodDocument,
-    (workspaceId) => ({ workspaceId, shippingMethodId }),
+    (workspaceId, channel) => ({ workspaceId, channel, shippingMethodId }),
   ).then((data) => data.cart.setShippingMethod);
 }
 
@@ -98,21 +98,21 @@ export function setShippingAddress(
 ): Promise<Cart> {
   return cartRequest(
     SetShippingAddressDocument,
-    (workspaceId) => ({ workspaceId, shippingAddress }),
+    (workspaceId, channel) => ({ workspaceId, channel, shippingAddress }),
   ).then((data) => data.cart.setShippingAddress);
 }
 
 export function mergeCart(): Promise<Cart> {
   return cartRequest(
     MergeCartDocument,
-    (workspaceId) => ({ workspaceId }),
+    (workspaceId, channel) => ({ workspaceId, channel }),
   ).then((data) => data.cart.merge);
 }
 
 export function checkout(input: CheckoutInput): Promise<CheckoutOrder> {
   return cartRequest(
     CheckoutDocument,
-    (workspaceId) => ({ input: { workspaceId, ...input } }),
+    (workspaceId, channel) => ({ input: { workspaceId, channel, ...input } }),
   ).then((data) => data.cart.checkout);
 }
 

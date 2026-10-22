@@ -6,22 +6,27 @@ import * as cart from "@/services/cart";
 import { fetchOrderByToken, getMyOrder } from "@/services/orders";
 import { createPaymentSession } from "@/services/payments";
 import { clearCartToken } from "@/lib/cmssy/cart-cookie";
+import { clearChannelCookie } from "@/lib/cmssy/channel-cookie";
+import { cartFailure, errorMessage, type CartFailure } from "@/lib/cart-errors";
 import { parseShippingAddress } from "@/lib/cmssy/shipping-address";
 import { localePath, shopLocale } from "@/lib/locale";
 import { siteUrl } from "@/lib/site-url";
 import { copyFor } from "@/lib/shop-copy";
 
-export type CartResult = { cart: Cart } | { error: string };
+export type CartResult = { cart: Cart } | CartFailure;
 
-function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : "Commerce request failed";
+async function failure(err: unknown): Promise<CartFailure> {
+  const { locale } = await shopLocale();
+  const result = cartFailure(err, copyFor(locale));
+  if (result.leaveChannel) await clearChannelCookie();
+  return result;
 }
 
 async function settle(work: Promise<Cart>): Promise<CartResult> {
   try {
     return { cart: await work };
   } catch (err) {
-    return { error: errorMessage(err) };
+    return failure(err);
   }
 }
 
@@ -98,7 +103,7 @@ export async function findBySkuAction(
 
 export type CheckoutResult =
   | { order: CheckoutOrder; paymentUrl: string | null }
-  | { error: string };
+  | CartFailure;
 
 async function confirmationUrl(
   orderId: string,
@@ -162,7 +167,7 @@ export async function checkoutAction(input: {
     }
     return { order, paymentUrl };
   } catch (err) {
-    return { error: errorMessage(err) };
+    return failure(err);
   }
 }
 

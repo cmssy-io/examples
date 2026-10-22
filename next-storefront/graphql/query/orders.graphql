@@ -1,6 +1,6 @@
-query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int) {
+query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int, $scope: AccountOrderScope) {
   account {
-    orders(workspaceId: $workspaceId, skip: $skip, limit: $limit) {
+    orders(workspaceId: $workspaceId, skip: $skip, limit: $limit, scope: $scope) {
       total
       hasMore
       items {
@@ -12,6 +12,11 @@ query MyOrders($workspaceId: ID!, $skip: Int, $limit: Int) {
         tax
         total
         pricesIncludeTax
+        companyName
+        channel { key name }
+        priceList { name }
+        priceListSource
+        taxTreatment { kind legalNote buyerVatId buyerVatCountry }
         taxSummary { rateId name rate base amount }
         currency
         customerEmail
@@ -52,6 +57,11 @@ query MyOrder($workspaceId: ID!, $id: ID!) {
       tax
       total
       pricesIncludeTax
+      companyName
+      channel { key name }
+      priceList { name }
+      priceListSource
+      taxTreatment { kind legalNote buyerVatId buyerVatCountry }
       taxSummary { rateId name rate base amount }
       currency
       customerEmail

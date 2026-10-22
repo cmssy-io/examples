@@ -14,6 +14,11 @@ query PublicOrder($workspaceId: ID!, $orderId: ID!, $accessToken: String!) {
         tax
         total
         pricesIncludeTax
+        companyName
+        channel { key name }
+        priceList { name }
+        priceListSource
+        taxTreatment { kind legalNote buyerVatId buyerVatCountry }
         taxSummary { rateId name rate base amount }
         currency
         customerEmail

@@ -8,6 +8,8 @@ query MyProfile($workspaceId: ID!) {
       editableFields
       loginField
       passwordField
+      company { id name role permissions }
+      priceList { name }
     }
   }
 }

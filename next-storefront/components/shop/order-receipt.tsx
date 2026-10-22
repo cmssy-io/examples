@@ -2,6 +2,8 @@ import { orderProgress, type CmssyOrderProgress } from "@cmssy/core";
 import type { MyOrders, Order, PublicOrder } from "@/graphql/types";
 import { formatMoney } from "@/lib/money";
 import type { ShopCopy } from "@/lib/shop-copy";
+import { orderPricingFacts } from "@/lib/tax-treatment";
+import { ReverseChargeNotice } from "./reverse-charge-notice";
 import styles from "./order.module.css";
 
 type ReceiptOrder = Order | PublicOrder | MyOrders["items"][number];
@@ -48,9 +50,23 @@ export function OrderReceipt({
   const currency = order.currency;
   const address = order.shippingAddress;
   const items = order.items ?? [];
+  const pricingFacts = orderPricingFacts(order, copy);
 
   return (
     <div className={styles.receipt}>
+      {pricingFacts.length > 0 ? (
+        <div className={styles.facts}>
+          {pricingFacts.map((fact) => (
+            <div key={fact.label} className={styles.fact}>
+              <span className={styles.factLabel}>{fact.label}</span>
+              <div className={styles.factBody}>
+                <span>{fact.value}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       {address || order.shippingMethod ? (
         <div className={styles.facts}>
           {address ? (
@@ -146,6 +162,8 @@ export function OrderReceipt({
             </span>
           </div>
         ))}
+
+        <ReverseChargeNotice treatment={order.taxTreatment} copy={copy} />
 
         <div className={styles.grandTotal}>
           <span>{copy.totalGross}</span>

@@ -5,6 +5,7 @@ import { memberRequest } from "@/lib/cmssy/member-request";
 import { retryMode } from "@/lib/cmssy/retry-mode";
 import { visitorHeaders } from "@/lib/cmssy/visitor-headers";
 import {
+  type AccountOrderScope,
   MyOrderDocument,
   MyOrdersDocument,
   PublicOrderDocument,
@@ -17,7 +18,7 @@ const EMPTY_ORDERS: MyOrders = { total: 0, hasMore: false, items: [] };
 const client = createCmssyClient(cmssy);
 
 export async function listMyOrders(
-  options: { skip?: number; limit?: number } = {},
+  options: { skip?: number; limit?: number; scope?: AccountOrderScope } = {},
 ): Promise<MyOrders> {
   const data = await memberRequest(
     MyOrdersDocument,
@@ -25,6 +26,7 @@ export async function listMyOrders(
       workspaceId,
       skip: options.skip ?? 0,
       limit: options.limit ?? 20,
+      ...(options.scope ? { scope: options.scope } : {}),
     }),
   );
   return data?.account.orders ?? EMPTY_ORDERS;

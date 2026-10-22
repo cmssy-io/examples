@@ -29,6 +29,7 @@ import {
   actionErrorMessage,
   reloadIfStaleDeployment,
 } from "@/lib/action-errors";
+import type { CartReview } from "@/lib/cart-errors";
 import { selectionKey } from "@/lib/variants";
 
 type CartAction =
@@ -93,6 +94,8 @@ export interface CartContextValue {
   itemCount: number;
   loading: boolean;
   error: string | null;
+  /** The channel refused the last cart write until the visitor signs in. */
+  signInRequired: boolean;
   addToCart(
     recordId: string,
     quantity?: number,
@@ -140,6 +143,7 @@ export function CartProvider({
   );
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [signInRequired, setSignInRequired] = useState(false);
 
   const value = useMemo<CartContextValue>(() => {
     const run = (
@@ -156,11 +160,14 @@ export function CartProvider({
         try {
           const result = await action();
           if ("error" in result) {
+            if (result.leaveChannel) window.location.reload();
             setError(result.error);
+            setSignInRequired(Boolean(result.signIn));
             settle(false);
           } else {
             setCart(result.cart);
             setError(null);
+            setSignInRequired(false);
             settle(true);
           }
         } catch (err) {
@@ -173,11 +180,35 @@ export function CartProvider({
       return done;
     };
 
+    const refresh = async () => {
+      try {
+        setCart(await getCartAction());
+      } catch (err) {
+        if (!reloadIfStaleDeployment(err)) {
+          setError(actionErrorMessage(err, "Commerce request failed"));
+        }
+      }
+    };
+
+    const review = async (
+      reason: CartReview,
+      shippingAddress: ShippingAddressInput | null,
+    ) => {
+      if (reason === "TAX_TREATMENT_CHANGED" && shippingAddress) {
+        const resent = await setShippingAddressAction(shippingAddress).catch(
+          () => null,
+        );
+        if (resent && "cart" in resent) setCart(resent.cart);
+      }
+      await refresh();
+    };
+
     return {
       cart: optimisticCart,
       itemCount: optimisticCart ? optimisticCart.itemCount : pendingAdds,
       loading: isPending,
       error,
+      signInRequired,
       addToCart: (recordId, quantity = 1, options) =>
         run(
           {
@@ -214,25 +245,23 @@ export function CartProvider({
         } catch (err) {
           throw new Error(actionErrorMessage(err, "Checkout failed"));
         }
-        if ("error" in result) throw new Error(result.error);
+        if ("error" in result) {
+          if (result.leaveChannel) window.location.reload();
+          setSignInRequired(Boolean(result.signIn));
+          if (result.review) await review(result.review, input.shippingAddress);
+          throw new Error(result.error);
+        }
         setCart(null);
         return result;
       },
-      refresh: async () => {
-        try {
-          setCart(await getCartAction());
-        } catch (err) {
-          if (!reloadIfStaleDeployment(err)) {
-            setError(actionErrorMessage(err, "Commerce request failed"));
-          }
-        }
-      },
+      refresh,
     };
   }, [
     optimisticCart,
     pendingAdds,
     isPending,
     error,
+    signInRequired,
     applyOptimistic,
     addPending,
     startTransition,

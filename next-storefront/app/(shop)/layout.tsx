@@ -12,6 +12,8 @@ import { currentUser } from "@/lib/cmssy/session";
 import { shopLocale } from "@/lib/locale";
 import { retryMode } from "@/lib/cmssy/retry-mode";
 import { CartDrawer } from "@/components/shop/cart-drawer";
+import { ChannelBanner } from "@/components/shop/channel-banner";
+import { activeChannel } from "@/services/channel";
 import { CartUiProvider } from "@/components/shop/cart-ui";
 import { CartProvider } from "@/components/shop/cart-provider";
 import { UserProvider } from "@/components/shop/user-provider";
@@ -30,9 +32,10 @@ export default async function ShopLayout({
 }: {
   children: ReactNode;
 }) {
-  const [cartToken, accessToken] = await Promise.all([
+  const [cartToken, accessToken, { channel, gone }] = await Promise.all([
     readCartToken(),
     memberAccessToken(),
+    activeChannel(),
   ]);
   const [initialCart, initialUser, { locale }, editMode] = await Promise.all([
     cartToken || accessToken ? getCart().catch(() => null) : null,
@@ -64,6 +67,14 @@ export default async function ShopLayout({
       <CartProvider initialCart={initialCart}>
         <CartUiProvider>
           <div className={`shop-scope ${inter.variable}`}>
+            <ChannelBanner
+              channel={
+                channel
+                  ? { name: channel.name, priceAccess: channel.priceAccess }
+                  : null
+              }
+              gone={gone}
+            />
             {slot("header")}
             <main className="shop-main">{children}</main>
             {slot("footer")}

@@ -14,6 +14,9 @@ import type { CountryOption } from "@/lib/shipping-countries";
 import { selectionLabel } from "@/lib/variants";
 import { useLocalePath, useShopCopy, useShopLocale } from "./locale-ui";
 import { OrderFieldInputs } from "./order-fields";
+import { ReverseChargeNotice } from "./reverse-charge-notice";
+import { Badge } from "./ui/badge";
+import { badgeLabel, type PriceBadge } from "@/lib/price-overlay";
 import styles from "./cart.module.css";
 
 const ADDRESS_FIELDS = new Set([
@@ -64,10 +67,12 @@ export function CartView({
   payOnline,
   orderFields,
   countries,
+  priceBadges = {},
 }: {
   payOnline: boolean;
   orderFields: OrderField[];
   countries: CountryOption[] | null;
+  priceBadges?: Record<string, PriceBadge>;
 }) {
   const localePath = useLocalePath();
   const { locale, defaultLocale } = useShopLocale();
@@ -83,6 +88,7 @@ export function CartView({
     setShippingMethod,
     setShippingAddress,
     checkout,
+    signInRequired,
   } = useCart();
   const { user } = useCmssyUser();
   const router = useRouter();
@@ -106,6 +112,7 @@ export function CartView({
   }
 
   const currency = cart.currency;
+  const gross = cart.displayMode === "gross";
 
   async function handleCheckout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -194,6 +201,9 @@ export function CartView({
             const listPrice = snapshot.price;
             const discounted = item.unitPrice < listPrice;
             const options = selectionLabel(item.variantSelections);
+            const badge = priceBadges[item.recordId];
+            const shownUnit = gross ? item.unit.gross : item.unit.net;
+            const shownLine = gross ? item.line.gross : item.line.net;
 
             return (
               <div key={item.id} className={styles.line}>
@@ -205,13 +215,17 @@ export function CartView({
                   {options ? (
                     <span className={styles.lineOptions}>{options}</span>
                   ) : null}
+                  {badge ? (
+                    <Badge variant="info">{badgeLabel(badge, copy)}</Badge>
+                  ) : null}
                   <span>
-                    {discounted ? (
+                    {discounted && !gross ? (
                       <span className={styles.lineWas}>
                         {formatMoney(listPrice, currency)}
                       </span>
                     ) : null}
-                    {formatMoney(item.unitPrice, currency)} {copy.netEach}
+                    {formatMoney(shownUnit, currency)}{" "}
+                    {gross ? copy.inclVatEach : copy.netEach}
                   </span>
                   {tier ? (
                     <span className={styles.lineTier}>
@@ -246,7 +260,7 @@ export function CartView({
                 />
 
                 <span className={styles.lineTotal}>
-                  {formatMoney(item.unitPrice * item.quantity, currency)}
+                  {formatMoney(shownLine, currency)}
                 </span>
               </div>
             );
@@ -484,6 +498,8 @@ export function CartView({
           </span>
         </div>
 
+        <ReverseChargeNotice treatment={cart.taxTreatment} copy={copy} />
+
         {cart.taxSummary.map((line) => (
           <div key={line.rateId ?? line.name} className={styles.taxLine}>
             <span>{line.name ?? `VAT ${line.rate}%`}</span>
@@ -517,7 +533,17 @@ export function CartView({
         {checkoutError ? (
           <span className="shop-error">{checkoutError}</span>
         ) : null}
-        {error ? <span className="shop-error">{error}</span> : null}
+        {error ? (
+          <span className="shop-error">
+            {error}
+            {signInRequired ? (
+              <>
+                {" "}
+                <Link href={localePath("/account")}>{copy.signIn}</Link>
+              </>
+            ) : null}
+          </span>
+        ) : null}
       </aside>
     </form>
   );

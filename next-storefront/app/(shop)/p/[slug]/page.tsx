@@ -11,6 +11,8 @@ import { productOutOfStock } from "@/lib/variants";
 import { copyFor } from "@/lib/shop-copy";
 import styles from "@/components/shop/product-detail.module.css";
 import { pageTitle } from "@/services/site";
+import { priceProduct } from "@/services/prices";
+import { priceChangeDate } from "@/lib/price-overlay";
 
 export const dynamic = "force-dynamic";
 
@@ -40,14 +42,21 @@ export default async function ProductPage({
 }) {
   const { slug } = await params;
   const { locale, defaultLocale } = await shopLocale();
-  const [product, categories] = await Promise.all([
+  const [catalogProduct, categories] = await Promise.all([
     loadProductBySlug(slug, locale),
     loadCategories(locale),
   ]);
   const href = (path: string) => localePath(path, locale, defaultLocale);
   const copy = copyFor(locale);
 
-  if (!product) notFound();
+  if (!catalogProduct) notFound();
+
+  const { product, overlay } = await priceProduct(catalogProduct, locale);
+  const priceChangesOn = priceChangeDate(
+    product.pricing,
+    overlay?.nextChangeAt ?? null,
+    locale,
+  );
 
   const category = categories.find((item) => item.id === product.categoryId);
   const specs = product.specs;
@@ -91,7 +100,11 @@ export default async function ProductPage({
             </p>
           ) : null}
 
-          <BuyBox product={product} categorySlug={category?.slug ?? null} />
+          <BuyBox
+            product={product}
+            categorySlug={category?.slug ?? null}
+            priceChangesOn={priceChangesOn}
+          />
         </div>
       </div>
 

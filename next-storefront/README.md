@@ -52,6 +52,12 @@ so every read and write here is this app's own typed GraphQL:
 - **Cart + checkout** - Server Actions in `lib/actions/`, optimistic UI with `useOptimistic`,
   cart bound to a random cart token, minted on the first write and merged into the member's cart on sign-in.
 - **Order history** - `/account` and `/order/[id]`, read through `services/orders.ts`.
+- **Sales channels and buyer prices** - `/channel/<key>` enters one of the channels listed in
+  `lib/channel.ts` (a cookie, a banner, a cart per channel); `services/prices.ts` lays the
+  signed-in buyer's or the channel's prices over the cached, channel-neutral catalogue.
+- **Company accounts** - `/account` shows the member's company, role and price list, and a
+  company-orders tab when the role grants `orders.company.read`; reverse charge prints its
+  legal note and the buyer's VAT id on the cart and every order page.
 - **Member account** - `/account` edits the profile, the login and the password, and deletes the
   account; `/verify-email`, `/reset-password`, `/forgot-password` and `/confirm-login-change`
   host the links this app emails (see [Member account emails](#member-account-emails)).
