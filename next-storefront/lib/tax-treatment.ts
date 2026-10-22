@@ -7,22 +7,34 @@ export interface TaxTreatmentView {
   buyerVatId?: string | null;
 }
 
-export interface ReverseChargeNote {
+export interface TaxTreatmentNote {
+  title: string;
   note: string;
   buyerVatId: string | null;
 }
 
 // cmssy decides the treatment and stores the merchant's invoice wording in
-// legalNote; the storefront only prints it next to the buyer's VAT id.
-export function reverseChargeNote(
+// legalNote; the storefront only prints it, next to the buyer's VAT id on a
+// reverse-charge order.
+export function taxTreatmentNote(
   treatment: TaxTreatmentView | null | undefined,
   copy: ShopCopy,
-): ReverseChargeNote | null {
-  if (treatment?.kind !== "reverse_charge") return null;
-  return {
-    note: treatment.legalNote?.trim() || copy.reverseChargeNote,
-    buyerVatId: treatment.buyerVatId?.trim() || null,
-  };
+): TaxTreatmentNote | null {
+  if (treatment?.kind === "reverse_charge") {
+    return {
+      title: copy.reverseCharge,
+      note: treatment.legalNote?.trim() || copy.reverseChargeNote,
+      buyerVatId: treatment.buyerVatId?.trim() || null,
+    };
+  }
+  if (treatment?.kind === "export") {
+    return {
+      title: copy.exportSale,
+      note: treatment.legalNote?.trim() || copy.exportSaleNote,
+      buyerVatId: null,
+    };
+  }
+  return null;
 }
 
 export interface OrderPricingView {

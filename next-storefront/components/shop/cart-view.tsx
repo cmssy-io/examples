@@ -18,7 +18,7 @@ import {
   useShopLocale,
 } from "./locale-ui";
 import { OrderFieldInputs } from "./order-fields";
-import { ReverseChargeNotice } from "./reverse-charge-notice";
+import { TaxTreatmentNotice } from "./tax-treatment-notice";
 import { Badge } from "./ui/badge";
 import { badgeLabel, type PriceBadge } from "@/lib/price-overlay";
 import styles from "./cart.module.css";
@@ -508,7 +508,7 @@ export function CartView({
           </span>
         </div>
 
-        <ReverseChargeNotice treatment={cart.taxTreatment} copy={copy} />
+        <TaxTreatmentNotice treatment={cart.taxTreatment} copy={copy} />
 
         {cart.taxSummary.map((line) => (
           <div key={line.rateId ?? line.name} className={styles.taxLine}>

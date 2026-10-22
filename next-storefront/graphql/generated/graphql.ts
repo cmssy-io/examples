@@ -167,6 +167,7 @@ export type SubmitFormInput = {
 
 export type TaxTreatmentKind =
   | 'exempt'
+  | 'export'
   | 'reverse_charge'
   | 'standard';
 

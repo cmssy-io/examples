@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { orderPricingFacts, reverseChargeNote } from "./tax-treatment";
+import { orderPricingFacts, taxTreatmentNote } from "./tax-treatment";
 import { copyFor } from "./shop-copy";
 
 const copy = copyFor("en");
 
-describe("reverseChargeNote", () => {
+describe("taxTreatmentNote", () => {
   it("prints the legal note and the buyer's VAT id on a reverse-charge order", () => {
     expect(
-      reverseChargeNote(
+      taxTreatmentNote(
         {
           kind: "reverse_charge",
           legalNote: "Reverse charge - Art. 196 Directive 2006/112/EC",
@@ -16,6 +16,7 @@ describe("reverseChargeNote", () => {
         copy,
       ),
     ).toEqual({
+      title: copy.reverseCharge,
       note: "Reverse charge - Art. 196 Directive 2006/112/EC",
       buyerVatId: "DE123456789",
     });
@@ -23,16 +24,40 @@ describe("reverseChargeNote", () => {
 
   it("falls back to the shop's wording when the workspace set none", () => {
     expect(
-      reverseChargeNote(
+      taxTreatmentNote(
         { kind: "reverse_charge", legalNote: "  ", buyerVatId: null },
         copy,
       ),
-    ).toEqual({ note: copy.reverseChargeNote, buyerVatId: null });
+    ).toEqual({
+      title: copy.reverseCharge,
+      note: copy.reverseChargeNote,
+      buyerVatId: null,
+    });
+  });
+
+  it("prints the seller's export note, without the buyer's VAT id", () => {
+    expect(
+      taxTreatmentNote(
+        {
+          kind: "export",
+          legalNote: "Eksport - mva-loven § 6-21",
+          buyerVatId: "DE123456789",
+        },
+        copy,
+      ),
+    ).toEqual({
+      title: copy.exportSale,
+      note: "Eksport - mva-loven § 6-21",
+      buyerVatId: null,
+    });
+    expect(
+      taxTreatmentNote({ kind: "export", legalNote: null }, copy)?.note,
+    ).toBe(copy.exportSaleNote);
   });
 
   it.each(["standard", "exempt"] as const)("prints nothing for %s", (kind) => {
     expect(
-      reverseChargeNote(
+      taxTreatmentNote(
         { kind, legalNote: "Exempt under §13", buyerVatId: "DE1" },
         copy,
       ),
@@ -40,8 +65,8 @@ describe("reverseChargeNote", () => {
   });
 
   it("prints nothing without a treatment", () => {
-    expect(reverseChargeNote(null, copy)).toBeNull();
-    expect(reverseChargeNote(undefined, copy)).toBeNull();
+    expect(taxTreatmentNote(null, copy)).toBeNull();
+    expect(taxTreatmentNote(undefined, copy)).toBeNull();
   });
 });
 

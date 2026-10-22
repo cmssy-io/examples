@@ -344,6 +344,8 @@ const en = {
   priceChangesOn: "Price changes on {date}",
   reverseCharge: "Reverse charge",
   reverseChargeNote: "VAT is reverse charged to the buyer.",
+  exportSale: "Export",
+  exportSaleNote: "Zero-rated export - no VAT charged.",
   buyerVatId: "Buyer VAT ID",
   salesChannel: "Sales channel",
   priceList: "Price list",
@@ -711,6 +713,8 @@ const no: ShopCopy = {
   reverseCharge: "Omvendt avgiftsplikt",
   reverseChargeNote:
     "Merverdiavgiften beregnes av kjøper (omvendt avgiftsplikt).",
+  exportSale: "Eksport",
+  exportSaleNote: "Eksport - fritatt for merverdiavgift.",
   buyerVatId: "Kjøpers MVA-nummer",
   salesChannel: "Salgskanal",
   priceList: "Prisliste",
