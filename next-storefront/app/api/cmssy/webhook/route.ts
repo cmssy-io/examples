@@ -15,7 +15,7 @@ import { idempotencyKey } from "@/lib/mailer";
 import { ShippingProviderError } from "@/lib/shipping";
 import { adminToken } from "@/services/admin";
 import { mailOrderEvent, ORDER_MAIL_EVENTS } from "@/services/order-mails";
-import { fetchMailBrand } from "@/services/site";
+import { fetchBrand } from "@/services/site";
 import { refundOnStripe } from "@/services/refunds";
 import { shipOrder } from "@/services/shipments";
 
@@ -49,7 +49,7 @@ function acknowledgeReturn(event: string, ret: CmssyWebhookReturn | undefined) {
 
 async function mailAccount(event: CmssyWebhookAccountEvent) {
   try {
-    const mail = accountMail(event, await fetchMailBrand());
+    const mail = accountMail(event, await fetchBrand());
     await accountMailSender().send(mail, idempotencyKey(event));
     return NextResponse.json({ received: true, handled: true });
   } catch (error) {

@@ -6,7 +6,7 @@ import { useLocalePath } from "@/components/shop/locale-ui";
 import styles from "./SiteFooter.module.css";
 
 export const siteFooterProps = {
-  brandName: fields.text({ label: "Brand name", defaultValue: "MACHTEC" }),
+  brandName: fields.text({ label: "Brand name" }),
   brandText: fields.textarea({ label: "Brand text" }),
   columns: fields.repeater({
     label: "Columns",

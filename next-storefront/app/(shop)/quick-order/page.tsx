@@ -1,10 +1,11 @@
 import { QuickOrder } from "@/components/shop/quick-order";
 import { shopLocale } from "@/lib/locale";
 import { copyFor } from "@/lib/shop-copy";
+import { pageTitle } from "@/services/site";
 
 export async function generateMetadata() {
   const { locale } = await shopLocale();
-  return { title: `${copyFor(locale).quickOrder} - MACHTEC` };
+  return { title: await pageTitle(copyFor(locale).quickOrder) };
 }
 
 export default async function QuickOrderPage() {

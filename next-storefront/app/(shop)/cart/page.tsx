@@ -3,11 +3,11 @@ import { shopLocale } from "@/lib/locale";
 import { countryOptions } from "@/lib/shipping-countries";
 import { payOnline } from "@/lib/stripe";
 import { copyFor } from "@/lib/shop-copy";
-import { fetchShopSettings } from "@/services/site";
+import { fetchShopSettings, pageTitle } from "@/services/site";
 
 export async function generateMetadata() {
   const { locale } = await shopLocale();
-  return { title: `${copyFor(locale).cart} - MACHTEC` };
+  return { title: await pageTitle(copyFor(locale).cart) };
 }
 
 export default async function CartPage() {

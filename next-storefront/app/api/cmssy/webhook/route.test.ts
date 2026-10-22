@@ -18,7 +18,7 @@ vi.mock("@/services/order-mails", async (importOriginal) => ({
   mailOrderEvent,
 }));
 vi.mock("@/services/site", () => ({
-  fetchMailBrand: async () => ({
+  fetchBrand: async () => ({
     name: "Northwind Parts",
     logoUrl: null,
     siteUrl: "https://shop.example",

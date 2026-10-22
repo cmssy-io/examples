@@ -23,7 +23,7 @@ import {
   isRefusal,
   type AdminResult,
 } from "@/services/admin";
-import { fetchMailBrand } from "@/services/site";
+import { fetchBrand } from "@/services/site";
 
 export const ORDER_MAIL_EVENTS = new Set([
   "order.created",
@@ -82,7 +82,7 @@ export interface OrderMailDeps {
 const defaultDeps = (): OrderMailDeps => ({
   resend: resendConfig(),
   hasAdminToken: adminToken() !== null,
-  brand: fetchMailBrand,
+  brand: fetchBrand,
   request: adminRequest,
   send: sendWithResend,
 });

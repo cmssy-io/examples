@@ -13,7 +13,7 @@ async function freshSite() {
   return import("./site");
 }
 
-describe("fetchMailBrand", () => {
+describe("fetchBrand", () => {
   beforeEach(() => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://parts.example");
     vi.stubEnv("MAIL_FROM", "Mail Sender <shop@parts.example>");
@@ -42,8 +42,8 @@ describe("fetchMailBrand", () => {
         },
       },
     });
-    const { fetchMailBrand } = await freshSite();
-    expect(await fetchMailBrand()).toEqual({
+    const { fetchBrand } = await freshSite();
+    expect(await fetchBrand()).toEqual({
       name: "Northwind Parts",
       logoUrl: "https://cdn.example/logo.png",
       siteUrl: "https://parts.example",
@@ -53,8 +53,8 @@ describe("fetchMailBrand", () => {
   it("still signs the mail with the sender's name when cmssy cannot be read", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     publicRequest.mockRejectedValueOnce(new Error("offline"));
-    const { fetchMailBrand } = await freshSite();
-    expect(await fetchMailBrand()).toEqual({
+    const { fetchBrand } = await freshSite();
+    expect(await fetchBrand()).toEqual({
       name: "Mail Sender",
       logoUrl: null,
       siteUrl: "https://parts.example",

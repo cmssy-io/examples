@@ -1,13 +1,14 @@
 import { ResetPasswordForm } from "@/components/shop/password-recovery";
 import { localePath, shopLocale } from "@/lib/locale";
 import { copyFor } from "@/lib/shop-copy";
+import { pageTitle } from "@/services/site";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const { locale } = await shopLocale();
   return {
-    title: `${copyFor(locale).resetPasswordTitle} - MACHTEC`,
+    title: await pageTitle(copyFor(locale).resetPasswordTitle),
     robots: { index: false },
   };
 }

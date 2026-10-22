@@ -6,7 +6,7 @@ import { OrderReceipt, paymentLabel } from "@/components/shop/order-receipt";
 import { PayOrderButton } from "@/components/shop/pay-order-button";
 import { OrderCustomFields } from "@/components/shop/order-fields";
 import { OrderReturns } from "@/components/shop/order-returns";
-import { fetchShopSettings } from "@/services/site";
+import { fetchShopSettings, pageTitle } from "@/services/site";
 import { payOnline } from "@/lib/stripe";
 import { localePath, shopLocale } from "@/lib/locale";
 import { copyFor } from "@/lib/shop-copy";
@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const { locale } = await shopLocale();
   return {
-    title: `${copyFor(locale).orderConfirmation} - MACHTEC`,
+    title: await pageTitle(copyFor(locale).orderConfirmation),
     robots: { index: false },
   };
 }

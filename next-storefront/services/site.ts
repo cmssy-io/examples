@@ -60,7 +60,7 @@ async function loadSiteConfig(): Promise<SiteConfig | null> {
   };
 }
 
-export async function fetchMailBrand(): Promise<Brand> {
+export async function fetchBrand(): Promise<Brand> {
   const config = await fetchSiteConfig().catch((error: unknown) => {
     console.warn("mail brand: site config not read", error);
     return null;
@@ -69,6 +69,11 @@ export async function fetchMailBrand(): Promise<Brand> {
     mailFrom: process.env.MAIL_FROM,
     siteUrl: siteUrl(),
   });
+}
+
+export async function pageTitle(label: string): Promise<string> {
+  const { name } = await fetchBrand();
+  return `${label} - ${name}`;
 }
 
 export async function resolveSiteLocales(): Promise<SiteLocales> {
