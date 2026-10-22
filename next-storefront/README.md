@@ -98,10 +98,10 @@ two of them set the shop stays on the invoice flow, so a buyer can never pay on 
 webhook has no secret or no token to record the payment with. Without them checkout places the
 order and the confirmation page reads "awaiting payment", which is the net-30 flow:
 
-| Variable                | Where to find it                                                                                   |
-| ----------------------- | -------------------------------------------------------------------------------------------------- |
-| `STRIPE_SECRET_KEY`     | `sk_test_...` from the Stripe dashboard, Developers -> API keys, test mode                         |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` of a webhook endpoint at `<origin>/api/stripe/webhook` subscribed to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `refund.created` and `refund.updated` |
+| Variable                | Where to find it                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `STRIPE_SECRET_KEY`     | `sk_test_...` from the Stripe dashboard, Developers -> API keys, test mode                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` of a webhook endpoint at `<origin>/api/stripe/webhook` subscribed to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `refund.created` and `refund.updated`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `CMSSY_API_TOKEN`       | `cs_...` from cmssy dashboard -> Settings -> API tokens, created by a member whose role can manage orders; the token acts as that member. Server-only. Cart, checkout, order and member-auth calls also send it with the shopper's address, so cmssy's per-address limits count each shopper rather than this server; without it every shopper shares the server's budget. The address is the first `x-forwarded-for` hop, else `x-real-ip`, so deploy behind a proxy that overwrites both with the connecting address (Vercel does); behind one that passes a client's value through, a shopper can pick the address cmssy counts them under. |
 
 ### Paying an order with Stripe
@@ -174,13 +174,13 @@ cmssy holds no carrier account either. It sends `order.paid` to a workspace webh
 the parcel with the carrier and writes the tracking number back as a shipment on the order, so the
 buyer's order page shows it.
 
-| Variable | What it is |
-| --- | --- |
-| `CMSSY_WEBHOOK_SECRET` | signing secret of a cmssy webhook at `<origin>/api/cmssy/webhook` subscribed to `order.paid`, `shipment.label_requested`, `order.refunded` and `order.partially_refunded` (Settings -> Webhooks), and for order emails to `order.created`, `order.canceled`, `shipment.created` and `shipment.updated` |
-| `SHIPPO_API_TOKEN` | Shippo API token (Settings -> API). A `shippo_test_` token buys free test labels on Shippo's own carrier accounts; DHL Express needs "Activate Account" under Settings -> Carriers first |
-| `SHIPPO_ADDRESS_FROM_US`, `SHIPPO_ADDRESS_FROM_DE` | `object_id` of a Shippo address for each warehouse, created once with `POST /addresses`. A warehouse without one is off |
-| `SHIPPO_CUSTOMS_SIGNER` | the name that certifies the customs declaration on parcels leaving the EU or the US; without it those parcels are refused |
-| `SHIPPO_WEBHOOK_TOKEN` | a random string. In Shippo (Settings -> Webhooks) point `track_updated` and `transaction_created` at `<origin>/api/shippo/webhook?token=<it>`; without it the route answers 503 |
+| Variable                                           | What it is                                                                                                                                                                                                                                                                                             |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CMSSY_WEBHOOK_SECRET`                             | signing secret of a cmssy webhook at `<origin>/api/cmssy/webhook` subscribed to `order.paid`, `shipment.label_requested`, `order.refunded` and `order.partially_refunded` (Settings -> Webhooks), and for order emails to `order.created`, `order.canceled`, `shipment.created` and `shipment.updated` |
+| `SHIPPO_API_TOKEN`                                 | Shippo API token (Settings -> API). A `shippo_test_` token buys free test labels on Shippo's own carrier accounts; DHL Express needs "Activate Account" under Settings -> Carriers first                                                                                                               |
+| `SHIPPO_ADDRESS_FROM_US`, `SHIPPO_ADDRESS_FROM_DE` | `object_id` of a Shippo address for each warehouse, created once with `POST /addresses`. A warehouse without one is off                                                                                                                                                                                |
+| `SHIPPO_CUSTOMS_SIGNER`                            | the name that certifies the customs declaration on parcels leaving the EU or the US; without it those parcels are refused                                                                                                                                                                              |
+| `SHIPPO_WEBHOOK_TOKEN`                             | a random string. In Shippo (Settings -> Webhooks) point `track_updated` and `transaction_created` at `<origin>/api/shippo/webhook?token=<it>`; without it the route answers 503                                                                                                                        |
 
 `CMSSY_API_TOKEN` from the Stripe section is needed too: it reads the order and records the parcel.
 Without them shipping is simply off, and orders are left for a person to ship.
@@ -195,12 +195,12 @@ to change their login, cmssy issues a single-use token and sends it to `/api/cms
 `{ to, subject, text, html, link, event }` to the sender in `lib/account-mail.ts`. A login change is
 mailed to the new login, which is how it proves the member owns it.
 
-| Variable | What it is |
-| --- | --- |
-| `CMSSY_WEBHOOK_SECRET` | the same cmssy webhook as above, also subscribed to the three `account.*` events. Account events need no `CMSSY_API_TOKEN` |
-| `NEXT_PUBLIC_SITE_URL` | the origin the links point at |
-| `RESEND_API_KEY`, `MAIL_FROM` | optional, see [Order emails with Resend](#order-emails-with-resend). With both set, account mails go out through Resend |
-| `ACCOUNT_MAIL_WEBHOOK_URL` | optional, used when Resend is not set. Each mail is POSTed there as JSON for your mail provider (or a Zapier/Make hook) to send. Unset, the mail is only logged with `console.info("account mail", ...)` - enough to click the link locally |
+| Variable                      | What it is                                                                                                                                                                                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CMSSY_WEBHOOK_SECRET`        | the same cmssy webhook as above, also subscribed to the three `account.*` events. Account events need no `CMSSY_API_TOKEN`                                                                                                                  |
+| `NEXT_PUBLIC_SITE_URL`        | the origin the links point at                                                                                                                                                                                                               |
+| `RESEND_API_KEY`, `MAIL_FROM` | optional, see [Order emails with Resend](#order-emails-with-resend). With both set, account mails go out through Resend                                                                                                                     |
+| `ACCOUNT_MAIL_WEBHOOK_URL`    | optional, used when Resend is not set. Each mail is POSTed there as JSON for your mail provider (or a Zapier/Make hook) to send. Unset, the mail is only logged with `console.info("account mail", ...)` - enough to click the link locally |
 
 A sender that fails answers 500, so cmssy retries the delivery. To send from code instead, return
 your own `AccountMailSender` from `accountMailSender()`.
@@ -209,22 +209,30 @@ your own `AccountMailSender` from `accountMailSender()`.
 
 The order mails come from the same webhook, sent by this app through [Resend](https://resend.com):
 
-| cmssy event | Mail |
-| --- | --- |
-| `order.created` | confirmation: order number, lines, subtotal, discount, shipping and total as net, VAT and gross, and the legal note with the buyer's VAT id when the order is reverse charge |
-| `shipment.created` with a tracking number, or `shipment.updated` from `pending` with one | shipped: carrier, tracking number and tracking link |
-| `order.canceled` | canceled |
+| cmssy event                                                                              | Mail                                                                                                                                                                         |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `order.created`                                                                          | confirmation: order number, lines, subtotal, discount, shipping and total as net, VAT and gross, and the legal note with the buyer's VAT id when the order is reverse charge |
+| `shipment.created` with a tracking number, or `shipment.updated` from `pending` with one | shipped: carrier, tracking number and tracking link                                                                                                                          |
+| `order.canceled`                                                                         | canceled                                                                                                                                                                     |
 
 The webhook carries no order number and no lines, so the route reads the order back with
 `CMSSY_API_TOKEN` before it writes the mail. Later parcel updates (in transit, delivered) send
 nothing.
 
-| Variable | What it is |
-| --- | --- |
-| `RESEND_API_KEY` | `re_...` from resend.com -> API Keys, with sending access to the domain of `MAIL_FROM` |
-| `MAIL_FROM` | the sender, e.g. `MACHTEC demo shop <shop@demo.cmssy.com>`, on a domain verified in Resend |
-| `MAIL_ALLOWLIST` | optional, comma-separated addresses or `@domain` entries. Set, only matching recipients get mail and the rest are logged and skipped - for a demo whose customers are made up. `@example.com` matches `a@example.com`, not `a@mail.example.com` |
-| `CMSSY_API_TOKEN` | the token above; order mails answer 503 without it |
+Every mail, order and account alike, shares one email-safe layout in `lib/mail-layout.ts`: a
+table-based 600px card with inline styles only, a hidden preheader, the shop's name or logo on
+top and a footer saying why the mail was sent. The shop is named from the site config in cmssy -
+Branding -> brand name, then the site name in the default language, with the logo from Branding
+when one is set - and from the display name of `MAIL_FROM` only when cmssy cannot be read. A
+member's confirmation links to `/order/<id>` on the site; a guest's has no link, since their order
+page needs the one-time token returned only at checkout.
+
+| Variable          | What it is                                                                                                                                                                                                                                      |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RESEND_API_KEY`  | `re_...` from resend.com -> API Keys, with sending access to the domain of `MAIL_FROM`                                                                                                                                                          |
+| `MAIL_FROM`       | the sender, e.g. `MACHTEC demo shop <shop@demo.cmssy.com>`, on a domain verified in Resend                                                                                                                                                      |
+| `MAIL_ALLOWLIST`  | optional, comma-separated addresses or `@domain` entries. Set, only matching recipients get mail and the rest are logged and skipped - for a demo whose customers are made up. `@example.com` matches `a@example.com`, not `a@mail.example.com` |
+| `CMSSY_API_TOKEN` | the token above; order mails answer 503 without it                                                                                                                                                                                              |
 
 cmssy retries a delivery that fails, so every mail is sent with Resend's `Idempotency-Key` set to
 `<event>/<delivery id>`. A retry carries the same delivery id, and Resend answers it with the mail
@@ -237,11 +245,11 @@ the behaviour above.
 Which carrier ships an order is decided by the shipping method the buyer chose and the destination
 country, in `SHIPPING_ROUTES` in `lib/shipping.ts`:
 
-| Shipping method id | Destination | Carrier |
-| --- | --- | --- |
-| `us-ground`, `us-priority` | US | USPS Ground Advantage, Priority Mail, from the US warehouse |
-| `dhl-express` | Nordics, UK, much of the EU | DHL Express Worldwide, from the US warehouse |
-| `nordic-letter` | NO, SE, DK, FI | Deutsche Post Maxibrief Plus, from the German warehouse |
+| Shipping method id         | Destination                 | Carrier                                                     |
+| -------------------------- | --------------------------- | ----------------------------------------------------------- |
+| `us-ground`, `us-priority` | US                          | USPS Ground Advantage, Priority Mail, from the US warehouse |
+| `dhl-express`              | Nordics, UK, much of the EU | DHL Express Worldwide, from the US warehouse                |
+| `nordic-letter`            | NO, SE, DK, FI              | Deutsche Post Maxibrief Plus, from the German warehouse     |
 
 Anything else - pickup, pallets, a courier to another country - is left alone. A parcel is booked as
 one box of the route's size: `DEFAULT_PARCEL` (5 kg, 40 x 30 x 20 cm), or `SMALL_PARCEL` (1.5 kg,
@@ -260,14 +268,14 @@ carrying a random claim token. cmssy keeps at most one shipment per key, so of t
 same webhook only one finds its own token on the parcel and books; the other answers 503 with
 `Retry-After: 60`. A redelivery then finds the claimed parcel and acts on it:
 
-| The claimed parcel | What the route does |
-| --- | --- |
-| has a tracking number | nothing - already shipped |
-| notes a Shippo transaction id | asks Shippo for the tracking number and fills it in (a label Shippo queued gets it a few seconds later) |
-| notes that the carrier did not make the booking (it answered 5xx or 429) | books again on the same parcel |
-| is still a bare claim younger than two minutes | 503 - another delivery is booking it |
-| is a bare claim older than that | marks it `exception` for a person: the booking may or may not exist at the carrier, and buying again could pay for two labels |
-| is `exception` | nothing - it waits for a person (see below) |
+| The claimed parcel                                                       | What the route does                                                                                                           |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| has a tracking number                                                    | nothing - already shipped                                                                                                     |
+| notes a Shippo transaction id                                            | asks Shippo for the tracking number and fills it in (a label Shippo queued gets it a few seconds later)                       |
+| notes that the carrier did not make the booking (it answered 5xx or 429) | books again on the same parcel                                                                                                |
+| is still a bare claim younger than two minutes                           | 503 - another delivery is booking it                                                                                          |
+| is a bare claim older than that                                          | marks it `exception` for a person: the booking may or may not exist at the carrier, and buying again could pay for two labels |
+| is `exception`                                                           | nothing - it waits for a person (see below)                                                                                   |
 
 A carrier refusing the booking (a bad postcode, a street without a building number, no rate for the
 service) marks the parcel `exception` with the reason and is answered 200 with `handled: false` - a
@@ -285,14 +293,14 @@ attempt's key, and stamps the same key on the label itself. Shippo then calls
 `/api/shippo/webhook`, authenticated by the `token` in its URL, and the app writes what it says on
 the parcel the key names:
 
-| Shippo sends | The parcel |
-| --- | --- |
-| `track_updated` `PRE_TRANSIT` | `pending` |
-| `track_updated` `TRANSIT` | `in_transit`; `out_for_delivery` for that substatus; `exception` when the carrier needs action (a bad address) |
-| `track_updated` `DELIVERED` / `RETURNED` / `FAILURE` | `delivered` / `returned` / `exception` |
-| `track_updated` `UNKNOWN` | unchanged |
-| `transaction_created` for a parcel with no tracking number | gets the label, tracking number and `pending` - the label whose booking answer was lost, so a parcel flagged *outcome unknown* recovers by itself |
-| `transaction_created` for a `canceled` attempt | a note to refund that label in Shippo - two labels were bought |
+| Shippo sends                                               | The parcel                                                                                                                                        |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `track_updated` `PRE_TRANSIT`                              | `pending`                                                                                                                                         |
+| `track_updated` `TRANSIT`                                  | `in_transit`; `out_for_delivery` for that substatus; `exception` when the carrier needs action (a bad address)                                    |
+| `track_updated` `DELIVERED` / `RETURNED` / `FAILURE`       | `delivered` / `returned` / `exception`                                                                                                            |
+| `track_updated` `UNKNOWN`                                  | unchanged                                                                                                                                         |
+| `transaction_created` for a parcel with no tracking number | gets the label, tracking number and `pending` - the label whose booking answer was lost, so a parcel flagged _outcome unknown_ recovers by itself |
+| `transaction_created` for a `canceled` attempt             | a note to refund that label in Shippo - two labels were bought                                                                                    |
 
 The carrier's own wording lands in the parcel's history. A parcel never moves back (a late
 `TRANSIT` after `DELIVERED` is ignored), and a canceled one is left alone. Each write carries the

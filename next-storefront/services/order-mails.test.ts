@@ -15,6 +15,7 @@ const ORDER: OrderForMail = {
   id: "o1",
   orderNumber: 42,
   customerEmail: "buyer@example.com",
+  customerId: null,
   currency: "EUR",
   items: [
     {
@@ -68,7 +69,7 @@ function delivery(
   };
 }
 
-function deps(overrides: Partial<Omit<OrderMailDeps, "send">> = {}) {
+function deps(overrides: Partial<Omit<OrderMailDeps, "send" | "brand">> = {}) {
   return {
     resend: {
       apiKey: "re_test",
@@ -76,6 +77,11 @@ function deps(overrides: Partial<Omit<OrderMailDeps, "send">> = {}) {
       allowlist: [],
     },
     hasAdminToken: true,
+    brand: vi.fn().mockResolvedValue({
+      name: "Northwind Parts",
+      logoUrl: null,
+      siteUrl: "https://parts.example",
+    }),
     request: vi.fn().mockResolvedValue({
       data: { order: { get: ORDER } },
       errors: [],
@@ -105,6 +111,26 @@ describe("mailOrderEvent", () => {
     expect(mail.text).toContain("Reverse charge. Buyer VAT ID: DE123456789.");
     expect(key).toBe("order.created/d1");
     expect(config).toBe(d.resend);
+  });
+
+  it("asks for the customer, and signs the mail with the shop's brand", async () => {
+    const d = deps();
+    await mailOrderEvent(delivery("order.created"), d);
+    expect(d.request).toHaveBeenCalledWith(
+      expect.stringMatching(/customerEmail\s+customerId\s/),
+      { id: "o1" },
+      expect.any(String),
+    );
+    expect(d.brand).toHaveBeenCalledTimes(1);
+    expect(d.send.mock.calls[0][0].html).toContain(
+      "you placed an order at Northwind Parts.",
+    );
+  });
+
+  it("reads no brand for a mail it does not send", async () => {
+    const d = deps({ hasAdminToken: false });
+    await mailOrderEvent(delivery("order.created"), d);
+    expect(d.brand).not.toHaveBeenCalled();
   });
 
   it("keys every mail by its delivery id, so a retry is not a second mail", async () => {
