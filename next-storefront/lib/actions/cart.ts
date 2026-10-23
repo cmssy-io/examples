@@ -142,6 +142,7 @@ export async function checkoutAction(input: {
   customerNote: string | null;
   customFields: Record<string, unknown> | null;
   shippingAddress: ShippingAddressInput | null;
+  expectedTotal: number;
 }): Promise<CheckoutResult> {
   try {
     const order = await cart.checkout({
@@ -150,6 +151,7 @@ export async function checkoutAction(input: {
       customerNote: input.customerNote,
       customFields: input.customFields,
       shippingAddress: parseShippingAddress(input.shippingAddress),
+      expectedTotal: input.expectedTotal,
     });
     await clearCartToken();
     let paymentUrl: string | null = null;

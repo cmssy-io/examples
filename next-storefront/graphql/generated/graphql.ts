@@ -27,6 +27,8 @@ export type CheckoutInput = {
   customerEmail: string;
   /** Buyer's message for this order (distinct from admin notes) */
   customerNote?: string | null | undefined;
+  /** The totalGross (minor units) the buyer was shown. If checkout computes another total it fails with CART_REPRICED and writes nothing. */
+  expectedTotal?: number | null | undefined;
   /** Buyer's purchase-order reference, frozen on the order */
   poNumber?: string | null | undefined;
   shippingAddress?: ShippingAddressInput | null | undefined;

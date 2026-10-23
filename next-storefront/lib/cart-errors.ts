@@ -1,7 +1,10 @@
 import { channelRefusal, checkoutErrorReason } from "@cmssy/core";
 import type { ShopCopy } from "@/lib/shop-copy";
 
-export type CartReview = "BUYER_CHANGED" | "TAX_TREATMENT_CHANGED";
+export type CartReview =
+  | "BUYER_CHANGED"
+  | "CART_REPRICED"
+  | "TAX_TREATMENT_CHANGED";
 
 export interface CartFailure {
   error: string;
@@ -30,7 +33,11 @@ export function cartFailure(err: unknown, copy: ShopCopy): CartFailure {
   }
 
   const reason = checkoutErrorReason(err);
-  if (reason === "BUYER_CHANGED" || reason === "TAX_TREATMENT_CHANGED") {
+  if (
+    reason === "BUYER_CHANGED" ||
+    reason === "CART_REPRICED" ||
+    reason === "TAX_TREATMENT_CHANGED"
+  ) {
     return { error: copy.pricesUpdatedReview, review: reason };
   }
 
