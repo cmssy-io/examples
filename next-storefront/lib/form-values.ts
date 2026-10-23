@@ -36,3 +36,25 @@ export function formValues(
     ]),
   );
 }
+
+function defaultOf(field: CmssyFormField): unknown {
+  const raw = field.defaultValue ?? "";
+  switch (field.fieldType) {
+    case "boolean":
+      return raw === "true";
+    case "multiselect":
+      return [];
+    case "number":
+      return raw === "" ? null : Number(raw);
+    default:
+      return raw;
+  }
+}
+
+export function defaultFormValues(
+  fields: readonly CmssyFormField[],
+): Record<string, unknown> {
+  return Object.fromEntries(
+    renderableFields(fields).map((field) => [field.name, defaultOf(field)]),
+  );
+}

@@ -10,7 +10,11 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { submitFormAction } from "@/lib/actions/forms";
 import { useShopCopy } from "@/components/shop/locale-ui";
-import { formValues, renderableFields } from "@/lib/form-values";
+import {
+  defaultFormValues,
+  formValues,
+  renderableFields,
+} from "@/lib/form-values";
 import { localizedText } from "@/lib/localized";
 import styles from "./ContactForm.module.css";
 
@@ -45,6 +49,8 @@ function FieldInput({
   );
   const { minLength, maxLength, minValue, maxValue, pattern } =
     field.validation;
+  const help = text(field.helpText);
+  const helpText = help ? <small className="shop-muted">{help}</small> : null;
 
   if (field.fieldType === "hidden") {
     return (
@@ -64,6 +70,7 @@ function FieldInput({
           defaultChecked={field.defaultValue === "true"}
         />{" "}
         {label}
+        {helpText}
       </label>
     );
   }
@@ -85,6 +92,7 @@ function FieldInput({
             {text(option.label) || option.value}
           </label>
         ))}
+        {helpText}
       </fieldset>
     );
   }
@@ -142,14 +150,13 @@ function FieldInput({
       />
     );
 
-  const help = text(field.helpText);
   return (
     <>
       <label className="shop-label" htmlFor={id}>
         {label}
       </label>
       {control}
-      {help ? <small className="shop-muted">{help}</small> : null}
+      {helpText}
     </>
   );
 }
@@ -165,7 +172,7 @@ export function ContactFormFields({
   const copy = useShopCopy();
   const formRef = useRef<HTMLFormElement>(null);
   const fields = renderableFields(form.fields);
-  const [values, setValues] = useState<Record<string, unknown>>({});
+  const [values, setValues] = useState(() => defaultFormValues(fields));
   const [outcome, setOutcome] = useState<{
     ok: boolean;
     message: string;

@@ -1,6 +1,10 @@
 import type { CmssyFormField } from "@cmssy/core";
 import { describe, expect, it } from "vitest";
-import { formValues, renderableFields } from "./form-values";
+import {
+  defaultFormValues,
+  formValues,
+  renderableFields,
+} from "./form-values";
 
 function field(
   name: string,
@@ -79,5 +83,28 @@ describe("contact form values", () => {
     expect(values.newsletter).toBe(false);
     expect(values.quantity).toBeNull();
     expect(values.topics).toEqual([]);
+  });
+
+  it("starts the visibility rules from each field's default, as the inputs render it", () => {
+    const defaults = FIELDS.map((item) =>
+      item.name === "newsletter"
+        ? { ...item, defaultValue: "true" }
+        : item.name === "quantity"
+          ? { ...item, defaultValue: "5" }
+          : item.name === "name"
+            ? { ...item, defaultValue: "Guest" }
+            : item,
+    );
+
+    expect(
+      defaultFormValues(defaults),
+      "A field shown by a default selection must be visible before the visitor touches the form",
+    ).toEqual({
+      name: "Guest",
+      message: "",
+      newsletter: true,
+      topics: [],
+      quantity: 5,
+    });
   });
 });
