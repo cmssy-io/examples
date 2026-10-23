@@ -2,6 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const queryScoped = vi.fn();
 
+vi.mock("next/headers", () => ({
+  draftMode: async () => ({ isEnabled: false }),
+}));
 vi.mock("@/cmssy.config", () => ({
   cmssy: { org: "acme", workspaceSlug: "shop", draftSecret: "x".repeat(16) },
 }));

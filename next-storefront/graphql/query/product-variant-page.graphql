@@ -4,6 +4,7 @@ query ProductVariantPage(
   $filter: JSON
   $locale: String
   $offset: Int!
+  $previewSecret: String
 ) {
   public {
     model {
@@ -12,6 +13,7 @@ query ProductVariantPage(
         modelSlug: $modelSlug
         filter: $filter
         locale: $locale
+        previewSecret: $previewSecret
         limit: 1
       ) {
         items {

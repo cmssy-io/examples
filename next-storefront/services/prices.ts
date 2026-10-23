@@ -20,6 +20,7 @@ import {
   type ProductQuery,
 } from "@/lib/catalog";
 import { memberAccessToken } from "@/lib/cmssy/member-token";
+import { previewSecret } from "@/lib/cmssy/preview-secret";
 import { retryMode } from "@/lib/cmssy/retry-mode";
 import {
   badgeFor,
@@ -117,6 +118,7 @@ export async function loadPriceOverlay(
   if (!viewer || items.length === 0) return null;
   const { workspaceId, accessToken, channel } = viewer;
   const retry = retryMode();
+  const secret = await previewSecret();
 
   return settleOverlay(viewer, async () => {
     if (accessToken) {
@@ -143,6 +145,7 @@ export async function loadPriceOverlay(
           workspaceId,
           channel: channel ?? undefined,
           locale,
+          previewSecret: secret,
           retry,
         }),
       ),
@@ -215,6 +218,7 @@ export async function loadCatalogOverlay(
   if (!viewer) return null;
   const { workspaceId, accessToken, channel } = viewer;
   const retry = retryMode();
+  const secret = await previewSecret();
   const listing = {
     modelSlug: PRODUCT_MODEL,
     filter: productFilter(query),
@@ -240,7 +244,12 @@ export async function loadCatalogOverlay(
     const page = await getPublicCatalogPrices(
       cmssy,
       { ...listing, offset },
-      { workspaceId, channel: channel ?? undefined, retry },
+      {
+        workspaceId,
+        channel: channel ?? undefined,
+        previewSecret: secret,
+        retry,
+      },
     );
     return {
       rows: page.items.flatMap((item) => (item.price ? [item.price] : [])),

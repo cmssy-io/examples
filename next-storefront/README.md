@@ -366,7 +366,9 @@ styles/                  plain CSS - cmssy does not control styling (no Tailwind
   request, rewrites it onto `/cmssy-edit` and applies the CSP `frame-ancestors` so only the
   cmssy admin can frame and live-patch blocks.
 - **Drafts** - the editor hits `/api/draft?secret=<CMSSY_DRAFT_SECRET>` to enter preview mode
-  and see unpublished content.
+  and see unpublished content. In draft mode the product page, listings, search and facets also
+  read unpublished products and brands (`lib/cmssy/preview-secret.ts`), past the shared catalog
+  cache, so a draft never reaches a visitor. The secret stays on the server.
 - **Server loaders** - a block's `loader` runs only on the server (never in the browser or the
   editor), so dependencies like `sanitize-html` and the delivery client stay out of the client
   bundle. See `blocks/prose` and `blocks/product-grid`.
