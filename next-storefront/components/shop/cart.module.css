@@ -57,6 +57,19 @@
   color: var(--foreground);
 }
 
+.lineUnavailable {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--destructive);
+}
+
+.lineFlagged {
+  background: var(--destructive-subtle);
+  margin: 0 -20px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 .lineWas {
   color: var(--muted-foreground);
   text-decoration: line-through;

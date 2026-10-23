@@ -319,6 +319,8 @@ const en = {
 
   productNotFound: "Product not found",
   formSend: "Send",
+  draftBanner: "Preview - you are seeing unpublished content",
+  draftExit: "Exit preview",
   by: "by",
   brandNotFound: "Brand not found",
   brandWebsite: "Manufacturer website",
@@ -339,6 +341,8 @@ const en = {
   channelForEveryone: "everyone",
   pricesUpdatedReview:
     "Your prices were updated. Please review your cart and place the order again.",
+  lineUnavailable:
+    "This product is no longer available. Remove it from your cart to place the order.",
   priceBadgeCompany: "Company price",
   priceBadgeChannel: "Channel price",
   priceBadgeMember: "Your price",
@@ -693,6 +697,8 @@ const no: ShopCopy = {
 
   productNotFound: "Fant ikke produktet",
   formSend: "Send",
+  draftBanner: "Forhåndsvisning - du ser upublisert innhold",
+  draftExit: "Avslutt forhåndsvisning",
   by: "fra",
   brandNotFound: "Fant ikke merket",
   brandWebsite: "Produsentens nettsted",
@@ -713,6 +719,8 @@ const no: ShopCopy = {
   channelForEveryone: "alle",
   pricesUpdatedReview:
     "Prisene dine er oppdatert. Se over handlekurven og legg inn bestillingen på nytt.",
+  lineUnavailable:
+    "Dette produktet er ikke lenger tilgjengelig. Fjern det fra handlekurven for å legge inn bestillingen.",
   priceBadgeCompany: "Bedriftspris",
   priceBadgeChannel: "Kanalpris",
   priceBadgeMember: "Din pris",
