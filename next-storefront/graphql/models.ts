@@ -11,6 +11,31 @@ import type {
 export type { CmssyLocalized, CmssyMedia, CmssyFile, CmssyRecordOf };
 
 /**
+ * Brand
+ *
+ * Manufacturers in the MACHTEC catalog. A product links its brand.
+ *
+ * Model slug: `brand`
+ * Display field: `name`
+ */
+export interface BrandData {
+  /** Name */
+  name: string;
+  /** Slug */
+  slug: string;
+  /** Country - Country of origin, e.g. Sweden */
+  country?: CmssyLocalized;
+  /** Website */
+  website?: string;
+  /** Description */
+  description?: CmssyLocalized;
+  /** Logo */
+  logo?: CmssyMedia | null;
+}
+
+export type BrandRecord = CmssyRecordOf<BrandData>;
+
+/**
  * Category
  *
  * Product categories for the MACHTEC industrial catalog.
@@ -123,6 +148,7 @@ export type ServiceRecord = CmssyRecordOf<ServiceData>;
 
 /** Every model in the workspace, by slug. */
 export interface CmssyModels {
+  brand: BrandData;
   category: CategoryData;
   product: ProductData;
   service: ServiceData;

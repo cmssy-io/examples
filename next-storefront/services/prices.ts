@@ -194,7 +194,7 @@ export async function priceProducts(
 
 type CatalogQuery = Pick<
   ProductQuery,
-  "categoryId" | "brand" | "stockState"
+  "categoryId" | "brandId" | "stockState"
 > & {
   locale?: string;
 };

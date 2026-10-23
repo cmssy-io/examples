@@ -8,6 +8,7 @@ import {
 } from "@/graphql/generated/graphql";
 // Generated from the workspace's models by `pnpm types`.
 import type {
+  BrandData,
   CategoryData,
   CmssyLocalized,
   CmssyMedia,
@@ -26,8 +27,8 @@ import {
 
 const client = createCmssyClient(cmssy);
 
-export { PRODUCT_MODEL, CATEGORY_MODEL } from "./catalog-models";
-import { PRODUCT_MODEL, CATEGORY_MODEL } from "./catalog-models";
+export { PRODUCT_MODEL, CATEGORY_MODEL, BRAND_MODEL } from "./catalog-models";
+import { PRODUCT_MODEL, CATEGORY_MODEL, BRAND_MODEL } from "./catalog-models";
 import { retryMode } from "@/lib/cmssy/retry-mode";
 import { readAllVariants, variantStates } from "@/lib/variants";
 export const PAGE_SIZE = 20;
@@ -42,6 +43,18 @@ export type Category = {
   description: string | null;
   sortOrder: number | null;
 };
+
+export type Brand = {
+  id: string;
+  name: string;
+  slug: string;
+  country: string | null;
+  website: string | null;
+  description: string | null;
+  logo: string | null;
+};
+
+export type BrandRef = Pick<Brand, "id" | "name" | "slug">;
 
 /** The `specs` object as the `product` model declares it. */
 export type ProductSpecs = NonNullable<ProductData["specs"]>;
@@ -66,7 +79,7 @@ export type Product = {
   title: string;
   slug: string;
   sku: string;
-  brand: string | null;
+  brand: BrandRef | null;
   categoryId: string | null;
   description: string | null;
   price: number;
@@ -142,6 +155,62 @@ function toCategory(row: RecordRow): Category {
   };
 }
 
+function toBrand(row: RecordRow): Brand {
+  const data = row.data as BrandData;
+  return {
+    id: row.id,
+    name: data.name || "Unnamed",
+    slug: data.slug || row.id,
+    country: blank(text(data.country)),
+    website: blank(data.website),
+    description: blank(text(data.description)),
+    logo: mediaUrl(data.logo),
+  };
+}
+
+async function fetchBrands(locale: string | undefined): Promise<Brand[]> {
+  const brands: Brand[] = [];
+  for (let guard = 0; guard < 100; guard += 1) {
+    const data = await client.queryScoped(
+      PublicModelRecordsDocument,
+      {
+        modelSlug: BRAND_MODEL,
+        locale: locale ?? null,
+        limit: API_PAGE_SIZE,
+        offset: brands.length,
+        sort: "name_asc",
+      },
+      { retry: retryMode() },
+    );
+    const records = data?.public?.model?.records;
+    const items = records?.items ?? [];
+    brands.push(...items.map(toBrand));
+    if (!records?.hasMore || items.length === 0) break;
+  }
+  return brands;
+}
+
+const brandsCache = ttlCache<Brand[]>(SCAN_TTL_MS);
+
+export function loadBrands(locale?: string): Promise<Brand[]> {
+  return brandsCache(locale ?? "", () => fetchBrands(locale));
+}
+
+async function brandRefs(locale: string | undefined) {
+  const brands = await loadBrands(locale);
+  return new Map<string, BrandRef>(
+    brands.map(({ id, name, slug }) => [id, { id, name, slug }]),
+  );
+}
+
+export async function loadBrandBySlug(
+  slug: string,
+  locale?: string,
+): Promise<Brand | null> {
+  const brands = await loadBrands(locale);
+  return brands.find((brand) => brand.slug === slug) ?? null;
+}
+
 export async function loadCategories(locale?: string): Promise<Category[]> {
   const data = await client.queryScoped(
     PublicModelRecordsDocument,
@@ -189,8 +258,10 @@ function toProduct(
   item: ProductRecord,
   shop: ShopSettings,
   roles: ProductRoles | null,
+  brands: ReadonlyMap<string, BrandRef>,
 ): Product {
   const data = item.data as ProductData;
+  const brandId = blank(data.brand);
   const price = Math.round((data.price ?? 0) * 100);
 
   return {
@@ -198,8 +269,8 @@ function toProduct(
     title: text(data.title, "Untitled"),
     slug: data.slug || item.id,
     sku: data.sku ?? "",
-    brand: blank(data.brand),
     // A relation stores the related record's id.
+    brand: brandId ? (brands.get(brandId) ?? null) : null,
     categoryId: blank(data.category),
     description: blank(text(data.description)),
     // The model stores a net price in major units; the app works in cents.
@@ -230,7 +301,7 @@ export type StockState = "in" | "low" | "out";
 
 export type ProductQuery = {
   categoryId?: string;
-  brand?: string;
+  brandId?: string;
   search?: string;
   sort?: string;
   page?: number;
@@ -290,9 +361,10 @@ async function fetchAllProducts(
   locale: string | undefined,
 ): Promise<Product[]> {
   const items: Product[] = [];
-  const [shop, roles] = await Promise.all([
+  const [shop, roles, brands] = await Promise.all([
     fetchShopSettings(),
     fetchProductRoles(PRODUCT_MODEL),
+    brandRefs(locale),
   ]);
   let offset = 0;
   for (let guard = 0; guard < 100; guard += 1) {
@@ -303,7 +375,9 @@ async function fetchAllProducts(
       limit: API_PAGE_SIZE,
       offset,
     });
-    items.push(...result.items.map((item) => toProduct(item, shop, roles)));
+    items.push(
+      ...result.items.map((item) => toProduct(item, shop, roles, brands)),
+    );
     if (!result.hasMore || result.items.length === 0) break;
     offset += result.items.length;
   }
@@ -323,16 +397,16 @@ function scanProducts(
 
 export function productFilter(query: {
   categoryId?: string;
-  brand?: string;
+  brandId?: string;
 }): Record<string, unknown> {
   const filter: Record<string, unknown> = {};
   if (query.categoryId) filter.category = query.categoryId;
-  if (query.brand) filter.brand = query.brand;
+  if (query.brandId) filter.brand = query.brandId;
   return filter;
 }
 
 function matchesSearch(product: Product, needle: string): boolean {
-  return [product.title, product.sku, product.brand ?? ""]
+  return [product.title, product.sku, product.brand?.name ?? ""]
     .join(" ")
     .toLowerCase()
     .includes(needle);
@@ -388,10 +462,11 @@ export async function loadProductBySlug(
   slug: string,
   locale?: string,
 ): Promise<Product | null> {
-  const [data, shop, roles] = await Promise.all([
+  const [data, shop, roles, brands] = await Promise.all([
     queryProduct(slug, locale),
     fetchShopSettings(),
     fetchProductRoles(PRODUCT_MODEL),
+    brandRefs(locale),
   ]);
   const record = data?.public?.model?.records?.items[0];
   if (!record) return null;
@@ -429,6 +504,7 @@ export async function loadProductBySlug(
     },
     shop,
     roles,
+    brands,
   );
 }
 
@@ -447,22 +523,24 @@ function queryProduct(slug: string, locale: string | undefined) {
 export async function loadBrandFacets(
   categoryId?: string,
   locale?: string,
-): Promise<Array<{ brand: string; count: number }>> {
+): Promise<Array<{ brand: BrandRef; count: number }>> {
   const all = await scanProducts(
     productFilter({ categoryId }),
     undefined,
     locale,
   );
 
-  const counts = new Map<string, number>();
+  const facets = new Map<string, { brand: BrandRef; count: number }>();
   for (const product of all) {
     if (!product.brand) continue;
-    counts.set(product.brand, (counts.get(product.brand) ?? 0) + 1);
+    const facet = facets.get(product.brand.id);
+    if (facet) facet.count += 1;
+    else facets.set(product.brand.id, { brand: product.brand, count: 1 });
   }
 
-  return [...counts.entries()]
-    .map(([brand, count]) => ({ brand, count }))
-    .sort((a, b) => a.brand.localeCompare(b.brand));
+  return [...facets.values()].sort((a, b) =>
+    a.brand.name.localeCompare(b.brand.name),
+  );
 }
 
 const STOCK_STATES: StockState[] = ["in", "low", "out"];
@@ -471,10 +549,10 @@ const stockFacetCache =
 
 export function loadStockFacets(
   categoryId?: string,
-  brand?: string,
+  brandId?: string,
   locale?: string,
 ): Promise<Array<{ state: StockState; count: number }>> {
-  const filter = productFilter({ categoryId, brand });
+  const filter = productFilter({ categoryId, brandId });
   const key = JSON.stringify([filter, locale ?? ""]);
   return stockFacetCache(key, async () => {
     const counts = await Promise.all(
