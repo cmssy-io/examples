@@ -22,6 +22,8 @@ export type CheckoutInput = {
   customerEmail: string;
   /** Buyer's message for this order (distinct from admin notes) */
   customerNote?: string | null | undefined;
+  /** The totalGross (minor units) the buyer was shown. If checkout computes another total it fails with CART_REPRICED and writes nothing. */
+  expectedTotal?: number | null | undefined;
   /** Buyer's purchase-order reference, frozen on the order */
   poNumber?: string | null | undefined;
   shippingAddress?: ShippingAddressInput | null | undefined;
@@ -71,6 +73,28 @@ export type OrderState =
   | 'closed'
   | 'open';
 
+export type PriceDisplayMode =
+  | 'gross'
+  | 'net';
+
+/** Whose list it is: the customer's (MEMBER), their company's or the sales channel's. */
+export type PriceListSource =
+  | 'CHANNEL'
+  | 'COMPANY'
+  | 'MEMBER';
+
+/** A product, or one variant of it, to price for the signed-in member. */
+export type PriceQueryItem = {
+  recordId: string | number;
+  /** The variant's id as the delivery ProductVariant.id returns it. Leave it out on a variant product to get its lowest and highest price. */
+  variantKey?: string | null | undefined;
+};
+
+export type PriceSource =
+  | 'catalogue'
+  | 'price_list_entry'
+  | 'price_list_percent';
+
 export type ShipmentStatus =
   | 'canceled'
   | 'delivered'
@@ -100,6 +124,12 @@ export type SubmitFormInput = {
   data: unknown;
   website?: string | null | undefined;
 };
+
+export type TaxTreatmentKind =
+  | 'exempt'
+  | 'export'
+  | 'reverse_charge'
+  | 'standard';
 
 /** Input for updating a cart item */
 export type UpdateCartItemInput = {
@@ -302,6 +332,7 @@ export type PublicModelRecordsQueryVariables = Exact<{
   limit?: number | null | undefined;
   offset?: number | null | undefined;
   populate?: Array<string> | string | null | undefined;
+  previewSecret?: string | null | undefined;
 }>;
 
 
@@ -311,6 +342,7 @@ export type PublicRecordsByIdsQueryVariables = Exact<{
   workspaceId: string;
   ids: Array<string> | string;
   locale?: string | null | undefined;
+  previewSecret?: string | null | undefined;
 }>;
 
 
@@ -330,6 +362,15 @@ export type SubmitFormMutationVariables = Exact<{
 
 
 export type SubmitFormMutation = { public: { form: { submit: { success: boolean, message: string, submissionId: string | null, redirectUrl: string | null } } } };
+
+export type BuyerPricesQueryVariables = Exact<{
+  workspaceId: string | number;
+  items: Array<PriceQueryItem> | PriceQueryItem;
+  channel?: string | null | undefined;
+}>;
+
+
+export type BuyerPricesQuery = { account: { prices: Array<{ recordId: string, variantKey: string | null, currency: string, price: number, priceMax: number | null, listed: boolean, basePrice: number, source: PriceSource, listSource: PriceListSource | null, minQuantity: number, maxQuantity: number, increment: number, displayMode: PriceDisplayMode, taxRate: number, taxTreatmentKind: TaxTreatmentKind, tiers: Array<{ minQty: number, price: number }>, priceAmount: { net: number, tax: number, gross: number }, priceMaxAmount: { net: number, tax: number, gross: number } | null, basePriceAmount: { net: number, tax: number, gross: number } }> } };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -1376,7 +1417,7 @@ export const PublicPageLayoutsDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<PublicPageLayoutsQuery, PublicPageLayoutsQueryVariables>;
 export const PublicModelRecordsDocument = new TypedDocumentString(`
-    query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int, $populate: [String!]) {
+    query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int, $populate: [String!], $previewSecret: String) {
   public {
     model {
       records(
@@ -1388,6 +1429,7 @@ export const PublicModelRecordsDocument = new TypedDocumentString(`
         limit: $limit
         offset: $offset
         populate: $populate
+        previewSecret: $previewSecret
       ) {
         items {
           id
@@ -1405,10 +1447,15 @@ export const PublicModelRecordsDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<PublicModelRecordsQuery, PublicModelRecordsQueryVariables>;
 export const PublicRecordsByIdsDocument = new TypedDocumentString(`
-    query PublicRecordsByIds($workspaceId: String!, $ids: [String!]!, $locale: String) {
+    query PublicRecordsByIds($workspaceId: String!, $ids: [String!]!, $locale: String, $previewSecret: String) {
   public {
     model {
-      recordsByIds(workspaceId: $workspaceId, ids: $ids, locale: $locale) {
+      recordsByIds(
+        workspaceId: $workspaceId
+        ids: $ids
+        locale: $locale
+        previewSecret: $previewSecret
+      ) {
         id
         modelId
         data
@@ -1483,3 +1530,45 @@ export const SubmitFormDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SubmitFormMutation, SubmitFormMutationVariables>;
+export const BuyerPricesDocument = new TypedDocumentString(`
+    query BuyerPrices($workspaceId: ID!, $items: [PriceQueryItem!]!, $channel: String) {
+  account {
+    prices(workspaceId: $workspaceId, items: $items, channel: $channel) {
+      recordId
+      variantKey
+      currency
+      price
+      priceMax
+      listed
+      basePrice
+      source
+      listSource
+      minQuantity
+      maxQuantity
+      increment
+      tiers {
+        minQty
+        price
+      }
+      displayMode
+      taxRate
+      taxTreatmentKind
+      priceAmount {
+        net
+        tax
+        gross
+      }
+      priceMaxAmount {
+        net
+        tax
+        gross
+      }
+      basePriceAmount {
+        net
+        tax
+        gross
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<BuyerPricesQuery, BuyerPricesQueryVariables>;
