@@ -2,16 +2,21 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 8px 16px;
   padding: 12px 16px;
   margin-bottom: 24px;
   border-radius: var(--radius-md);
-  border: 1px dashed var(--foreground);
-  background: var(--card);
+  border: 1px solid var(--warning);
+  background: var(--warning-subtle);
+  color: var(--foreground);
   font-size: 14px;
 }
 
 .link {
   font-weight: 600;
   color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
 }

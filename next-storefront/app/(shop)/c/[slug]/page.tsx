@@ -382,6 +382,18 @@ export default async function CategoryPage({
 
       <div className={styles.layout}>
         <aside className={`shop-card ${styles.facets}`}>
+          <input
+            id="catalog-filters-toggle"
+            type="checkbox"
+            className={styles.facetsToggle}
+          />
+          <label
+            htmlFor="catalog-filters-toggle"
+            className={styles.facetsToggleLabel}
+          >
+            {copy.filtersToggle}
+          </label>
+          <div className={styles.facetsBody}>
           <div className={styles.facetGroup}>
             <span className={styles.facetTitle}>{copy.category}</span>
             <Link
@@ -414,6 +426,7 @@ export default async function CategoryPage({
               copy={copy}
             />
           </Suspense>
+          </div>
         </aside>
 
         <div>
