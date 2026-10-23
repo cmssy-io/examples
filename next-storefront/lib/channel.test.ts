@@ -27,9 +27,15 @@ describe("findChannel", () => {
 });
 
 describe("SHOP_CHANNELS", () => {
-  it("offers the four demo channels with unique keys", () => {
+  it("offers the five demo channels with unique keys", () => {
     const keys = SHOP_CHANNELS.map((channel) => channel.key);
-    expect(keys).toEqual(["workshop", "distributor", "plant", "express"]);
+    expect(keys).toEqual([
+      "workshop",
+      "distributor",
+      "plant",
+      "express",
+      "eu-export",
+    ]);
   });
 
   it("prices express gross and the trade channels net", () => {
