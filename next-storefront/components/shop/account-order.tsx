@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Order, OrderField } from "@/graphql/types";
 import { OrderReceipt, paymentLabel } from "./order-receipt";
 import { PayOrderButton } from "./pay-order-button";
+import { ReorderButton } from "./reorder-button";
 import { OrderCustomFields } from "./order-fields";
 import { OrderReturns } from "./order-returns";
 import type { BadgeVariant } from "./ui/badge";
@@ -243,6 +244,8 @@ export function AccountOrder({
         locale={{ locale, defaultLocale }}
         copy={copy}
       />
+
+      <ReorderButton items={order.items} />
 
       <div className={styles.actions}>
         {canPay && !paid ? <PayOrderButton orderId={order.id} /> : null}

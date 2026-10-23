@@ -177,6 +177,7 @@ const en = {
     "Sign in with the account that placed this order, or open the confirmation link from your email.",
   goToAccount: "Go to account",
   backToOrders: "Back to orders",
+  orderAgain: "Order again",
   orderNotFound: "Order not found",
   orderLinkExpired:
     "This confirmation link is invalid or has expired. Sign in to see the order in your account.",
@@ -549,6 +550,7 @@ const no: ShopCopy = {
     "Logg inn med kontoen som la inn bestillingen, eller åpne bekreftelseslenken fra e-posten din.",
   goToAccount: "Gå til konto",
   backToOrders: "Tilbake til bestillinger",
+  orderAgain: "Bestill igjen",
   orderNotFound: "Fant ikke bestillingen",
   orderLinkExpired:
     "Denne bekreftelseslenken er ugyldig eller utløpt. Logg inn for å se bestillingen på kontoen din.",
