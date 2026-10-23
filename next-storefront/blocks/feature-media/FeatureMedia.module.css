@@ -10,7 +10,8 @@
   order: 2;
 }
 
-.mediaFirst .media {
+.mediaFirst .media,
+.mediaFirst .panel {
   order: 1;
 }
 
@@ -20,7 +21,8 @@
   }
 
   .mediaFirst .body,
-  .mediaFirst .media {
+  .mediaFirst .media,
+  .mediaFirst .panel {
     order: initial;
   }
 }
@@ -51,4 +53,17 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid var(--border);
+}
+
+.panel {
+  padding: 28px 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.panel .bullets {
+  margin: 0;
+  gap: 14px;
+  font-size: 15px;
 }

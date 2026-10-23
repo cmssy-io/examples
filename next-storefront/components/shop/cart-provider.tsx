@@ -166,7 +166,7 @@ export function CartProvider({
             setSignInRequired(Boolean(result.signIn));
             settle(false);
           } else {
-            setCart(result.cart);
+            startTransition(() => setCart(result.cart));
             setError(null);
             setSignInRequired(false);
             settle(true);
