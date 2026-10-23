@@ -75,8 +75,6 @@ export interface ProductData {
   slug: string;
   /** SKU */
   sku: string;
-  /** Brand */
-  brand?: string;
   /** Category - Record id(s) from `category`. */
   category?: string;
   /** Description */
@@ -120,6 +118,8 @@ export interface ProductData {
   size?: "6 mm" | "8 mm" | "10 mm" | "12 mm" | "20 mm" | "25 mm" | "30 mm" | "35 mm" | "40 mm" | "M16" | "M20" | "M25" | "1250 mm" | "1400 mm" | "1600 mm";
   /** Pack - Variant axis: units per pack */
   pack?: "1 pc" | "10 pcs" | "50 pcs";
+  /** Brand - Record id(s) from `brand`. */
+  brand?: string;
 }
 
 export type ProductRecord = CmssyRecordOf<ProductData>;
