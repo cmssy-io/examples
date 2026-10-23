@@ -5,6 +5,8 @@ import { fetchSiteConfig, resolveSiteLocales } from "@/services/site";
 import { listPublicPages } from "@/services/pages";
 import { siteUrl } from "@/lib/site-url";
 
+export const dynamic = "force-dynamic";
+
 interface SitemapContext {
   baseUrl: string;
   defaultLocale: string;
