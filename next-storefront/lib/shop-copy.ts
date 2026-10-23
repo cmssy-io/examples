@@ -318,6 +318,8 @@ const en = {
 
   productNotFound: "Product not found",
   by: "by",
+  brandNotFound: "Brand not found",
+  brandWebsite: "Manufacturer website",
 
   channelShoppingOn: "Shopping on",
   channelExit: "Exit",
@@ -688,6 +690,8 @@ const no: ShopCopy = {
 
   productNotFound: "Fant ikke produktet",
   by: "fra",
+  brandNotFound: "Fant ikke merket",
+  brandWebsite: "Produsentens nettsted",
 
   channelShoppingOn: "Du handler i",
   channelExit: "Avslutt",

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { loadCategories, loadProductSlugs } from "@/lib/catalog";
+import { loadBrands, loadCategories, loadProductSlugs } from "@/lib/catalog";
 import { localePath } from "@/lib/locale";
 import { fetchSiteConfig, resolveSiteLocales } from "@/services/site";
 import { listPublicPages } from "@/services/pages";
@@ -31,8 +31,9 @@ async function shopEntries(
   context: SitemapContext,
 ): Promise<MetadataRoute.Sitemap> {
   const { baseUrl, defaultLocale, locales } = context;
-  const [categories, productSlugs] = await Promise.all([
+  const [categories, brands, productSlugs] = await Promise.all([
     loadCategories(),
+    loadBrands(),
     loadProductSlugs(),
   ]);
 
@@ -40,6 +41,7 @@ async function shopEntries(
     "/",
     "/c/all",
     ...categories.map((category) => `/c/${category.slug}`),
+    ...brands.map((brand) => `/b/${brand.slug}`),
     ...productSlugs.map((slug) => `/p/${slug}`),
   ];
 

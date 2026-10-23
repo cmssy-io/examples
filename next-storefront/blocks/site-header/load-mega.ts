@@ -1,4 +1,9 @@
-import { loadAllProducts, sortProducts, type Product } from "@/lib/catalog";
+import {
+  loadAllProducts,
+  sortProducts,
+  type BrandRef,
+  type Product,
+} from "@/lib/catalog";
 import { loadCategories } from "@/lib/catalog-cached";
 import { ttlCache } from "@/lib/ttl-cache";
 
@@ -9,7 +14,7 @@ export interface MegaCategory {
   code: string;
   count: number;
   lines: Array<{ slug: string; title: string }>;
-  brands: string[];
+  brands: BrandRef[];
   featured: { slug: string; title: string } | null;
 }
 
@@ -35,10 +40,11 @@ async function buildMegaMenu(locale?: string): Promise<MegaCategory[]> {
     const all = byCategory.get(category.id) ?? [];
     const items = all.slice(0, LINES_PER_CATEGORY);
 
-    const brands: string[] = [];
+    const brands: BrandRef[] = [];
     for (const product of items) {
-      if (product.brand && !brands.includes(product.brand)) {
-        brands.push(product.brand);
+      const brand = product.brand;
+      if (brand && !brands.some((known) => known.id === brand.id)) {
+        brands.push(brand);
       }
     }
 

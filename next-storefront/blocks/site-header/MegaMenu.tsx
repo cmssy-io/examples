@@ -78,14 +78,14 @@ export function MegaMenu({
               <div className={styles.megaBrands}>
                 {active.brands.map((brand) => (
                   <Link
-                    key={brand}
+                    key={brand.id}
                     href={localePath(
-                      `/c/${active.slug}?brand=${encodeURIComponent(brand)}`,
+                      `/c/${active.slug}?brand=${encodeURIComponent(brand.slug)}`,
                     )}
                     className={styles.megaBrand}
                     onClick={onClose}
                   >
-                    {brand}
+                    {brand.name}
                   </Link>
                 ))}
               </div>

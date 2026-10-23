@@ -36,6 +36,11 @@
   margin-bottom: 20px;
 }
 
+.brand a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .details {
   margin-top: 40px;
   max-width: 760px;

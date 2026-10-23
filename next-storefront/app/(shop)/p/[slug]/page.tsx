@@ -97,7 +97,10 @@ export default async function ProductPage({
           <h1 className={styles.title}>{product.title}</h1>
           {product.brand ? (
             <p className={styles.brand}>
-              {copy.by} {product.brand}
+              {copy.by}{" "}
+              <Link href={href(`/b/${product.brand.slug}`)}>
+                {product.brand.name}
+              </Link>
             </p>
           ) : null}
 

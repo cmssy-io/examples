@@ -4,6 +4,7 @@ import { Suspense, cache } from "react";
 import {
   PAGE_SIZE,
   loadBrandFacets,
+  loadBrands,
   loadStockFacets,
   type ProductQuery,
   type StockState,
@@ -79,12 +80,14 @@ async function ResultCount({
 
 async function RefineFacets({
   categoryId,
+  brandId,
   locale,
   base,
   current,
   copy,
 }: {
   categoryId: string | undefined;
+  brandId: string | undefined;
   locale: string;
   base: string;
   current: Current;
@@ -92,7 +95,7 @@ async function RefineFacets({
 }) {
   const [brands, stockFacets] = await Promise.all([
     loadBrandFacets(categoryId, locale),
-    loadStockFacets(categoryId, current.brand, locale),
+    loadStockFacets(categoryId, brandId, locale),
   ]);
   const stockLabels = stockLabelsFor(copy);
   return (
@@ -145,16 +148,16 @@ async function RefineFacets({
           </Link>
           {brands.map((facet) => (
             <Link
-              key={facet.brand}
+              key={facet.brand.id}
               href={buildHref(base, current, {
-                brand: facet.brand,
+                brand: facet.brand.slug,
                 page: undefined,
               })}
               className={`${styles.facetLink} ${
-                current.brand === facet.brand ? styles.facetLinkActive : ""
+                current.brand === facet.brand.slug ? styles.facetLinkActive : ""
               }`}
             >
-              <span>{facet.brand}</span>
+              <span>{facet.brand.name}</span>
               <span className={styles.facetCount}>{facet.count}</span>
             </Link>
           ))}
@@ -303,19 +306,25 @@ export default async function CategoryPage({
   const { slug } = await params;
   const query = await searchParams;
   const { locale, defaultLocale } = await shopLocale();
-  const categories = await loadCategories(locale);
+  const [categories, brands] = await Promise.all([
+    loadCategories(locale),
+    loadBrands(locale),
+  ]);
 
   const category =
     slug === "all" ? null : categories.find((item) => item.slug === slug);
   if (slug !== "all" && !category) notFound();
 
   const page = Math.max(1, Number(query.page ?? "1") || 1);
+  const brand = query.brand
+    ? (brands.find((item) => item.slug === query.brand) ?? null)
+    : null;
 
   const stockState = toStockState(query.stock);
   const term = query.q?.trim() || undefined;
   const productsKey = JSON.stringify({
     categoryId: category?.id,
-    brand: query.brand,
+    brandId: brand?.id,
     search: term,
     sort: query.sort,
     stockState,
@@ -334,17 +343,17 @@ export default async function CategoryPage({
 
   const base = href(`/c/${slug}`);
   const current = {
-    brand: query.brand,
+    brand: brand?.slug,
     sort: query.sort,
     q: term,
     stock: stockState,
   };
-  const facetsKey = JSON.stringify([slug, query.brand, locale]);
+  const facetsKey = JSON.stringify([slug, brand?.id, locale]);
 
   const activeFilters = [
-    query.brand
+    brand
       ? {
-          label: query.brand,
+          label: brand.name,
           clearHref: buildHref(base, current, {
             brand: undefined,
             page: undefined,
@@ -420,6 +429,7 @@ export default async function CategoryPage({
           <Suspense key={facetsKey} fallback={<FacetsSkeleton />}>
             <RefineFacets
               categoryId={category?.id}
+              brandId={brand?.id}
               locale={locale}
               base={base}
               current={current}
@@ -443,7 +453,7 @@ export default async function CategoryPage({
               >
                 <ResultCount
                   productsKey={productsKey}
-                  brand={query.brand}
+                  brand={brand?.name}
                   copy={copy}
                 />
               </Suspense>

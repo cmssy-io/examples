@@ -79,7 +79,7 @@ export function ProductCard({ product }: { product: Product }) {
 
       <div className={styles.cardBody}>
         {product.brand ? (
-          <span className={styles.cardBrand}>{product.brand}</span>
+          <span className={styles.cardBrand}>{product.brand.name}</span>
         ) : null}
         <h3 className={styles.title}>
           <Link href={href} prefetch={false}>
