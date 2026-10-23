@@ -530,3 +530,7 @@
   text-decoration: underline;
   text-underline-offset: 4px;
 }
+
+.reorder {
+  margin-top: 20px;
+}
