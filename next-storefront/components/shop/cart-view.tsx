@@ -94,6 +94,7 @@ export function CartView({
     setShippingAddress,
     checkout,
     signInRequired,
+    unavailableItemId,
   } = useCart();
   const { user } = useCmssyUser();
   const router = useRouter();
@@ -212,9 +213,14 @@ export function CartView({
             const badge = priceBadges[item.recordId];
             const shownUnit = gross ? item.unit.gross : item.unit.net;
             const shownLine = gross ? item.line.gross : item.line.net;
+            const unavailable = item.currentPrice === null;
+            const flagged = item.id === unavailableItemId;
 
             return (
-              <div key={item.id} className={styles.line}>
+              <div
+                key={item.id}
+                className={`${styles.line} ${flagged ? styles.lineFlagged : ""}`}
+              >
                 <div className={styles.lineInfo}>
                   <span className={styles.lineName}>{snapshot.name}</span>
                   {snapshot.sku ? (
@@ -237,6 +243,11 @@ export function CartView({
                       {fill(copy.volumePriceApplied, { minQty: tier.minQty })}
                     </span>
                   ) : null}
+                  {unavailable || flagged ? (
+                    <span className={styles.lineUnavailable} role="status">
+                      {copy.lineUnavailable}
+                    </span>
+                  ) : null}
                   <button
                     type="button"
                     className={styles.remove}
@@ -246,23 +257,27 @@ export function CartView({
                   </button>
                 </div>
 
-                <input
-                  className={`shop-input ${styles.qtyInput}`}
-                  type="number"
-                  min={1}
-                  max={999}
-                  defaultValue={item.quantity}
-                  aria-label={fill(copy.quantityFor, { name: snapshot.name })}
-                  onBlur={(event) => {
-                    const quantity = Math.max(
-                      1,
-                      Number(event.target.value) || 1,
-                    );
-                    if (quantity !== item.quantity) {
-                      void updateItem(item.id, quantity);
-                    }
-                  }}
-                />
+                {unavailable || flagged ? (
+                  <span />
+                ) : (
+                  <input
+                    className={`shop-input ${styles.qtyInput}`}
+                    type="number"
+                    min={1}
+                    max={999}
+                    defaultValue={item.quantity}
+                    aria-label={fill(copy.quantityFor, { name: snapshot.name })}
+                    onBlur={(event) => {
+                      const quantity = Math.max(
+                        1,
+                        Number(event.target.value) || 1,
+                      );
+                      if (quantity !== item.quantity) {
+                        void updateItem(item.id, quantity);
+                      }
+                    }}
+                  />
+                )}
 
                 <span className={styles.lineTotal}>{money(shownLine)}</span>
               </div>

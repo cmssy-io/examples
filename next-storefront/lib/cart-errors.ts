@@ -1,10 +1,12 @@
-import { channelRefusal, checkoutErrorReason } from "@cmssy/core";
+import {
+  channelRefusal,
+  checkoutErrorItemId,
+  checkoutErrorReason,
+} from "@cmssy/core";
 import type { ShopCopy } from "@/lib/shop-copy";
 
 export type CartReview =
-  | "BUYER_CHANGED"
-  | "CART_REPRICED"
-  | "TAX_TREATMENT_CHANGED";
+  "BUYER_CHANGED" | "CART_REPRICED" | "TAX_TREATMENT_CHANGED";
 
 export interface CartFailure {
   error: string;
@@ -14,6 +16,7 @@ export interface CartFailure {
   leaveChannel?: boolean;
   /** The cart was re-priced under the visitor - read it again before checkout. */
   review?: CartReview;
+  unavailableItemId?: string;
 }
 
 export function errorMessage(err: unknown): string {
@@ -39,6 +42,13 @@ export function cartFailure(err: unknown, copy: ShopCopy): CartFailure {
     reason === "TAX_TREATMENT_CHANGED"
   ) {
     return { error: copy.pricesUpdatedReview, review: reason };
+  }
+  if (reason === "PRODUCT_NOT_SOLD") {
+    const itemId = checkoutErrorItemId(err);
+    return {
+      error: copy.lineUnavailable,
+      ...(itemId ? { unavailableItemId: itemId } : {}),
+    };
   }
 
   return { error: errorMessage(err) };

@@ -96,6 +96,7 @@ export interface CartContextValue {
   error: string | null;
   /** The channel refused the last cart write until the visitor signs in. */
   signInRequired: boolean;
+  unavailableItemId: string | null;
   addToCart(
     recordId: string,
     quantity?: number,
@@ -145,8 +146,21 @@ export function CartProvider({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [signInRequired, setSignInRequired] = useState(false);
+  const [unavailableItemId, setUnavailableItemId] = useState<string | null>(
+    null,
+  );
 
   const value = useMemo<CartContextValue>(() => {
+    const refresh = async () => {
+      try {
+        setCart(await getCartAction());
+      } catch (err) {
+        if (!reloadIfStaleDeployment(err)) {
+          setError(actionErrorMessage(err, "Commerce request failed"));
+        }
+      }
+    };
+
     const run = (
       optimistic: CartAction | null,
       action: () => Promise<CartResult>,
@@ -164,11 +178,14 @@ export function CartProvider({
             if (result.leaveChannel) window.location.reload();
             setError(result.error);
             setSignInRequired(Boolean(result.signIn));
+            setUnavailableItemId(result.unavailableItemId ?? null);
+            if (result.unavailableItemId) await refresh();
             settle(false);
           } else {
             startTransition(() => setCart(result.cart));
             setError(null);
             setSignInRequired(false);
+            setUnavailableItemId(null);
             settle(true);
           }
         } catch (err) {
@@ -179,16 +196,6 @@ export function CartProvider({
         }
       });
       return done;
-    };
-
-    const refresh = async () => {
-      try {
-        setCart(await getCartAction());
-      } catch (err) {
-        if (!reloadIfStaleDeployment(err)) {
-          setError(actionErrorMessage(err, "Commerce request failed"));
-        }
-      }
     };
 
     const review = async (
@@ -210,6 +217,7 @@ export function CartProvider({
       loading: isPending,
       error,
       signInRequired,
+      unavailableItemId,
       addToCart: (recordId, quantity = 1, options) =>
         run(
           {
@@ -249,7 +257,9 @@ export function CartProvider({
         if ("error" in result) {
           if (result.leaveChannel) window.location.reload();
           setSignInRequired(Boolean(result.signIn));
+          setUnavailableItemId(result.unavailableItemId ?? null);
           if (result.review) await review(result.review, input.shippingAddress);
+          if (result.unavailableItemId) await refresh();
           throw new Error(result.error);
         }
         setCart(null);
@@ -263,6 +273,7 @@ export function CartProvider({
     isPending,
     error,
     signInRequired,
+    unavailableItemId,
     applyOptimistic,
     addPending,
     startTransition,

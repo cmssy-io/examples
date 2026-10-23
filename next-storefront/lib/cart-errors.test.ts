@@ -61,15 +61,42 @@ describe("cartFailure", () => {
 
   it("passes other checkout refusals through with their message", () => {
     const failure = cartFailure(
-      new CmssyGraphqlError("Product is not sold here", [
+      new CmssyGraphqlError("Bolt is priced in another currency", [
         {
-          message: "Product is not sold here",
-          extensions: { code: "BAD_USER_INPUT", reason: "PRODUCT_NOT_SOLD" },
+          message: "Bolt is priced in another currency",
+          extensions: {
+            code: "CONFLICT",
+            reason: "CART_CURRENCY_CHANGED",
+            itemId: "line-1",
+          },
         },
       ]),
       copy,
     );
-    expect(failure).toEqual({ error: "Product is not sold here" });
+    expect(failure).toEqual({ error: "Bolt is priced in another currency" });
+  });
+
+  it("names the line whose product is no longer available", () => {
+    const failure = cartFailure(
+      graphqlError({
+        code: "CONFLICT",
+        reason: "PRODUCT_NOT_SOLD",
+        itemId: "line-7",
+      }),
+      copyFor("no"),
+    );
+    expect(failure).toEqual({
+      error: copyFor("no").lineUnavailable,
+      unavailableItemId: "line-7",
+    });
+  });
+
+  it("still says the product is unavailable when the refusal names no line", () => {
+    const failure = cartFailure(
+      graphqlError({ code: "CONFLICT", reason: "PRODUCT_NOT_SOLD" }),
+      copy,
+    );
+    expect(failure).toEqual({ error: copy.lineUnavailable });
   });
 
   it("does not read a bad-input error without a channel as a channel refusal", () => {
