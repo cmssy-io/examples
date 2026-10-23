@@ -37,7 +37,7 @@ const client = createCmssyClient(cmssy);
 const CATALOG_PAGE_SIZE = 50;
 const CATALOG_MAX_PAGES = 40;
 
-interface Viewer {
+export interface Viewer {
   workspaceId: string;
   accessToken: string | undefined;
   channel: string | null;
@@ -79,8 +79,10 @@ function withheldBy(error: unknown): CmssyPriceWithheldReason | null {
 }
 
 // A failed price read never breaks the page: the catalogue price stays, and a
-// channel that refuses this member reads as withheld.
-async function settleOverlay(
+// channel that refuses this member reads as withheld. On a channel in another
+// currency the catalogue price is in the wrong currency, so a failed read
+// prices nothing and the products read as not sold rather than show it.
+export async function settleOverlay(
   viewer: Viewer,
   read: () => Promise<PriceOverlay>,
 ): Promise<PriceOverlay | null> {
@@ -97,7 +99,13 @@ async function settleOverlay(
       };
     }
     console.error("prices: overlay read failed", error);
-    return null;
+    if (!viewer.channelCurrency) return null;
+    return {
+      rows: new Map(),
+      withheld: null,
+      nextChangeAt: viewer.nextChangeAt,
+      channelCurrency: viewer.channelCurrency,
+    };
   }
 }
 
