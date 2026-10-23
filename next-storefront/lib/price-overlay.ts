@@ -17,6 +17,7 @@ export type ProductPricing =
   | {
       kind: "priced";
       badge: PriceBadge | null;
+      currency: string;
       displayMode: CmssyPriceDisplayMode;
       taxTreatmentKind: CmssyTaxTreatmentKind;
     };
@@ -25,6 +26,7 @@ export type ProductPricing =
 export interface OverlayPriceRow {
   recordId: string;
   variantKey?: string | null;
+  currency: string;
   price: number;
   source: CmssyBuyerPrice["source"];
   listSource: CmssyPriceListSource | null;
@@ -39,6 +41,11 @@ export interface PriceOverlay {
   rows: Map<string, OverlayPriceRow>;
   withheld: CmssyPriceWithheldReason | null;
   nextChangeAt: string | null;
+  /**
+   * The channel's currency when it is not the workspace default: the catalogue
+   * holds no price in it, so a product or variant without a row is not sold.
+   */
+  channelCurrency: string | null;
 }
 
 export function overlayKey(recordId: string, variantKey?: string | null) {
@@ -120,6 +127,31 @@ function repriceVariant(
   };
 }
 
+// On a channel in another currency only the API's rows price anything; a
+// product it returned no row for is not sold there and must not be listed with
+// its default-currency catalogue price.
+export function soldOnChannel(
+  product: Product,
+  overlay: PriceOverlay | null,
+): boolean {
+  if (!overlay?.channelCurrency || overlay.withheld) return true;
+  return overlay.rows.has(product.id);
+}
+
+function sellableVariants(
+  product: Product,
+  overlay: PriceOverlay,
+): ProductVariant[] {
+  const rowOf = (variant: ProductVariant) =>
+    overlay.rows.get(overlayKey(product.id, variant.id));
+  const variantRowsRead = product.variants.some((variant) => rowOf(variant));
+  return product.variants.flatMap((variant) => {
+    const row = rowOf(variant);
+    if (!row && overlay.channelCurrency && variantRowsRead) return [];
+    return [repriceVariant(variant, row)];
+  });
+}
+
 export function repriceProduct(
   product: Product,
   overlay: PriceOverlay | null,
@@ -139,15 +171,11 @@ export function repriceProduct(
     price: product.hasVariants ? product.price : amount,
     fromPrice: amount,
     tiers: tiersFor(row, product.tiers),
-    variants: product.variants.map((variant) =>
-      repriceVariant(
-        variant,
-        overlay.rows.get(overlayKey(product.id, variant.id)),
-      ),
-    ),
+    variants: sellableVariants(product, overlay),
     pricing: {
       kind: "priced",
       badge: badgeFor(row.listSource),
+      currency: row.currency,
       displayMode: row.displayMode,
       taxTreatmentKind: row.taxTreatmentKind,
     },

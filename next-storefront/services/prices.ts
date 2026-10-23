@@ -25,6 +25,7 @@ import {
   badgeFor,
   indexRows,
   repriceProduct,
+  soldOnChannel,
   type OverlayPriceRow,
   type PriceBadge,
   type PriceOverlay,
@@ -40,6 +41,7 @@ interface Viewer {
   workspaceId: string;
   accessToken: string | undefined;
   channel: string | null;
+  channelCurrency: string | null;
   nextChangeAt: string | null;
 }
 
@@ -56,6 +58,7 @@ async function priceViewer(): Promise<Viewer | null> {
     workspaceId,
     accessToken,
     channel: channel?.key ?? null,
+    channelCurrency: probe?.known ? probe.currency : null,
     nextChangeAt: probe?.known ? probe.nextChangeAt : null,
   };
 }
@@ -86,7 +89,12 @@ async function settleOverlay(
   } catch (error) {
     const withheld = withheldBy(error);
     if (withheld) {
-      return { rows: new Map(), withheld, nextChangeAt: viewer.nextChangeAt };
+      return {
+        rows: new Map(),
+        withheld,
+        nextChangeAt: viewer.nextChangeAt,
+        channelCurrency: viewer.channelCurrency,
+      };
     }
     console.error("prices: overlay read failed", error);
     return null;
@@ -118,6 +126,7 @@ export async function loadPriceOverlay(
         rows: indexRows(pages.flat()),
         withheld: null,
         nextChangeAt: viewer.nextChangeAt,
+        channelCurrency: viewer.channelCurrency,
       };
     }
     const pages = await Promise.all(
@@ -137,6 +146,7 @@ export async function loadPriceOverlay(
       rows: indexRows(rows),
       withheld: pages.find((page) => page.priceWithheld)?.priceWithheld ?? null,
       nextChangeAt: pages[0]?.nextChangeAt ?? viewer.nextChangeAt,
+      channelCurrency: viewer.channelCurrency,
     };
   });
 }
@@ -154,9 +164,13 @@ function priceItems(product: Product): CmssyPriceQueryItem[] {
 export async function priceProduct(
   product: Product,
   locale?: string,
-): Promise<{ product: Product; overlay: PriceOverlay | null }> {
+): Promise<{ product: Product; overlay: PriceOverlay | null; sold: boolean }> {
   const overlay = await loadPriceOverlay(priceItems(product), locale);
-  return { product: repriceProduct(product, overlay), overlay };
+  return {
+    product: repriceProduct(product, overlay),
+    overlay,
+    sold: soldOnChannel(product, overlay),
+  };
 }
 
 // A handful of products picked by a block, priced in one overlay read.
@@ -165,7 +179,9 @@ export async function priceProducts(
   locale?: string,
 ): Promise<Product[]> {
   const overlay = await loadPriceOverlay(products.flatMap(priceItems), locale);
-  return products.map((product) => repriceProduct(product, overlay));
+  return products
+    .filter((product) => soldOnChannel(product, overlay))
+    .map((product) => repriceProduct(product, overlay));
 }
 
 type CatalogQuery = Pick<
@@ -241,6 +257,7 @@ export async function loadCatalogOverlay(
       rows: indexRows([first, ...rest].flatMap((page) => page.rows)),
       withheld: first.withheld,
       nextChangeAt: first.nextChangeAt,
+      channelCurrency: viewer.channelCurrency,
     };
   });
 }
@@ -252,7 +269,9 @@ export async function loadPricedProducts(
   const page = await loadProducts(query, async (products) => {
     const overlay = await loadCatalogOverlay(query);
     nextChangeAt = overlay?.nextChangeAt ?? null;
-    return products.map((product) => repriceProduct(product, overlay));
+    return products
+      .filter((product) => soldOnChannel(product, overlay))
+      .map((product) => repriceProduct(product, overlay));
   });
   return { ...page, nextChangeAt };
 }

@@ -20,6 +20,11 @@ describe("formatMoney", () => {
     expect(plain(formatMoney(2100, "EUR", "no"))).toBe("21,00 €");
   });
 
+  it("divides by the currency's own decimals, not by 100", () => {
+    expect(plain(formatMoney(2100, "JPY", "en"))).toBe("¥2,100");
+    expect(plain(formatMoney(21000, "KWD", "en"))).toBe("KWD 21.000");
+  });
+
   it("prints a bare amount when the currency is unknown", () => {
     expect(plain(formatMoney(123456, null, "en"))).toBe("1,234.56");
     expect(plain(formatMoney(123456, null, "no"))).toBe("1 234,56");

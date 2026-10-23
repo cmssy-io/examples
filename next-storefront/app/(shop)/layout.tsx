@@ -34,7 +34,7 @@ export default async function ShopLayout({
 }: {
   children: ReactNode;
 }) {
-  const [cartToken, accessToken, { channel, gone }] = await Promise.all([
+  const [cartToken, accessToken, { channel, gone, probe }] = await Promise.all([
     readCartToken(),
     memberAccessToken(),
     activeChannel(),
@@ -67,7 +67,9 @@ export default async function ShopLayout({
   );
 
   return (
-    <CurrencyProvider currency={currency}>
+    <CurrencyProvider
+      currency={(probe?.known ? probe.currency : null) ?? currency}
+    >
       <UserProvider initialUser={initialUser}>
         <CartProvider initialCart={initialCart}>
           <CartUiProvider>

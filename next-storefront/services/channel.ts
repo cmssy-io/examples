@@ -20,6 +20,8 @@ export type ChannelProbe =
   | { known: false }
   | {
       known: true;
+      /** Set only when the channel sells in one of the additional currencies. */
+      currency: string | null;
       displayMode: CmssyPriceDisplayMode;
       priceWithheld: CmssyPriceWithheldReason | null;
       nextChangeAt: string | null;
@@ -48,6 +50,7 @@ function probeChannel(key: string): Promise<ChannelProbe> {
       });
       return {
         known: true,
+        currency: result.currency,
         displayMode: result.displayMode,
         priceWithheld: result.priceWithheld,
         nextChangeAt: result.nextChangeAt,

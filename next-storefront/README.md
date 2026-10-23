@@ -55,6 +55,9 @@ so every read and write here is this app's own typed GraphQL:
 - **Sales channels and buyer prices** - `/channel/<key>` enters one of the channels listed in
   `lib/channel.ts` (a cookie, a banner, a cart per channel); `services/prices.ts` lays the
   signed-in buyer's or the channel's prices over the cached, channel-neutral catalogue.
+  Every price is formatted in the currency the API returns with it; on a channel that sells in
+  another currency than the workspace default, a product with no price in that currency is not
+  listed and its page is a 404.
 - **Company accounts** - `/account` shows the member's company, role and price list, and a
   company-orders tab when the role grants `orders.company.read`; reverse charge prints its
   legal note and the buyer's VAT id on the cart and every order page.
