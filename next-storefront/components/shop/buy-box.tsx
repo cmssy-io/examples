@@ -35,7 +35,9 @@ export function BuyBox({
 }) {
   const copy = useShopCopy();
   const localePath = useLocalePath();
-  const money = useMoney();
+  const money = useMoney(
+    product.pricing?.kind === "priced" ? product.pricing.currency : null,
+  );
   const { addToCart, error, signInRequired } = useCart();
   const { announceAdded } = useCartUi();
   const [quantity, setQuantity] = useState(1);

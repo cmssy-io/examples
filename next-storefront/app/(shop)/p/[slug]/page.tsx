@@ -51,7 +51,8 @@ export default async function ProductPage({
 
   if (!catalogProduct) notFound();
 
-  const { product, overlay } = await priceProduct(catalogProduct, locale);
+  const { product, overlay, sold } = await priceProduct(catalogProduct, locale);
+  if (!sold) notFound();
   const priceChangesOn = priceChangeDate(
     product.pricing,
     overlay?.nextChangeAt ?? null,

@@ -6,6 +6,7 @@ import {
   perUnitLabel,
   priceChangeDate,
   repriceProduct,
+  soldOnChannel,
   withheldLabel,
   type OverlayPriceRow,
   type PriceOverlay,
@@ -48,6 +49,7 @@ function row(overrides: Partial<OverlayPriceRow> = {}): OverlayPriceRow {
   return {
     recordId: "p1",
     variantKey: null,
+    currency: "NOK",
     price: 800,
     source: "price_list_entry",
     listSource: "COMPANY",
@@ -59,11 +61,15 @@ function row(overrides: Partial<OverlayPriceRow> = {}): OverlayPriceRow {
   };
 }
 
-function overlay(rows: OverlayPriceRow[], extra: Partial<PriceOverlay> = {}) {
+function overlay(
+  rows: OverlayPriceRow[],
+  extra: Partial<PriceOverlay> = {},
+): PriceOverlay {
   return {
     rows: indexRows(rows),
     withheld: null,
     nextChangeAt: null,
+    channelCurrency: null,
     ...extra,
   };
 }
@@ -98,6 +104,7 @@ describe("repriceProduct", () => {
     expect(priced.pricing).toEqual({
       kind: "priced",
       badge: "company",
+      currency: "NOK",
       displayMode: "net",
       taxTreatmentKind: "standard",
     });
@@ -220,5 +227,112 @@ describe("priceChangeDate", () => {
   it("shows no date without a change or with a bad one", () => {
     expect(priceChangeDate(channelPriced, null, "en")).toBeNull();
     expect(priceChangeDate(channelPriced, "not a date", "en")).toBeNull();
+  });
+});
+
+describe("a channel in another currency (CMS-2143)", () => {
+  const eur = (overrides: Partial<OverlayPriceRow> = {}) =>
+    row({
+      currency: "EUR",
+      price: 90,
+      priceAmount: { net: 90, tax: 0, gross: 90 },
+      tiers: [],
+      ...overrides,
+    });
+  const variants: Product["variants"] = [
+    {
+      id: "v-s",
+      sku: "S",
+      price: 1000,
+      inventory: 3,
+      selectedOptions: [],
+      tiers: [],
+    },
+    {
+      id: "v-l",
+      sku: "L",
+      price: 1200,
+      inventory: 3,
+      selectedOptions: [],
+      tiers: [],
+    },
+  ];
+
+  it("prices with the row's currency, not the catalogue's", () => {
+    const priced = repriceProduct(
+      product(),
+      overlay([eur()], { channelCurrency: "EUR" }),
+    );
+
+    expect(priced.fromPrice).toBe(90);
+    expect(priced.pricing).toMatchObject({ kind: "priced", currency: "EUR" });
+  });
+
+  it("does not sell a product the channel returned no row for", () => {
+    const inEur = overlay([eur({ recordId: "other" })], {
+      channelCurrency: "EUR",
+    });
+
+    expect(soldOnChannel(product(), inEur)).toBe(false);
+    expect(
+      soldOnChannel(product(), overlay([eur()], { channelCurrency: "EUR" })),
+    ).toBe(true);
+  });
+
+  it("keeps the catalogue product on a default-currency channel, without an overlay and while prices are withheld", () => {
+    expect(soldOnChannel(product(), overlay([]))).toBe(true);
+    expect(soldOnChannel(product(), null)).toBe(true);
+    expect(
+      soldOnChannel(
+        product(),
+        overlay([], { channelCurrency: "EUR", withheld: "MEMBERS_ONLY" }),
+      ),
+    ).toBe(true);
+  });
+
+  it("drops a variant the channel does not price once variant rows were read", () => {
+    const withVariants = product({
+      hasVariants: true,
+      variantCount: 2,
+      variants,
+    });
+    const priced = repriceProduct(
+      withVariants,
+      overlay([eur(), eur({ variantKey: "v-s" })], { channelCurrency: "EUR" }),
+    );
+
+    expect(priced.variants.map((variant) => variant.id)).toEqual(["v-s"]);
+    expect(priced.variants[0]?.price).toBe(90);
+  });
+
+  it("keeps every variant on a listing, which reads no variant rows", () => {
+    const withVariants = product({
+      hasVariants: true,
+      variantCount: 2,
+      variants,
+    });
+    const priced = repriceProduct(
+      withVariants,
+      overlay([eur()], { channelCurrency: "EUR" }),
+    );
+
+    expect(priced.variants.map((variant) => variant.id)).toEqual([
+      "v-s",
+      "v-l",
+    ]);
+  });
+
+  it("keeps a variant without a row on a default-currency channel", () => {
+    const withVariants = product({
+      hasVariants: true,
+      variantCount: 2,
+      variants,
+    });
+    const priced = repriceProduct(
+      withVariants,
+      overlay([row(), row({ variantKey: "v-s" })]),
+    );
+
+    expect(priced.variants).toHaveLength(2);
   });
 });

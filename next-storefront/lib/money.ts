@@ -8,7 +8,9 @@ export function formatMoney(
   const options: Intl.NumberFormatOptions = currency
     ? { style: "currency", currency }
     : { minimumFractionDigits: 2, maximumFractionDigits: 2 };
-  return new Intl.NumberFormat(locale, options).format(minorUnits / 100);
+  const format = new Intl.NumberFormat(locale, options);
+  const digits = format.resolvedOptions().maximumFractionDigits ?? 2;
+  return format.format(minorUnits / 10 ** digits);
 }
 
 export function unitPriceFor(

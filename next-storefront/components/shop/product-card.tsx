@@ -55,10 +55,10 @@ export function PriceBadge({
 export function ProductCard({ product }: { product: Product }) {
   const localePath = useLocalePath();
   const copy = useShopCopy();
-  const money = useMoney();
+  const pricing = product.pricing;
+  const money = useMoney(pricing?.kind === "priced" ? pricing.currency : null);
   const bestTier = product.tiers.at(-1);
   const href = localePath(`/p/${product.slug}`);
-  const pricing = product.pricing;
 
   return (
     <article className={`sf-card ${styles.card}`}>

@@ -345,9 +345,6 @@ export async function loadProducts(
   query: ProductQuery,
   reprice?: (products: Product[]) => Promise<Product[]>,
 ): Promise<ProductPage> {
-  const page = Math.max(1, query.page ?? 1);
-  const limit = Math.max(1, query.limit ?? PAGE_SIZE);
-  const offset = (page - 1) * limit;
   const needle = query.search?.trim().toLowerCase();
   const all = await scanProducts(
     productFilter(query),
@@ -357,10 +354,19 @@ export async function loadProducts(
   const matching = needle
     ? all.filter((product) => matchesSearch(product, needle))
     : all;
-  const sorted = sortProducts(
-    reprice ? await reprice(matching) : matching,
-    query.sort,
-  );
+  return pageProducts(reprice ? await reprice(matching) : matching, query);
+}
+
+// Pages what the listing sells: a product the reprice step dropped (not sold
+// on the channel) is gone before counting, so total and hasMore never count it.
+export function pageProducts(
+  products: Product[],
+  query: Pick<ProductQuery, "page" | "limit" | "sort">,
+): ProductPage {
+  const page = Math.max(1, query.page ?? 1);
+  const limit = Math.max(1, query.limit ?? PAGE_SIZE);
+  const offset = (page - 1) * limit;
+  const sorted = sortProducts(products, query.sort);
   const items = sorted.slice(offset, offset + limit);
   return {
     items,
