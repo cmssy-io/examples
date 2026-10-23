@@ -120,6 +120,7 @@ export function CartView({
   const gross = cart.displayMode === "gross";
   const vatCharged = chargesVat(cart.taxTreatment);
   const showsVat = gross && vatCharged;
+  const shownTotal = cart.totalGross;
 
   async function handleCheckout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -141,6 +142,7 @@ export function CartView({
         customerNote: value("customerNote") || null,
         customFields: readOrderFieldValues(form, orderFields),
         shippingAddress,
+        expectedTotal: shownTotal,
       });
 
       const token = order.accessToken;

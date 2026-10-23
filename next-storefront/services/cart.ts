@@ -33,6 +33,7 @@ export interface CheckoutInput {
   customerNote: string | null;
   customFields: Record<string, unknown> | null;
   shippingAddress: ShippingAddressInput | null;
+  expectedTotal: number;
 }
 
 export function getCart(): Promise<Cart | null> {
