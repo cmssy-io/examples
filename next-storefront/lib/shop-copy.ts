@@ -317,6 +317,7 @@ const en = {
   goToSignIn: "Go to sign in",
 
   productNotFound: "Product not found",
+  formSend: "Send",
   by: "by",
   brandNotFound: "Brand not found",
   brandWebsite: "Manufacturer website",
@@ -689,6 +690,7 @@ const no: ShopCopy = {
   goToSignIn: "Gå til innlogging",
 
   productNotFound: "Fant ikke produktet",
+  formSend: "Send",
   by: "fra",
   brandNotFound: "Fant ikke merket",
   brandWebsite: "Produsentens nettsted",

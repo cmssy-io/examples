@@ -10,6 +10,7 @@ import { featureMediaBlock } from "@/blocks/feature-media/block";
 import { statsBandBlock } from "@/blocks/stats-band/block";
 import { faqBlock } from "@/blocks/faq/block";
 import { ctaBannerBlock } from "@/blocks/cta-banner/block";
+import { contactFormBlock } from "@/blocks/contact-form/block";
 import { siteHeaderBlock } from "@/blocks/site-header/block";
 import { siteFooterBlock } from "@/blocks/site-footer/block";
 
@@ -28,6 +29,7 @@ export const blocks = [
   statsBandBlock,
   faqBlock,
   ctaBannerBlock,
+  contactFormBlock,
   siteHeaderBlock,
   siteFooterBlock,
 ];
