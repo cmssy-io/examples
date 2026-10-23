@@ -100,10 +100,10 @@ query PublicPageLayouts($workspaceSlug: String!, $pageSlug: String!, $previewSec
 }
 
 # Records of one model - the typed half of `cmssy types`.
-query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int, $populate: [String!]) {
+query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int, $populate: [String!], $previewSecret: String) {
   public {
     model {
-      records(workspaceId: $workspaceId, modelSlug: $modelSlug, filter: $filter, sort: $sort, locale: $locale, limit: $limit, offset: $offset, populate: $populate) {
+      records(workspaceId: $workspaceId, modelSlug: $modelSlug, filter: $filter, sort: $sort, locale: $locale, limit: $limit, offset: $offset, populate: $populate, previewSecret: $previewSecret) {
         items { id modelId data status createdAt updatedAt }
         total
         hasMore
@@ -113,10 +113,10 @@ query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JS
 }
 
 # Records by id - how a relation field resolves to records.
-query PublicRecordsByIds($workspaceId: String!, $ids: [String!]!, $locale: String) {
+query PublicRecordsByIds($workspaceId: String!, $ids: [String!]!, $locale: String, $previewSecret: String) {
   public {
     model {
-      recordsByIds(workspaceId: $workspaceId, ids: $ids, locale: $locale) {
+      recordsByIds(workspaceId: $workspaceId, ids: $ids, locale: $locale, previewSecret: $previewSecret) {
         id modelId data status createdAt updatedAt
       }
     }
