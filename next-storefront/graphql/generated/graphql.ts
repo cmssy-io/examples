@@ -240,6 +240,7 @@ export type PublicModelRecordsQueryVariables = Exact<{
   limit?: number | null | undefined;
   offset?: number | null | undefined;
   populate?: Array<string> | string | null | undefined;
+  previewSecret?: string | null | undefined;
 }>;
 
 
@@ -249,6 +250,7 @@ export type PublicRecordsByIdsQueryVariables = Exact<{
   workspaceId: string;
   ids: Array<string> | string;
   locale?: string | null | undefined;
+  previewSecret?: string | null | undefined;
 }>;
 
 
@@ -713,7 +715,7 @@ export const PublicPageLayoutsDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<PublicPageLayoutsQuery, PublicPageLayoutsQueryVariables>;
 export const PublicModelRecordsDocument = new TypedDocumentString(`
-    query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int, $populate: [String!]) {
+    query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int, $populate: [String!], $previewSecret: String) {
   public {
     model {
       records(
@@ -725,6 +727,7 @@ export const PublicModelRecordsDocument = new TypedDocumentString(`
         limit: $limit
         offset: $offset
         populate: $populate
+        previewSecret: $previewSecret
       ) {
         items {
           id
@@ -742,10 +745,15 @@ export const PublicModelRecordsDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<PublicModelRecordsQuery, PublicModelRecordsQueryVariables>;
 export const PublicRecordsByIdsDocument = new TypedDocumentString(`
-    query PublicRecordsByIds($workspaceId: String!, $ids: [String!]!, $locale: String) {
+    query PublicRecordsByIds($workspaceId: String!, $ids: [String!]!, $locale: String, $previewSecret: String) {
   public {
     model {
-      recordsByIds(workspaceId: $workspaceId, ids: $ids, locale: $locale) {
+      recordsByIds(
+        workspaceId: $workspaceId
+        ids: $ids
+        locale: $locale
+        previewSecret: $previewSecret
+      ) {
         id
         modelId
         data
