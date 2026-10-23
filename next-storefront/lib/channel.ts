@@ -40,6 +40,12 @@ export const SHOP_CHANNELS: readonly ShopChannel[] = [
     priceAccess: "PUBLIC",
     displayMode: "gross",
   },
+  {
+    key: "eu-export",
+    name: "EU Export",
+    priceAccess: "PUBLIC",
+    displayMode: "gross",
+  },
 ];
 
 export function findChannel(
