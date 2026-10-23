@@ -64,6 +64,13 @@
 .price {
   font-size: var(--text-lg);
   font-weight: var(--font-semibold);
+  white-space: nowrap;
+}
+
+.fromPrefix {
+  font-size: var(--text-xs);
+  font-weight: var(--font-normal);
+  color: var(--muted-foreground);
 }
 
 .cardPer {
@@ -221,13 +228,72 @@
   text-decoration: underline;
 }
 
+.facetsToggle,
+.facetsToggleLabel {
+  display: none;
+}
+
+.facetsBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 /* Placed after the base .facets rule so it wins in source order: on the
    stacked mobile layout the facet rail scrolls with the page instead of
    sticking over the product grid. */
 @media (max-width: 860px) {
   .facets {
-    position: static;
+    position: relative;
     top: auto;
+    padding: 0;
+    gap: 0;
+  }
+
+  .facetsToggle {
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .facetsToggleLabel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  .facetsToggleLabel::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-right: 1.5px solid var(--muted-foreground);
+    border-bottom: 1.5px solid var(--muted-foreground);
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform 150ms ease;
+  }
+
+  .facetsToggle:checked + .facetsToggleLabel::after {
+    transform: translateY(2px) rotate(-135deg);
+  }
+
+  .facetsToggle:focus-visible + .facetsToggleLabel {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  .facetsBody {
+    display: none;
+    padding: 0 16px 16px;
+  }
+
+  .facetsToggle:checked ~ .facetsBody {
+    display: flex;
   }
 }
 

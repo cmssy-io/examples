@@ -18,9 +18,33 @@
 }
 
 .question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   cursor: pointer;
   font-weight: 600;
   font-size: 15px;
+  list-style: none;
+}
+
+.question::-webkit-details-marker {
+  display: none;
+}
+
+.question::after {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid var(--muted-foreground);
+  border-bottom: 1.5px solid var(--muted-foreground);
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 150ms ease;
+}
+
+.item[open] .question::after {
+  transform: translateY(2px) rotate(-135deg);
 }
 
 .answer {

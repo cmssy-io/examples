@@ -121,7 +121,9 @@ export function ProductCard({ product }: { product: Product }) {
                   product.hasVariants ? product.fromPrice : undefined
                 }
               >
-                {product.hasVariants ? `${copy.from} ` : ""}
+                {product.hasVariants ? (
+                  <span className={styles.fromPrefix}>{copy.from} </span>
+                ) : null}
                 {money(product.fromPrice)}
               </div>
               <div className={styles.cardPer}>
