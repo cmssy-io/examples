@@ -34,6 +34,14 @@ export default function FeatureMedia({
 
   const bullets = (content.bullets ?? []).filter((bullet) => bullet.text);
   const mediaFirst = content.mediaSide === "left";
+  const bulletList =
+    bullets.length > 0 ? (
+      <ul className={styles.bullets}>
+        {bullets.map((bullet, index) => (
+          <li key={index}>{bullet.text}</li>
+        ))}
+      </ul>
+    ) : null;
 
   return (
     <section
@@ -42,13 +50,7 @@ export default function FeatureMedia({
       <div className={styles.body}>
         <h2 className={styles.heading}>{heading}</h2>
         {text ? <p className={styles.text}>{text}</p> : null}
-        {bullets.length > 0 ? (
-          <ul className={styles.bullets}>
-            {bullets.map((bullet, index) => (
-              <li key={index}>{bullet.text}</li>
-            ))}
-          </ul>
-        ) : null}
+        {mediaSrc ? bulletList : null}
         {buttonText && buttonUrl ? (
           <CmssyLink href={buttonUrl} className="shop-btn shop-btn-primary">
             {buttonText}
@@ -66,6 +68,8 @@ export default function FeatureMedia({
             style={{ objectFit: "cover" }}
           />
         </div>
+      ) : bullets.length > 0 ? (
+        <div className={styles.panel}>{bulletList}</div>
       ) : null}
     </section>
   );
