@@ -128,6 +128,7 @@ export async function loadPriceOverlay(
             workspaceId,
             accessToken,
             channel,
+            previewSecret: secret,
             retry,
           }),
         ),
@@ -232,7 +233,7 @@ export async function loadCatalogOverlay(
       const page = await getBuyerCatalogPrices(
         cmssy,
         { ...listing, offset },
-        { workspaceId, accessToken, channel, retry },
+        { workspaceId, accessToken, channel, previewSecret: secret, retry },
       );
       return {
         rows: page.items,
