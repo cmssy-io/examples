@@ -477,6 +477,7 @@ export type PublicModelProductsQueryVariables = Exact<{
   limit?: number | null | undefined;
   offset?: number | null | undefined;
   sort?: string | null | undefined;
+  previewSecret?: string | null | undefined;
 }>;
 
 
@@ -549,6 +550,7 @@ export type ProductVariantPageQueryVariables = Exact<{
   filter?: unknown;
   locale?: string | null | undefined;
   offset: number;
+  previewSecret?: string | null | undefined;
 }>;
 
 
@@ -559,6 +561,7 @@ export type ProductQueryVariables = Exact<{
   modelSlug: string;
   filter?: unknown;
   locale?: string | null | undefined;
+  previewSecret?: string | null | undefined;
 }>;
 
 
@@ -2033,7 +2036,7 @@ export const CartDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<CartQuery, CartQueryVariables>;
 export const PublicModelProductsDocument = new TypedDocumentString(`
-    query PublicModelProducts($workspaceId: String!, $modelSlug: String!, $filter: JSON, $stockState: String, $locale: String, $limit: Int, $offset: Int, $sort: String) {
+    query PublicModelProducts($workspaceId: String!, $modelSlug: String!, $filter: JSON, $stockState: String, $locale: String, $limit: Int, $offset: Int, $sort: String, $previewSecret: String) {
   public {
     model {
       records(
@@ -2042,6 +2045,7 @@ export const PublicModelProductsDocument = new TypedDocumentString(`
         filter: $filter
         stockState: $stockState
         locale: $locale
+        previewSecret: $previewSecret
         limit: $limit
         offset: $offset
         sort: $sort
@@ -2496,7 +2500,7 @@ export const ProductRolesDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<ProductRolesQuery, ProductRolesQueryVariables>;
 export const ProductVariantPageDocument = new TypedDocumentString(`
-    query ProductVariantPage($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String, $offset: Int!) {
+    query ProductVariantPage($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String, $offset: Int!, $previewSecret: String) {
   public {
     model {
       records(
@@ -2504,6 +2508,7 @@ export const ProductVariantPageDocument = new TypedDocumentString(`
         modelSlug: $modelSlug
         filter: $filter
         locale: $locale
+        previewSecret: $previewSecret
         limit: 1
       ) {
         items {
@@ -2584,7 +2589,7 @@ export const ProductVariantPageDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<ProductVariantPageQuery, ProductVariantPageQueryVariables>;
 export const ProductDocument = new TypedDocumentString(`
-    query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String) {
+    query Product($workspaceId: String!, $modelSlug: String!, $filter: JSON, $locale: String, $previewSecret: String) {
   public {
     model {
       records(
@@ -2592,6 +2597,7 @@ export const ProductDocument = new TypedDocumentString(`
         modelSlug: $modelSlug
         filter: $filter
         locale: $locale
+        previewSecret: $previewSecret
         limit: 1
       ) {
         items {

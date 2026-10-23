@@ -3,6 +3,7 @@ query Product(
   $modelSlug: String!
   $filter: JSON
   $locale: String
+  $previewSecret: String
 ) {
   public {
     model {
@@ -11,6 +12,7 @@ query Product(
         modelSlug: $modelSlug
         filter: $filter
         locale: $locale
+        previewSecret: $previewSecret
         limit: 1
       ) {
         items {

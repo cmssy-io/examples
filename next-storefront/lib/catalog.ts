@@ -29,6 +29,7 @@ const client = createCmssyClient(cmssy);
 
 export { PRODUCT_MODEL, CATEGORY_MODEL, BRAND_MODEL } from "./catalog-models";
 import { PRODUCT_MODEL, CATEGORY_MODEL, BRAND_MODEL } from "./catalog-models";
+import { previewSecret } from "@/lib/cmssy/preview-secret";
 import { retryMode } from "@/lib/cmssy/retry-mode";
 import { readAllVariants, variantStates } from "@/lib/variants";
 export const PAGE_SIZE = 20;
@@ -168,7 +169,10 @@ function toBrand(row: RecordRow): Brand {
   };
 }
 
-async function fetchBrands(locale: string | undefined): Promise<Brand[]> {
+async function fetchBrands(
+  locale: string | undefined,
+  secret?: string,
+): Promise<Brand[]> {
   const brands: Brand[] = [];
   for (let guard = 0; guard < 100; guard += 1) {
     const data = await client.queryScoped(
@@ -179,6 +183,7 @@ async function fetchBrands(locale: string | undefined): Promise<Brand[]> {
         limit: API_PAGE_SIZE,
         offset: brands.length,
         sort: "name_asc",
+        previewSecret: secret ?? null,
       },
       { retry: retryMode() },
     );
@@ -196,8 +201,15 @@ export function loadBrands(locale?: string): Promise<Brand[]> {
   return brandsCache(locale ?? "", () => fetchBrands(locale));
 }
 
-async function brandRefs(locale: string | undefined) {
-  const brands = await loadBrands(locale);
+function readBrands(
+  locale: string | undefined,
+  secret: string | undefined,
+): Promise<Brand[]> {
+  return secret ? fetchBrands(locale, secret) : loadBrands(locale);
+}
+
+async function brandRefs(locale: string | undefined, secret?: string) {
+  const brands = await readBrands(locale, secret);
   return new Map<string, BrandRef>(
     brands.map(({ id, name, slug }) => [id, { id, name, slug }]),
   );
@@ -207,7 +219,7 @@ export async function loadBrandBySlug(
   slug: string,
   locale?: string,
 ): Promise<Brand | null> {
-  const brands = await loadBrands(locale);
+  const brands = await readBrands(locale, await previewSecret());
   return brands.find((brand) => brand.slug === slug) ?? null;
 }
 
@@ -334,6 +346,7 @@ async function queryProducts(vars: {
   locale?: string;
   limit?: number;
   offset?: number;
+  previewSecret?: string;
 }): Promise<{ items: ProductRecord[]; total: number; hasMore: boolean }> {
   const data = await client.queryScoped(
     PublicModelProductsDocument,
@@ -344,6 +357,7 @@ async function queryProducts(vars: {
       locale: vars.locale ?? null,
       limit: vars.limit ?? API_PAGE_SIZE,
       offset: vars.offset ?? 0,
+      previewSecret: vars.previewSecret ?? null,
     },
     { retry: retryMode() },
   );
@@ -359,12 +373,13 @@ async function fetchAllProducts(
   filter: Record<string, unknown>,
   stockState: StockState | undefined,
   locale: string | undefined,
+  secret: string | undefined,
 ): Promise<Product[]> {
   const items: Product[] = [];
   const [shop, roles, brands] = await Promise.all([
     fetchShopSettings(),
     fetchProductRoles(PRODUCT_MODEL),
-    brandRefs(locale),
+    brandRefs(locale, secret),
   ]);
   let offset = 0;
   for (let guard = 0; guard < 100; guard += 1) {
@@ -374,6 +389,7 @@ async function fetchAllProducts(
       locale,
       limit: API_PAGE_SIZE,
       offset,
+      previewSecret: secret,
     });
     items.push(
       ...result.items.map((item) => toProduct(item, shop, roles, brands)),
@@ -390,9 +406,13 @@ function scanProducts(
   filter: Record<string, unknown>,
   stockState: StockState | undefined,
   locale: string | undefined,
+  secret?: string,
 ): Promise<Product[]> {
+  if (secret) return fetchAllProducts(filter, stockState, locale, secret);
   const key = JSON.stringify([filter, stockState ?? "", locale ?? ""]);
-  return scanCache(key, () => fetchAllProducts(filter, stockState, locale));
+  return scanCache(key, () =>
+    fetchAllProducts(filter, stockState, locale, undefined),
+  );
 }
 
 export function productFilter(query: {
@@ -424,6 +444,7 @@ export async function loadProducts(
     productFilter(query),
     query.stockState,
     query.locale,
+    await previewSecret(),
   );
   const matching = needle
     ? all.filter((product) => matchesSearch(product, needle))
@@ -462,11 +483,12 @@ export async function loadProductBySlug(
   slug: string,
   locale?: string,
 ): Promise<Product | null> {
+  const secret = await previewSecret();
   const [data, shop, roles, brands] = await Promise.all([
-    queryProduct(slug, locale),
+    queryProduct(slug, locale, secret),
     fetchShopSettings(),
     fetchProductRoles(PRODUCT_MODEL),
-    brandRefs(locale),
+    brandRefs(locale, secret),
   ]);
   const record = data?.public?.model?.records?.items[0];
   if (!record) return null;
@@ -478,6 +500,7 @@ export async function loadProductBySlug(
         filter: { slug },
         locale: locale ?? null,
         offset,
+        previewSecret: secret ?? null,
       },
       { retry: retryMode() },
     );
@@ -508,13 +531,18 @@ export async function loadProductBySlug(
   );
 }
 
-function queryProduct(slug: string, locale: string | undefined) {
+function queryProduct(
+  slug: string,
+  locale: string | undefined,
+  secret: string | undefined,
+) {
   return client.queryScoped(
     ProductDocument,
     {
       modelSlug: PRODUCT_MODEL,
       filter: { slug },
       locale: locale ?? null,
+      previewSecret: secret ?? null,
     },
     { retry: retryMode() },
   );
@@ -528,6 +556,7 @@ export async function loadBrandFacets(
     productFilter({ categoryId }),
     undefined,
     locale,
+    await previewSecret(),
   );
 
   const facets = new Map<string, { brand: BrandRef; count: number }>();
@@ -547,21 +576,27 @@ const STOCK_STATES: StockState[] = ["in", "low", "out"];
 const stockFacetCache =
   ttlCache<Array<{ state: StockState; count: number }>>(SCAN_TTL_MS);
 
-export function loadStockFacets(
+export async function loadStockFacets(
   categoryId?: string,
   brandId?: string,
   locale?: string,
 ): Promise<Array<{ state: StockState; count: number }>> {
   const filter = productFilter({ categoryId, brandId });
-  const key = JSON.stringify([filter, locale ?? ""]);
-  return stockFacetCache(key, async () => {
+  const secret = await previewSecret();
+  const count = async () => {
     const counts = await Promise.all(
       STOCK_STATES.map((state) =>
-        queryProducts({ filter, stockState: state, locale, limit: 1 }).then(
-          (page) => ({ state, count: page.total }),
-        ),
+        queryProducts({
+          filter,
+          stockState: state,
+          locale,
+          limit: 1,
+          previewSecret: secret,
+        }).then((page) => ({ state, count: page.total })),
       ),
     );
     return counts.filter((facet) => facet.count > 0);
-  });
+  };
+  if (secret) return count();
+  return stockFacetCache(JSON.stringify([filter, locale ?? ""]), count);
 }
