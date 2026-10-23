@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Inter } from "next/font/google";
+import { draftMode } from "next/headers";
 
 import { CmssyLayoutSlot, isCmssyEditMode } from "@cmssy/next/server";
 import { cmssy } from "@/cmssy.config";
@@ -13,6 +14,7 @@ import { shopLocale } from "@/lib/locale";
 import { retryMode } from "@/lib/cmssy/retry-mode";
 import { CartDrawer } from "@/components/shop/cart-drawer";
 import { ChannelBanner } from "@/components/shop/channel-banner";
+import { DraftBanner } from "@/components/shop/draft-banner";
 import { activeChannel } from "@/services/channel";
 import { CartUiProvider } from "@/components/shop/cart-ui";
 import { CartProvider } from "@/components/shop/cart-provider";
@@ -39,13 +41,14 @@ export default async function ShopLayout({
     memberAccessToken(),
     activeChannel(),
   ]);
-  const [initialCart, initialUser, { locale }, editMode, { currency }] =
+  const [initialCart, initialUser, { locale }, editMode, { currency }, draft] =
     await Promise.all([
       cartToken || accessToken ? getCart().catch(() => null) : null,
       currentUser(),
       shopLocale(),
       isCmssyEditMode(),
       fetchShopSettings(),
+      draftMode(),
     ]);
 
   // No `path` here - a route-group layout has no params - so the language is
@@ -74,6 +77,7 @@ export default async function ShopLayout({
         <CartProvider initialCart={initialCart}>
           <CartUiProvider>
             <div className={`shop-scope ${inter.variable}`}>
+              {draft.isEnabled && !editMode ? <DraftBanner /> : null}
               <ChannelBanner
                 channel={
                   channel

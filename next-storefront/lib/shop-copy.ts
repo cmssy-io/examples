@@ -319,6 +319,8 @@ const en = {
 
   productNotFound: "Product not found",
   formSend: "Send",
+  draftBanner: "Preview - you are seeing unpublished content",
+  draftExit: "Exit preview",
   by: "by",
   brandNotFound: "Brand not found",
   brandWebsite: "Manufacturer website",
@@ -695,6 +697,8 @@ const no: ShopCopy = {
 
   productNotFound: "Fant ikke produktet",
   formSend: "Send",
+  draftBanner: "Forhåndsvisning - du ser upublisert innhold",
+  draftExit: "Avslutt forhåndsvisning",
   by: "fra",
   brandNotFound: "Fant ikke merket",
   brandWebsite: "Produsentens nettsted",
