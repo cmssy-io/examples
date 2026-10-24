@@ -11,6 +11,31 @@ import type {
 export type { CmssyLocalized, CmssyMedia, CmssyFile, CmssyRecordOf };
 
 /**
+ * Brand
+ *
+ * Manufacturers in the MACHTEC catalog. A product links its brand.
+ *
+ * Model slug: `brand`
+ * Display field: `name`
+ */
+export interface BrandData {
+  /** Name */
+  name: string;
+  /** Slug */
+  slug: string;
+  /** Country - Country of origin, e.g. Sweden */
+  country?: CmssyLocalized;
+  /** Website */
+  website?: string;
+  /** Description */
+  description?: CmssyLocalized;
+  /** Logo */
+  logo?: CmssyMedia | null;
+}
+
+export type BrandRecord = CmssyRecordOf<BrandData>;
+
+/**
  * Category
  *
  * Product categories for the MACHTEC industrial catalog.
@@ -38,7 +63,7 @@ export type CategoryRecord = CmssyRecordOf<CategoryData>;
 /**
  * Product
  *
- * Industrial parts catalog for the MACHTEC demo shop. Prices are net, in minor units (cents).
+ * Industrial parts catalog for the MACHTEC demo shop. Prices are net, in NOK major units.
  *
  * Model slug: `product`
  * Display field: `title`
@@ -50,13 +75,13 @@ export interface ProductData {
   slug: string;
   /** SKU */
   sku: string;
-  /** Brand */
-  brand?: string;
   /** Category - Record id(s) from `category`. */
   category?: string;
+  /** Brand - Record id(s) from `brand`. */
+  brand?: string;
   /** Description */
   description?: CmssyLocalized;
-  /** Price net (minor units) - Net unit price in cents */
+  /** Price net (NOK) - Net unit price in NOK, e.g. 1139 = NOK 1 139 */
   price: number;
   /** Tax rate - VAT percent, e.g. 23 */
   taxRate?: number;
@@ -123,6 +148,7 @@ export type ServiceRecord = CmssyRecordOf<ServiceData>;
 
 /** Every model in the workspace, by slug. */
 export interface CmssyModels {
+  brand: BrandData;
   category: CategoryData;
   product: ProductData;
   service: ServiceData;

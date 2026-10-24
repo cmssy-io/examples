@@ -63,7 +63,7 @@ export type CategoryRecord = CmssyRecordOf<CategoryData>;
 /**
  * Product
  *
- * Industrial parts catalog for the MACHTEC demo shop. Prices are net, in minor units (cents).
+ * Industrial parts catalog for the MACHTEC demo shop. Prices are net, in NOK major units.
  *
  * Model slug: `product`
  * Display field: `title`
@@ -81,7 +81,7 @@ export interface ProductData {
   brand?: string;
   /** Description */
   description?: CmssyLocalized;
-  /** Price net (minor units) - Net unit price in cents */
+  /** Price net (NOK) - Net unit price in NOK, e.g. 1139 = NOK 1 139 */
   price: number;
   /** Tax rate - VAT percent, e.g. 23 */
   taxRate?: number;
