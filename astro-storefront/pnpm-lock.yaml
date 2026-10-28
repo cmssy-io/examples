@@ -15,14 +15,14 @@ importers:
         specifier: ^11.0.5
         version: 11.0.5(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0))(react@19.2.8)(ws@8.22.0)
       '@cmssy/astro':
-        specifier: ^19.23.0
-        version: 19.23.0(@cmssy/react@19.23.0(react@19.2.8))(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0))
+        specifier: ^19.25.0
+        version: 19.25.0(@cmssy/react@19.25.0(react@19.2.8))(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0))
       '@cmssy/core':
-        specifier: ^19.23.0
-        version: 19.23.0
+        specifier: ^19.25.0
+        version: 19.25.0
       '@cmssy/react':
-        specifier: ^19.23.0
-        version: 19.23.0(react@19.2.8)
+        specifier: ^19.25.0
+        version: 19.25.0(react@19.2.8)
       '@graphql-typed-document-node/core':
         specifier: 3.2.0
         version: 3.2.0(graphql@17.0.2)
@@ -52,8 +52,8 @@ importers:
         specifier: ^11.1.2
         version: 11.1.2(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0))
       '@cmssy/cli':
-        specifier: ^19.23.0
-        version: 19.23.0
+        specifier: ^19.25.0
+        version: 19.25.0
       '@graphql-codegen/cli':
         specifier: ^7.4.6
         version: 7.4.6(@types/node@26.2.0)(crossws@0.3.5)(graphql@17.0.2)(typescript@5.9.3)
@@ -358,21 +358,21 @@ packages:
     resolution: {integrity: sha512-y7/yvZ2TPAnR9+jnc00klvNNLkJiXFFrQA/hlLCcxA9a2A4zQIOimyFQ9XfwYKiGD1fb5GY8vbKIIgO8d5Tb2A==}
     engines: {node: '>= 20.12.0'}
 
-  '@cmssy/astro@19.23.0':
-    resolution: {integrity: sha512-dR3KYAGoAeCokyvC7TG79+Da2bHhyUDvBI1Cz4vwRZH4e4HeKX1NcWFg38E5jCQpC/Yoo5ujySVRJfhsnI2ZKw==}
+  '@cmssy/astro@19.25.0':
+    resolution: {integrity: sha512-lcD8hYOfoNWsiY1+N/pqhUoSU6f8ZHZXE2qhBKP4VHBMX/tEDrGJucqpPLmVeiGwJZgyMHo7pzy3rBWL38bwfQ==}
     peerDependencies:
-      '@cmssy/react': ^19.23.0
+      '@cmssy/react': ^19.25.0
       astro: '>=4.16'
 
-  '@cmssy/cli@19.23.0':
-    resolution: {integrity: sha512-lhZfllY+xccJSZSf+rI7vAwfy+ZtrdEoBAY4Po0eERC4GwUEC3TUegKbpOLwsjd0uOfdDReBzPzo6xB44rg3Og==}
+  '@cmssy/cli@19.25.0':
+    resolution: {integrity: sha512-ueWhp++8qw2G+xLSfrlaz+cyFwmgNbEKQqoKttwe33A0tK8ajNgqkakPjFxPVEwQuw4OXp/drk0UPat55TXGbw==}
     hasBin: true
 
-  '@cmssy/core@19.23.0':
-    resolution: {integrity: sha512-s5Bh28g8m9ZwHZAqB94N3FpYzt8l1Cpzr3TwxinrBu+uFi5bCskDfC/TeoyhP4hfi3J/HpKsTTREugnM4bzRpQ==}
+  '@cmssy/core@19.25.0':
+    resolution: {integrity: sha512-RrOA9Oj4TDkH1eedhzjI4rnkpiQ4ukDPmlFNJNHwMFhG2hLh12jKH9Og/GxoSuBtSNbIRwylaO5p7R1q6ghKLA==}
 
-  '@cmssy/react@19.23.0':
-    resolution: {integrity: sha512-o/P86VUSvZZ1BZqHRXEg4RffOu8dWH4ZoJ3agll9z65eMpYgWR68EoXsx9+SPuxQk7oZzubyolEgcA6k3h72ig==}
+  '@cmssy/react@19.25.0':
+    resolution: {integrity: sha512-X5tqXO9Srya6cMKN98ipPUJqLnZ2oMLUzDLW9RCDij6k10BZt4kigQIng1pPI7MwxTSt+eif43K8hwRcjwG7Iw==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
 
@@ -3985,25 +3985,25 @@ snapshots:
       fast-wrap-ansi: 0.2.2
       sisteransi: 1.0.5
 
-  '@cmssy/astro@19.23.0(@cmssy/react@19.23.0(react@19.2.8))(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0))':
+  '@cmssy/astro@19.25.0(@cmssy/react@19.25.0(react@19.2.8))(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0))':
     dependencies:
-      '@cmssy/core': 19.23.0
-      '@cmssy/react': 19.23.0(react@19.2.8)
+      '@cmssy/core': 19.25.0
+      '@cmssy/react': 19.25.0(react@19.2.8)
       astro: 7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0)
 
-  '@cmssy/cli@19.23.0':
+  '@cmssy/cli@19.25.0':
     dependencies:
-      '@cmssy/core': 19.23.0
+      '@cmssy/core': 19.25.0
       esbuild: 0.27.7
 
-  '@cmssy/core@19.23.0':
+  '@cmssy/core@19.25.0':
     dependencies:
       '@cmssy/types': 0.71.0
       jose: 6.2.8
 
-  '@cmssy/react@19.23.0(react@19.2.8)':
+  '@cmssy/react@19.25.0(react@19.2.8)':
     dependencies:
-      '@cmssy/core': 19.23.0
+      '@cmssy/core': 19.25.0
       '@cmssy/types': 0.71.0
       react: 19.2.8
 
