@@ -15,14 +15,14 @@ importers:
         specifier: ^11.0.5
         version: 11.0.5(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0))(react@19.2.8)(ws@8.22.0)
       '@cmssy/astro':
-        specifier: ^19.25.0
-        version: 19.25.0(@cmssy/react@19.25.0(react@19.2.8))(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0))
+        specifier: ^19.27.0
+        version: 19.27.0(@cmssy/react@19.27.0(react@19.2.8))(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0))
       '@cmssy/core':
-        specifier: ^19.25.0
-        version: 19.25.0
+        specifier: ^19.27.0
+        version: 19.27.0
       '@cmssy/react':
-        specifier: ^19.25.0
-        version: 19.25.0(react@19.2.8)
+        specifier: ^19.27.0
+        version: 19.27.0(react@19.2.8)
       '@graphql-typed-document-node/core':
         specifier: 3.2.0
         version: 3.2.0(graphql@17.0.2)
@@ -52,8 +52,8 @@ importers:
         specifier: ^11.1.2
         version: 11.1.2(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0))
       '@cmssy/cli':
-        specifier: ^19.25.0
-        version: 19.25.0
+        specifier: ^19.27.0
+        version: 19.27.0
       '@graphql-codegen/cli':
         specifier: ^7.4.6
         version: 7.4.6(@types/node@26.2.0)(crossws@0.3.5)(graphql@17.0.2)(typescript@5.9.3)
@@ -358,26 +358,26 @@ packages:
     resolution: {integrity: sha512-y7/yvZ2TPAnR9+jnc00klvNNLkJiXFFrQA/hlLCcxA9a2A4zQIOimyFQ9XfwYKiGD1fb5GY8vbKIIgO8d5Tb2A==}
     engines: {node: '>= 20.12.0'}
 
-  '@cmssy/astro@19.25.0':
-    resolution: {integrity: sha512-lcD8hYOfoNWsiY1+N/pqhUoSU6f8ZHZXE2qhBKP4VHBMX/tEDrGJucqpPLmVeiGwJZgyMHo7pzy3rBWL38bwfQ==}
+  '@cmssy/astro@19.27.0':
+    resolution: {integrity: sha512-GXPxZL4rpQ+x2QUKcqJzRrUq5LtsvMSHpXOA6sYrAKN8Hddcdl80EimO92yziGiC7uU0+rSMwJ+lMV4xlTo46g==}
     peerDependencies:
-      '@cmssy/react': ^19.25.0
+      '@cmssy/react': ^19.27.0
       astro: '>=4.16'
 
-  '@cmssy/cli@19.25.0':
-    resolution: {integrity: sha512-ueWhp++8qw2G+xLSfrlaz+cyFwmgNbEKQqoKttwe33A0tK8ajNgqkakPjFxPVEwQuw4OXp/drk0UPat55TXGbw==}
+  '@cmssy/cli@19.27.0':
+    resolution: {integrity: sha512-JZyIxhq4G0XBhKxHE/yvapZajMQGWLnGRuoLKamO7kyt9jAlAIz9XLRLsJ6u5gUMrZKnjw8QYp2SRKLNamol0A==}
     hasBin: true
 
-  '@cmssy/core@19.25.0':
-    resolution: {integrity: sha512-RrOA9Oj4TDkH1eedhzjI4rnkpiQ4ukDPmlFNJNHwMFhG2hLh12jKH9Og/GxoSuBtSNbIRwylaO5p7R1q6ghKLA==}
+  '@cmssy/core@19.27.0':
+    resolution: {integrity: sha512-wjTba2zVEH5RpTJe6ydKyzIwwnw1ZQsau/9o0Y330Dl9R8qi3C+5LQBkZzTXrnG96fux/Fw6rfxpZqeohzgY/A==}
 
-  '@cmssy/react@19.25.0':
-    resolution: {integrity: sha512-X5tqXO9Srya6cMKN98ipPUJqLnZ2oMLUzDLW9RCDij6k10BZt4kigQIng1pPI7MwxTSt+eif43K8hwRcjwG7Iw==}
+  '@cmssy/react@19.27.0':
+    resolution: {integrity: sha512-H2ZrXWF4JUQAVlkGEN1PsDQwJsITqU6FtyrqQyhrTxMiQOOWdU/FgnsO9qwoZEjs9z+XNflVq5BOXI/fI7dbtw==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
 
-  '@cmssy/types@0.71.0':
-    resolution: {integrity: sha512-vkW+mxUl86pC0kSrc2Ve+Mx6ti1rLefswFdDPka5BtvGu3hHsF2IWhCea8zAIfO/RjZFpfKfPEY5Ku2jRtY3sA==}
+  '@cmssy/types@0.72.0':
+    resolution: {integrity: sha512-z140dISQ9vhpqphyX+Ge+8LVPLn8Gt+OS5bk7xKCmTMaaQ18gygDQ7mOwzw0x5ArHtDOMKwoevIfwjuoAjo47A==}
 
   '@emmetio/abbreviation@2.3.3':
     resolution: {integrity: sha512-mgv58UrU3rh4YgbE/TzgLQwJ3pFsHHhCLqY20aJq+9comytTXUDNGG/SMtSeMJdkpxgXSXunBGLD8Boka3JyVA==}
@@ -3985,29 +3985,29 @@ snapshots:
       fast-wrap-ansi: 0.2.2
       sisteransi: 1.0.5
 
-  '@cmssy/astro@19.25.0(@cmssy/react@19.25.0(react@19.2.8))(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0))':
+  '@cmssy/astro@19.27.0(@cmssy/react@19.27.0(react@19.2.8))(astro@7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0))':
     dependencies:
-      '@cmssy/core': 19.25.0
-      '@cmssy/react': 19.25.0(react@19.2.8)
+      '@cmssy/core': 19.27.0
+      '@cmssy/react': 19.27.0(react@19.2.8)
       astro: 7.2.2(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@26.2.0)(@vercel/functions@3.9.3(ws@8.22.0))(jiti@2.7.0)(yaml@2.9.0)
 
-  '@cmssy/cli@19.25.0':
+  '@cmssy/cli@19.27.0':
     dependencies:
-      '@cmssy/core': 19.25.0
+      '@cmssy/core': 19.27.0
       esbuild: 0.27.7
 
-  '@cmssy/core@19.25.0':
+  '@cmssy/core@19.27.0':
     dependencies:
-      '@cmssy/types': 0.71.0
+      '@cmssy/types': 0.72.0
       jose: 6.2.8
 
-  '@cmssy/react@19.25.0(react@19.2.8)':
+  '@cmssy/react@19.27.0(react@19.2.8)':
     dependencies:
-      '@cmssy/core': 19.25.0
-      '@cmssy/types': 0.71.0
+      '@cmssy/core': 19.27.0
+      '@cmssy/types': 0.72.0
       react: 19.2.8
 
-  '@cmssy/types@0.71.0': {}
+  '@cmssy/types@0.72.0': {}
 
   '@emmetio/abbreviation@2.3.3':
     dependencies:
