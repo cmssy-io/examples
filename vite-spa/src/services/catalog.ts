@@ -53,7 +53,9 @@ function text(value: unknown, locales: Locales): string {
 }
 
 export async function loadCategories(locales: Locales): Promise<Category[]> {
-  const items = await records(CATEGORY_MODEL, locales, { sort: "sortOrder" });
+  const items = await records(CATEGORY_MODEL, locales, {
+    sort: "sortOrder_asc",
+  });
   return items
     .map((item) => ({
       id: item.id,
@@ -78,7 +80,7 @@ export async function loadProducts(
   const limit = options.limit ?? 8;
 
   const items = await records(PRODUCT_MODEL, locales, {
-    sort: options.sort ?? "title",
+    sort: options.sort ?? "title_asc",
     limit,
     ...(options.categoryId ? { filter: { category: options.categoryId } } : {}),
   });
