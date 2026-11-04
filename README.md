@@ -15,8 +15,10 @@ pnpm dev
 
 Each of the five apps ships an `.env.example` pointing at the **public cmssy demo workspace**, so a
 fresh clone renders real content without a cmssy account. Point one at your own workspace with
-`npx @cmssy/cli link --token cs_...`. `catalog-import` is the exception: it writes, so it needs a
-workspace id and a token of your own.
+`npx @cmssy/cli@latest link --token cs_...`. On pnpm 10+ the CLI needs `allowBuilds: { esbuild: true }`
+in `pnpm-workspace.yaml` (every example ships it), or `pnpm exec cmssy` fails with
+`ERR_PNPM_IGNORED_BUILDS`. `catalog-import` is the exception: it writes, so it needs a workspace id
+and a token of your own.
 
 ## Examples
 
@@ -78,6 +80,6 @@ remaining gap: a breaking SDK change is caught here once it is published, not be
 
 ## Related
 
-- `npx @cmssy/cli init` - generates this same wiring into an app you already have, if you
+- `npx @cmssy/cli@latest init` - generates this same wiring into an app you already have, if you
   want an empty starting point rather than a finished one.
 - [Documentation](https://www.cmssy.com/docs)

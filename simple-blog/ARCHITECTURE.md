@@ -6,7 +6,7 @@ A complete, buildable Next.js (App Router) app wired to the headless cmssy CMS. 
 ## The cmssy overlay
 
 These cmssy-specific files are the canonical wiring "overlay" - what you add to a fresh
-`create-next-app@latest` and then connect with `npx @cmssy/cli link` (everything else is stock
+`create-next-app@latest` and then connect with `npx @cmssy/cli@latest link` (everything else is stock
 Next):
 
 - `cmssy.config.ts` - `defineCmssyConfig` with the three required values (`org`, `workspaceSlug`,
