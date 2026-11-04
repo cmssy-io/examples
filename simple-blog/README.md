@@ -22,7 +22,7 @@ redirect lives in `proxy.ts` and is locale-aware, so `/no` lands on `/no/blog`.
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcmssy-io%2Fexamples%2Ftree%2Fmain%2Fsimple-blog&env=CMSSY_ORG_SLUG,CMSSY_WORKSPACE_SLUG,CMSSY_DRAFT_SECRET,NEXT_PUBLIC_SITE_URL&envDescription=Your%20cmssy%20org%20slug%2C%20workspace%20slug%20and%20draft%20secret%20from%20Settings%20-%20Headless&envLink=https%3A%2F%2Fwww.cmssy.com%2Fdocs%2Fstart%2Finstallation&project-name=cmssy-simple-blog&repository-name=cmssy-simple-blog)
 
 > To point this at **your own** workspace instead of the demo, run
-> `npx @cmssy/cli link --token cs_...` - it rewrites the `CMSSY_*` values in `.env.local`.
+> `npx @cmssy/cli@latest link --token cs_...` - it rewrites the `CMSSY_*` values in `.env.local`.
 > Draft preview and editing need your own workspace and its real secret.
 
 ## What's inside
@@ -55,7 +55,7 @@ pnpm dev                            # http://localhost:3000
 To use your own workspace instead of the demo:
 
 ```bash
-npx @cmssy/cli link --token cs_...  # rewrites .env.local, verifies the wiring
+npx @cmssy/cli@latest link --token cs_...  # rewrites .env.local, verifies the wiring
 ```
 
 `cmssy link` connects the app to your workspace: it fetches the slugs and the draft
@@ -70,8 +70,8 @@ This example is a reference, not a required starting point. To add cmssy to an a
 already have (or a fresh `npx create-next-app`), generate exactly this wiring with:
 
 ```bash
-npx @cmssy/cli init   # detects your framework, writes the cmssy wiring (idempotent)
-npx @cmssy/cli link   # connects it to your workspace
+npx @cmssy/cli@latest init   # detects your framework, writes the cmssy wiring (idempotent)
+npx @cmssy/cli@latest link   # connects it to your workspace
 ```
 
 ### Environment
@@ -179,7 +179,7 @@ It then appears in the editor's block picker automatically. Full guide:
 
 Use the **Deploy with Vercel** button above, or push to any Node 22.13+ host. Set the three
 environment variables in your host's dashboard, then point the workspace at the deployed
-origin (`npx @cmssy/cli link --preview-url https://your-site.example`) and open the site
+origin (`npx @cmssy/cli@latest link --preview-url https://your-site.example`) and open the site
 in the cmssy editor to start editing visually.
 
 ## Learn more
