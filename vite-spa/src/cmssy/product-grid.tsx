@@ -11,8 +11,8 @@ export const productGridProps = {
   }),
   sort: fields.select({
     label: "Sort",
-    options: ["title", "price", "-price"],
-    defaultValue: "title",
+    options: ["title_asc", "price_asc", "price_desc"],
+    defaultValue: "title_asc",
   }),
   limit: fields.number({ label: "Products shown", defaultValue: 8 }),
 };
