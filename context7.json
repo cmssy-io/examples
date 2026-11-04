@@ -8,7 +8,9 @@
     "simple-blog",
     "next-storefront",
     "astro-storefront",
-    "remix-storefront"
+    "remix-storefront",
+    "vite-spa",
+    "catalog-import"
   ],
   "excludeFolders": [
     "node_modules",
