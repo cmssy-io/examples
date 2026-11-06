@@ -3,7 +3,11 @@ import {
   verifyCmssyWebhook,
   type CmssyWebhookAccountEvent,
   type CmssyWebhookEvent,
+  type CmssyWebhookEventName,
+  type CmssyWebhookOrderEvent,
   type CmssyWebhookReturn,
+  type CmssyWebhookReturnEvent,
+  type CmssyWebhookShipmentEvent,
 } from "@cmssy/core";
 import { NextResponse } from "next/server";
 import {
@@ -14,7 +18,11 @@ import {
 import { idempotencyKey } from "@/lib/mailer";
 import { ShippingProviderError } from "@/lib/shipping";
 import { adminToken } from "@/services/admin";
-import { mailOrderEvent, ORDER_MAIL_EVENTS } from "@/services/order-mails";
+import {
+  mailOrderEvent,
+  ORDER_MAIL_EVENTS,
+  type OrderMailEvent,
+} from "@/services/order-mails";
 import { fetchBrand } from "@/services/site";
 import { refundOnStripe } from "@/services/refunds";
 import { shipOrder } from "@/services/shipments";
@@ -23,13 +31,34 @@ export const maxDuration = 30;
 
 const PENDING_RETRY_SECONDS = 60;
 const LABEL_REQUESTED = "shipment.label_requested";
-const REFUND_EVENTS = new Set(["order.refunded", "order.partially_refunded"]);
+const REFUND_EVENTS = new Set<CmssyWebhookEventName>([
+  "order.refunded",
+  "order.partially_refunded",
+]);
 const RETURN_EVENT_PREFIX = "return.";
-const HANDLED_EVENTS = new Set(["order.paid", LABEL_REQUESTED]);
+const HANDLED_EVENTS = new Set<CmssyWebhookEventName>([
+  "order.paid",
+  LABEL_REQUESTED,
+]);
 
-function requestedShipment(data: object): string | undefined {
-  const shipment = (data as { shipment?: { id?: unknown } }).shipment;
-  return typeof shipment?.id === "string" ? shipment.id : undefined;
+function isAccountDelivery(
+  event: CmssyWebhookEvent,
+): event is CmssyWebhookAccountEvent {
+  return isAccountEvent(event.event);
+}
+
+function isReturnEvent(
+  event: CmssyWebhookEvent,
+): event is CmssyWebhookReturnEvent {
+  return event.event.startsWith(RETURN_EVENT_PREFIX);
+}
+
+function carriesOrder(
+  event: CmssyWebhookEvent,
+): event is CmssyWebhookOrderEvent | CmssyWebhookShipmentEvent {
+  return (
+    event.event.startsWith("order.") || event.event.startsWith("shipment.")
+  );
 }
 
 function acknowledgeReturn(event: string, ret: CmssyWebhookReturn | undefined) {
@@ -58,7 +87,7 @@ async function mailAccount(event: CmssyWebhookAccountEvent) {
   }
 }
 
-async function mailOrder(event: CmssyWebhookEvent) {
+async function mailOrder(event: OrderMailEvent) {
   try {
     const mail = await mailOrderEvent(event);
     if (mail === "no_admin_token") {
@@ -116,11 +145,14 @@ export async function POST(request: Request) {
     throw error;
   }
 
-  if (isAccountEvent(event.event)) {
-    return mailAccount(event as unknown as CmssyWebhookAccountEvent);
+  if (isAccountDelivery(event)) {
+    return mailAccount(event);
   }
-  if (event.event.startsWith(RETURN_EVENT_PREFIX)) {
+  if (isReturnEvent(event)) {
     return acknowledgeReturn(event.event, event.data.return);
+  }
+  if (!carriesOrder(event)) {
+    return NextResponse.json({ received: true, handled: false });
   }
   if (ORDER_MAIL_EVENTS.has(event.event)) {
     return mailOrder(event);
@@ -138,7 +170,7 @@ export async function POST(request: Request) {
   try {
     const outcome = await shipOrder(event.data.order.id, undefined, {
       retryOf:
-        event.event === LABEL_REQUESTED ? requestedShipment(event.data) : undefined,
+        event.event === LABEL_REQUESTED ? event.data.shipment?.id : undefined,
     });
     if ("pending" in outcome) {
       return NextResponse.json(

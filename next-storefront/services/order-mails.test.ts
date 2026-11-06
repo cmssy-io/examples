@@ -1,10 +1,11 @@
-import type { CmssyWebhookEvent } from "@cmssy/core";
+import type { CmssyWebhookShipmentPayload } from "@cmssy/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { OrderForMail } from "@/lib/order-mail";
 import {
   mailOrderEvent,
   shippedWithTracking,
   type OrderMailDeps,
+  type OrderMailEvent,
 } from "./order-mails";
 
 vi.mock("@/cmssy.config", () => ({ cmssy: {} }));
@@ -54,9 +55,9 @@ const SHIPMENT = {
 };
 
 function delivery(
-  event: string,
-  data: Partial<CmssyWebhookEvent["data"]> = {},
-): CmssyWebhookEvent {
+  event: OrderMailEvent["event"],
+  data: Partial<CmssyWebhookShipmentPayload> = {},
+): OrderMailEvent {
   return {
     id: "d1",
     event,
@@ -65,8 +66,8 @@ function delivery(
       workspaceId: "w1",
       order: { id: "o1", customerEmail: "buyer@example.com" },
       ...data,
-    } as CmssyWebhookEvent["data"],
-  };
+    },
+  } as OrderMailEvent;
 }
 
 function deps(overrides: Partial<Omit<OrderMailDeps, "send" | "brand">> = {}) {

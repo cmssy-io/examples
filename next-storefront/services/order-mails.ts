@@ -1,4 +1,9 @@
-import type { CmssyWebhookEvent } from "@cmssy/core";
+import type {
+  CmssyWebhookEventName,
+  CmssyWebhookOrderEvent,
+  CmssyWebhookShipment,
+  CmssyWebhookShipmentEvent,
+} from "@cmssy/core";
 import {
   idempotencyKey,
   isAllowed,
@@ -14,7 +19,6 @@ import {
   orderConfirmationMail,
   orderShippedMail,
   type OrderForMail,
-  type WebhookShipment,
 } from "@/lib/order-mail";
 import {
   adminRequest,
@@ -25,12 +29,20 @@ import {
 } from "@/services/admin";
 import { fetchBrand } from "@/services/site";
 
-export const ORDER_MAIL_EVENTS = new Set([
+export type OrderMailEvent = CmssyWebhookOrderEvent | CmssyWebhookShipmentEvent;
+
+export const ORDER_MAIL_EVENTS = new Set<CmssyWebhookEventName>([
   "order.created",
   "order.canceled",
   "shipment.created",
   "shipment.updated",
 ]);
+
+function isShipmentEvent(
+  event: OrderMailEvent,
+): event is CmssyWebhookShipmentEvent {
+  return event.event.startsWith("shipment.");
+}
 
 const TAXED = "{ net tax gross }";
 
@@ -90,17 +102,16 @@ const defaultDeps = (): OrderMailDeps => ({
 type Template = (order: OrderForMail, brand: Brand) => OutgoingMail;
 
 export function shippedWithTracking(
-  event: Pick<CmssyWebhookEvent, "event" | "data">,
-): WebhookShipment | null {
+  event: OrderMailEvent,
+): CmssyWebhookShipment | null {
+  if (!isShipmentEvent(event)) return null;
   const { shipment, previousStatus } = event.data;
   if (!shipment?.trackingNumber || shipment.status === "canceled") return null;
   if (event.event === "shipment.created") return shipment;
   return previousStatus === "pending" ? shipment : null;
 }
 
-export function templateFor(
-  event: Pick<CmssyWebhookEvent, "event" | "data">,
-): Template | null {
+export function templateFor(event: OrderMailEvent): Template | null {
   if (event.event === "order.created") return orderConfirmationMail;
   if (event.event === "order.canceled") return orderCanceledMail;
   const shipment = shippedWithTracking(event);
@@ -110,7 +121,7 @@ export function templateFor(
 }
 
 export async function mailOrderEvent(
-  event: CmssyWebhookEvent,
+  event: OrderMailEvent,
   deps: OrderMailDeps = defaultDeps(),
 ): Promise<OrderMailOutcome> {
   const template = templateFor(event);
