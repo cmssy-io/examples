@@ -106,7 +106,7 @@ export function shippedWithTracking(
 ): CmssyWebhookShipment | null {
   if (!isShipmentEvent(event)) return null;
   const { shipment, previousStatus } = event.data;
-  if (!shipment.trackingNumber || shipment.status === "canceled") return null;
+  if (!shipment?.trackingNumber || shipment.status === "canceled") return null;
   if (event.event === "shipment.created") return shipment;
   return previousStatus === "pending" ? shipment : null;
 }

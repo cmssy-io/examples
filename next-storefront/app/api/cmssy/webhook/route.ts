@@ -170,7 +170,7 @@ export async function POST(request: Request) {
   try {
     const outcome = await shipOrder(event.data.order.id, undefined, {
       retryOf:
-        event.event === LABEL_REQUESTED ? event.data.shipment.id : undefined,
+        event.event === LABEL_REQUESTED ? event.data.shipment?.id : undefined,
     });
     if ("pending" in outcome) {
       return NextResponse.json(
