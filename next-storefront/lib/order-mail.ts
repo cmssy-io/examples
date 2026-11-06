@@ -1,4 +1,4 @@
-import type { CmssyTaxTreatmentKind, CmssyWebhookEvent } from "@cmssy/core";
+import type { CmssyTaxTreatmentKind, CmssyWebhookShipment } from "@cmssy/core";
 import { escapeHtml, type OutgoingMail } from "@/lib/mailer";
 import {
   button,
@@ -11,10 +11,6 @@ import {
   type Brand,
 } from "@/lib/mail-layout";
 import { formatMoney } from "@/lib/money";
-
-export type WebhookShipment = NonNullable<
-  CmssyWebhookEvent["data"]["shipment"]
->;
 
 interface TaxedAmount {
   net: number;
@@ -220,7 +216,10 @@ export function orderConfirmationMail(
 
 export function orderShippedMail(
   order: OrderForMail,
-  shipment: Pick<WebhookShipment, "carrier" | "trackingNumber" | "trackingUrl">,
+  shipment: Pick<
+    CmssyWebhookShipment,
+    "carrier" | "trackingNumber" | "trackingUrl"
+  >,
   brand: Brand,
 ): OutgoingMail {
   const intro = `${orderName(order)} is on its way.`;
