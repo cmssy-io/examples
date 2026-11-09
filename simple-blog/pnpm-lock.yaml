@@ -9,14 +9,14 @@ importers:
   .:
     dependencies:
       '@cmssy/core':
-        specifier: ^19.25.0
-        version: 19.25.0
+        specifier: ^19.30.0
+        version: 19.30.0
       '@cmssy/next':
-        specifier: ^19.25.0
-        version: 19.25.0(@cmssy/react@19.25.0(react@19.2.8))(next@16.3.1(@babel/core@7.29.7)(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^19.30.0
+        version: 19.30.0(@cmssy/react@19.30.0(react@19.2.8))(next@16.3.1(@babel/core@7.29.7)(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@cmssy/react':
-        specifier: ^19.25.0
-        version: 19.25.0(react@19.2.8)
+        specifier: ^19.30.0
+        version: 19.30.0(react@19.2.8)
       next:
         specifier: ^16.3.1
         version: 16.3.1(@babel/core@7.29.7)(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -31,8 +31,8 @@ importers:
         version: 2.17.7
     devDependencies:
       '@cmssy/cli':
-        specifier: ^19.25.0
-        version: 19.27.0
+        specifier: ^19.30.0
+        version: 19.30.0
       '@types/node':
         specifier: ^26.2.0
         version: 26.2.0
@@ -124,34 +124,32 @@ packages:
     resolution: {integrity: sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA==}
     engines: {node: '>=6.9.0'}
 
-  '@cmssy/cli@19.27.0':
-    resolution: {integrity: sha512-JZyIxhq4G0XBhKxHE/yvapZajMQGWLnGRuoLKamO7kyt9jAlAIz9XLRLsJ6u5gUMrZKnjw8QYp2SRKLNamol0A==}
+  '@cmssy/cli@19.30.0':
+    resolution: {integrity: sha512-b/FrdhxlB5TWwm3cgSqiqWRMdNfEFgnU9yGuqmkXVBOEBiNSKPqP8I2DUKiH9rsBvIwAAhgJglmE4Ru84CBVVw==}
+    engines: {node: '>=20'}
     hasBin: true
 
-  '@cmssy/core@19.25.0':
-    resolution: {integrity: sha512-RrOA9Oj4TDkH1eedhzjI4rnkpiQ4ukDPmlFNJNHwMFhG2hLh12jKH9Og/GxoSuBtSNbIRwylaO5p7R1q6ghKLA==}
+  '@cmssy/core@19.30.0':
+    resolution: {integrity: sha512-/u8rHbJdwSOSJJZyt1YhvZ1XBqh43Tq2kEJmHvHRJHDddRBKbgKu0KOz95vtPJFSRd0LWWMjJDVrDRp6cpC2kA==}
+    engines: {node: '>=20'}
 
-  '@cmssy/core@19.27.0':
-    resolution: {integrity: sha512-wjTba2zVEH5RpTJe6ydKyzIwwnw1ZQsau/9o0Y330Dl9R8qi3C+5LQBkZzTXrnG96fux/Fw6rfxpZqeohzgY/A==}
-
-  '@cmssy/next@19.25.0':
-    resolution: {integrity: sha512-Ylu8x06Olvjutg8VVf1uiV41iNcOfzw2IckVzi3Q/TDaZtdOLlo3NQJvym1GWi5ZZlOvTO/zzceTU/ReyhE07w==}
+  '@cmssy/next@19.30.0':
+    resolution: {integrity: sha512-PRcTTyQDmM3jbCA2/uqdkbPtY7u21ANRw7j9wowwpO8Y8OELs61ANo8lCGBSaE1U6JQsdpx0jl4MSOejiX7s5g==}
+    engines: {node: '>=20'}
     peerDependencies:
-      '@cmssy/react': ^19.25.0
+      '@cmssy/react': ^19.30.0
       next: '>=15'
       react: ^18.2.0 || ^19.0.0
       react-dom: ^18.2.0 || ^19.0.0
 
-  '@cmssy/react@19.25.0':
-    resolution: {integrity: sha512-X5tqXO9Srya6cMKN98ipPUJqLnZ2oMLUzDLW9RCDij6k10BZt4kigQIng1pPI7MwxTSt+eif43K8hwRcjwG7Iw==}
+  '@cmssy/react@19.30.0':
+    resolution: {integrity: sha512-6aIl5tQc/HJ07P3a5ugsia8nUPLf+DWXOPZWnNOZSgdUVyYDwni9qArYDpbQkWQ0tzg8c5/siFKTBsL33v3A+g==}
+    engines: {node: '>=20'}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
 
-  '@cmssy/types@0.71.0':
-    resolution: {integrity: sha512-vkW+mxUl86pC0kSrc2Ve+Mx6ti1rLefswFdDPka5BtvGu3hHsF2IWhCea8zAIfO/RjZFpfKfPEY5Ku2jRtY3sA==}
-
-  '@cmssy/types@0.72.0':
-    resolution: {integrity: sha512-z140dISQ9vhpqphyX+Ge+8LVPLn8Gt+OS5bk7xKCmTMaaQ18gygDQ7mOwzw0x5ArHtDOMKwoevIfwjuoAjo47A==}
+  '@cmssy/types@0.73.0':
+    resolution: {integrity: sha512-pMrN2/H6w73Eq99whD5Y3u/0HN7qkfqFrh/0LzLJTqjnw4p3UyH8+y/u/W+L5YTIKHiBDS9SDX30Id87ncbdUA==}
 
   '@emnapi/core@1.10.0':
     resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
@@ -2197,40 +2195,33 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@cmssy/cli@19.27.0':
+  '@cmssy/cli@19.30.0':
     dependencies:
-      '@cmssy/core': 19.27.0
+      '@cmssy/core': 19.30.0
       esbuild: 0.27.7
 
-  '@cmssy/core@19.25.0':
+  '@cmssy/core@19.30.0':
     dependencies:
-      '@cmssy/types': 0.71.0
+      '@cmssy/types': 0.73.0
       jose: 6.2.8
 
-  '@cmssy/core@19.27.0':
+  '@cmssy/next@19.30.0(@cmssy/react@19.30.0(react@19.2.8))(next@16.3.1(@babel/core@7.29.7)(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@cmssy/types': 0.72.0
-      jose: 6.2.8
-
-  '@cmssy/next@19.25.0(@cmssy/react@19.25.0(react@19.2.8))(next@16.3.1(@babel/core@7.29.7)(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
-    dependencies:
-      '@cmssy/core': 19.25.0
-      '@cmssy/react': 19.25.0(react@19.2.8)
-      '@cmssy/types': 0.71.0
+      '@cmssy/core': 19.30.0
+      '@cmssy/react': 19.30.0(react@19.2.8)
+      '@cmssy/types': 0.73.0
       next: 16.3.1(@babel/core@7.29.7)(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
       server-only: 0.0.1
 
-  '@cmssy/react@19.25.0(react@19.2.8)':
+  '@cmssy/react@19.30.0(react@19.2.8)':
     dependencies:
-      '@cmssy/core': 19.25.0
-      '@cmssy/types': 0.71.0
+      '@cmssy/core': 19.30.0
+      '@cmssy/types': 0.73.0
       react: 19.2.8
 
-  '@cmssy/types@0.71.0': {}
-
-  '@cmssy/types@0.72.0': {}
+  '@cmssy/types@0.73.0': {}
 
   '@emnapi/core@1.10.0':
     dependencies:
