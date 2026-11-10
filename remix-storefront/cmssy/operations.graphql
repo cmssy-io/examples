@@ -163,9 +163,15 @@ query BuyerPrices(
   $workspaceId: ID!
   $items: [PriceQueryItem!]!
   $channel: String
+  $previewSecret: String
 ) {
   account {
-    prices(workspaceId: $workspaceId, items: $items, channel: $channel) {
+    prices(
+      workspaceId: $workspaceId
+      items: $items
+      channel: $channel
+      previewSecret: $previewSecret
+    ) {
       recordId
       variantKey
       currency

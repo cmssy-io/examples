@@ -158,6 +158,8 @@ export type SiteMemberRegisterInput = {
   /** Initial values, keyed by field. Only fields the account model marks memberCanSet are accepted; any other non-null key refuses the registration and the message names it. Password fields and the company field are never accepted, whatever their flag. The login field may be sent but is ignored: the login comes from identity, the password from password. */
   fields?: unknown;
   identity: string;
+  /** Language of the visitor's site (e.g. en, pl, de-AT) for the email cmssy sends when the account model has account emails on; unknown or missing falls back to the site's default language. register and requestLoginChange also remember it on the account, so admin resends use it. */
+  locale?: string | null | undefined;
   modelSlug: string;
   password: string;
 };

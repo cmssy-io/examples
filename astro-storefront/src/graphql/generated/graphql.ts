@@ -233,6 +233,7 @@ export type BuyerPricesQueryVariables = Exact<{
   workspaceId: string | number;
   items: Array<PriceQueryItem> | PriceQueryItem;
   channel?: string | null | undefined;
+  previewSecret?: string | null | undefined;
 }>;
 
 
@@ -630,9 +631,14 @@ export const SubmitFormDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<SubmitFormMutation, SubmitFormMutationVariables>;
 export const BuyerPricesDocument = new TypedDocumentString(`
-    query BuyerPrices($workspaceId: ID!, $items: [PriceQueryItem!]!, $channel: String) {
+    query BuyerPrices($workspaceId: ID!, $items: [PriceQueryItem!]!, $channel: String, $previewSecret: String) {
   account {
-    prices(workspaceId: $workspaceId, items: $items, channel: $channel) {
+    prices(
+      workspaceId: $workspaceId
+      items: $items
+      channel: $channel
+      previewSecret: $previewSecret
+    ) {
       recordId
       variantKey
       currency
