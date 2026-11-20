@@ -323,6 +323,22 @@ export type PublicPageLayoutsQueryVariables = Exact<{
 
 export type PublicPageLayoutsQuery = { public: { page: { layouts: Array<{ region: string, settings: unknown, blocks: Array<{ id: string, type: string, content: unknown, style: unknown, advanced: unknown, order: number, isActive: boolean }> }> } } };
 
+export type PublicPageLayoutKeyQueryVariables = Exact<{
+  workspaceSlug: string;
+  pageSlug: string;
+}>;
+
+
+export type PublicPageLayoutKeyQuery = { public: { page: { layoutKey: string | null } } };
+
+export type PublicPageLayoutsByKeyQueryVariables = Exact<{
+  workspaceSlug: string;
+  layoutKey: string;
+}>;
+
+
+export type PublicPageLayoutsByKeyQuery = { public: { page: { layoutsByKey: Array<{ region: string, settings: unknown, blocks: Array<{ id: string, type: string, content: unknown, style: unknown, advanced: unknown, order: number, isActive: boolean }> }> } } };
+
 export type PublicModelRecordsQueryVariables = Exact<{
   workspaceId: string;
   modelSlug: string;
@@ -331,12 +347,13 @@ export type PublicModelRecordsQueryVariables = Exact<{
   locale?: string | null | undefined;
   limit?: number | null | undefined;
   offset?: number | null | undefined;
+  after?: string | null | undefined;
   populate?: Array<string> | string | null | undefined;
   previewSecret?: string | null | undefined;
 }>;
 
 
-export type PublicModelRecordsQuery = { public: { model: { records: { total: number, hasMore: boolean, items: Array<{ id: string, modelId: string, data: unknown, status: string | null, createdAt: string, updatedAt: string }> } } } };
+export type PublicModelRecordsQuery = { public: { model: { records: { total: number, hasMore: boolean, nextCursor: string | null, items: Array<{ id: string, modelId: string, data: unknown, status: string | null, createdAt: string, updatedAt: string }> } } } };
 
 export type PublicRecordsByIdsQueryVariables = Exact<{
   workspaceId: string;
@@ -1417,8 +1434,38 @@ export const PublicPageLayoutsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PublicPageLayoutsQuery, PublicPageLayoutsQueryVariables>;
+export const PublicPageLayoutKeyDocument = new TypedDocumentString(`
+    query PublicPageLayoutKey($workspaceSlug: String!, $pageSlug: String!) {
+  public {
+    page {
+      layoutKey(workspaceSlug: $workspaceSlug, pageSlug: $pageSlug)
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PublicPageLayoutKeyQuery, PublicPageLayoutKeyQueryVariables>;
+export const PublicPageLayoutsByKeyDocument = new TypedDocumentString(`
+    query PublicPageLayoutsByKey($workspaceSlug: String!, $layoutKey: String!) {
+  public {
+    page {
+      layoutsByKey(workspaceSlug: $workspaceSlug, layoutKey: $layoutKey) {
+        region
+        blocks {
+          id
+          type
+          content
+          style
+          advanced
+          order
+          isActive
+        }
+        settings
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PublicPageLayoutsByKeyQuery, PublicPageLayoutsByKeyQueryVariables>;
 export const PublicModelRecordsDocument = new TypedDocumentString(`
-    query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int, $populate: [String!], $previewSecret: String) {
+    query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int, $after: String, $populate: [String!], $previewSecret: String) {
   public {
     model {
       records(
@@ -1429,6 +1476,7 @@ export const PublicModelRecordsDocument = new TypedDocumentString(`
         locale: $locale
         limit: $limit
         offset: $offset
+        after: $after
         populate: $populate
         previewSecret: $previewSecret
       ) {
@@ -1442,6 +1490,7 @@ export const PublicModelRecordsDocument = new TypedDocumentString(`
         }
         total
         hasMore
+        nextCursor
       }
     }
   }

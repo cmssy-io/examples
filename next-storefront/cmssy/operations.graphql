@@ -99,14 +99,37 @@ query PublicPageLayouts($workspaceSlug: String!, $pageSlug: String!, $previewSec
   }
 }
 
+# The layout key of a page - pages that inherit one layout share it.
+query PublicPageLayoutKey($workspaceSlug: String!, $pageSlug: String!) {
+  public {
+    page {
+      layoutKey(workspaceSlug: $workspaceSlug, pageSlug: $pageSlug)
+    }
+  }
+}
+
+# Layout regions by that key - one cached read for every page sharing it.
+query PublicPageLayoutsByKey($workspaceSlug: String!, $layoutKey: String!) {
+  public {
+    page {
+      layoutsByKey(workspaceSlug: $workspaceSlug, layoutKey: $layoutKey) {
+        region
+        blocks { id type content style advanced order isActive }
+        settings
+      }
+    }
+  }
+}
+
 # Records of one model - the typed half of `cmssy types`.
-query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int, $populate: [String!], $previewSecret: String) {
+query PublicModelRecords($workspaceId: String!, $modelSlug: String!, $filter: JSON, $sort: String, $locale: String, $limit: Int, $offset: Int, $after: String, $populate: [String!], $previewSecret: String) {
   public {
     model {
-      records(workspaceId: $workspaceId, modelSlug: $modelSlug, filter: $filter, sort: $sort, locale: $locale, limit: $limit, offset: $offset, populate: $populate, previewSecret: $previewSecret) {
+      records(workspaceId: $workspaceId, modelSlug: $modelSlug, filter: $filter, sort: $sort, locale: $locale, limit: $limit, offset: $offset, after: $after, populate: $populate, previewSecret: $previewSecret) {
         items { id modelId data status createdAt updatedAt }
         total
         hasMore
+        nextCursor
       }
     }
   }
