@@ -36,6 +36,9 @@ redirect lives in `proxy.ts` and is locale-aware, so `/no` lands on `/no/blog`.
 - **Two example blocks** that back the [block recipes](https://www.cmssy.com/docs/blocks):
   - `prose` - rich text, sanitized on the server with `sanitize-html` (XSS-safe).
   - `blog-index` - lists published child pages via the delivery API (`public.page.byType`).
+    A post whose page type has a `cover_image` media field gets its cover on the card; the
+    loader passes the page's language as `locale`, so the image's alt text is in that
+    language too. Posts without the field render as text cards.
 
   Two, not a gallery: this example registers exactly the blocks the pages it serves
   actually use, so every block here renders against real content. The wider set -
