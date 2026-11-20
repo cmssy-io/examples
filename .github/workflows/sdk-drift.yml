@@ -41,8 +41,23 @@ jobs:
         with:
           version: 11.1.2
 
+      - name: Close a drift PR that main already caught up with
+        if: steps.check.outputs.behind == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for pr in $(gh pr list --head chore/sdk-drift --base main --state open \
+            --json number,headRepositoryOwner \
+            --jq ".[] | select(.headRepositoryOwner.login == \"$GITHUB_REPOSITORY_OWNER\") | .number"); do
+            gh pr close "$pr" --delete-branch --comment "main is on the current @cmssy minor - nothing left to bump."
+          done
+
       - id: bump
         if: steps.check.outputs.behind == 'true'
+        env:
+          CMSSY_ORG_SLUG: cmssy
+          CMSSY_WORKSPACE_SLUG: cmssy-demo
         run: |
           set -euo pipefail
           latest=$(npm view @cmssy/core version)
@@ -64,6 +79,9 @@ jobs:
                 fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
               "
               pnpm install --no-frozen-lockfile
+              has() { node -e "process.exit(require('./package.json').scripts?.['$1'] ? 0 : 1)"; }
+              if has types; then pnpm types; fi
+              if has codegen; then pnpm codegen; fi
               cp .env.example .env.local
               pnpm build
               rm -f .env.local
@@ -105,13 +123,14 @@ jobs:
           git push -f origin chore/sdk-drift
           body=$(printf '%s\n\n%s\n\n%s\n' \
             "Every example was a minor or more behind \`@cmssy/* $LATEST\`." \
-            "Each one was reinstalled and **built** before this PR was opened. A build failure opens an issue instead, because that is a break in the published SDK rather than drift." \
+            "Each one was reinstalled, its generated types and operations regenerated, and **built** before this PR was opened. A build failure opens an issue instead, because that is a break in the published SDK rather than drift." \
             "A patch behind does not open a PR - an example demonstrates a released version, not the tip.")
           open_prs=$(gh pr list --head chore/sdk-drift --base main --state open \
             --json number,headRepositoryOwner \
             --jq "[.[] | select(.headRepositoryOwner.login == \"$GITHUB_REPOSITORY_OWNER\")] | length")
-          [ "$open_prs" -gt 0 ] || gh pr create \
-            --base main \
-            --head chore/sdk-drift \
-            --title "chore(examples): take @cmssy $LATEST everywhere" \
-            --body "$body"
+          title="chore(examples): take @cmssy $LATEST everywhere"
+          if [ "$open_prs" -gt 0 ]; then
+            gh pr edit chore/sdk-drift --title "$title" --body "$body"
+          else
+            gh pr create --base main --head chore/sdk-drift --title "$title" --body "$body"
+          fi
