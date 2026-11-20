@@ -196,7 +196,10 @@ Without them shipping is simply off, and orders are left for a person to ship.
 
 ### Member account emails
 
-cmssy never emails a shop's members or customers. When a member registers, asks for a password reset or asks
+This example sends member account emails itself, so it leaves cmssy's own account emails off on the
+account model. (Turn them on and cmssy emails the verification, password-reset and login-change links
+itself; the webhook events below still go out.) Order, shipping and form emails are always the app's job.
+When a member registers, asks for a password reset or asks
 to change their login, cmssy issues a single-use token and sends it to `/api/cmssy/webhook` as
 `account.verification_requested`, `account.password_reset_requested` or
 `account.login_change_requested`. The route builds the link on this site's own origin
