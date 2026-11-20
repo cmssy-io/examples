@@ -19,6 +19,9 @@ export type Post = {
   displayName?: Localized;
   seoTitle?: Localized;
   seoDescription?: Localized;
+  // JSON on the wire: the API makes no promise about a value's shape, so the
+  // component narrows it before use (see `coverOf` in BlogIndex.tsx).
+  customFields?: Array<{ fieldKey: string; value: unknown }> | null;
 };
 
 export type PostsResult = { items: Post[]; hasMore: boolean };
@@ -26,6 +29,7 @@ export type PostsResult = { items: Post[]; hasMore: boolean };
 export async function loadPosts(vars: {
   parentSlug: string;
   limit: number;
+  locale?: string;
 }): Promise<PostsResult | null> {
   if (typeof window !== "undefined") {
     throw new Error("loadPosts is server-only");

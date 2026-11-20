@@ -39,7 +39,7 @@
   display: block;
   border: 1px solid #e4e4e7;
   border-radius: 0.75rem;
-  padding: 1.5rem;
+  overflow: hidden;
   text-decoration: none;
   color: inherit;
   transition: border-color 0.2s;
@@ -47,6 +47,20 @@
 
 .card:hover {
   border-color: rgb(10 10 10 / 0.3);
+}
+
+.cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #f4f4f5;
+}
+
+.coverImage {
+  object-fit: cover;
+}
+
+.body {
+  padding: 1.5rem;
 }
 
 .date {
